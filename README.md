@@ -1,2 +1,4 @@
-# predicator
+Predicator
+==========
+
 Predicate calculus library
