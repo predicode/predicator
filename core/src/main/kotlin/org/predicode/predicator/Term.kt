@@ -5,8 +5,8 @@ package org.predicode.predicator
  *
  * Can be one of:
  * - [word][WordTerm],
- * - [variable][VariableTerm],
  * - [arbitrary value][ValueTerm], or
+ * - [variable][VariableTerm],
  * - [chain of terms][TermChain]
  */
 sealed class Term {
@@ -19,12 +19,42 @@ sealed class Term {
 }
 
 /**
+ * Simple (non-compound) term.
+ */
+sealed class SimpleTerm: Term() {
+
+    /**
+     * Attempts to match against another term.
+     *
+     * This method is called for the terms of the [RulePattern] stored in the [RuleSet].
+     *
+     * @param term a term to match against.
+     * @param knowns known resolutions to update.
+     *
+     * @return updated knowns if the term matches, or `null` otherwise.
+     */
+    abstract fun match(term: SimpleTerm, knowns: Knowns): Knowns?
+
+    // TODO Implement inherent value matching
+    internal fun <V> valueMatch(pattern: V, value: V?) = pattern == value
+
+}
+
+sealed class ResolvedTerm: SimpleTerm()
+
+/**
  * Word term.
  */
-data class WordTerm(val word: Word): Term() {
+data class WordTerm(val word: Word): ResolvedTerm() {
 
     companion object {
         operator fun invoke(word: String) = WordTerm(Word(word))
+    }
+
+    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+        is WordTerm -> if (term.word == word) knowns else null
+        is ValueTerm<*> -> null // Words never match values
+        is VariableTerm -> knowns.resolve(term.name, this)
     }
 
     override fun toString() = word.toString()
@@ -32,27 +62,36 @@ data class WordTerm(val word: Word): Term() {
 }
 
 /**
+ * Arbitrary value term.
+ */
+data class ValueTerm<out V>(val value: V): ResolvedTerm() {
+
+    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+        is ValueTerm<*> -> if (valueMatch(value, term.value)) knowns else null
+        is WordTerm -> null // Words never match values
+        is VariableTerm -> knowns.resolve(term.name, this)
+    }
+
+    override fun toString() = value.toString()
+
+    override fun toChainString() = "[$value]"
+
+}
+
+/**
  * Variable term.
  */
-data class VariableTerm(val name: Name): Term() {
+data class VariableTerm(val name: Name): SimpleTerm() {
 
     companion object {
         operator fun invoke(vararg parts: NamePart) = VariableTerm(Name(*parts))
         operator fun invoke(vararg parts: String) = VariableTerm(Name(parts.map { NamePart(it) }))
     }
 
+    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
+        knowns.map(name, term)
+
     override fun toString(): String = "_${name}_"
-
-}
-
-/**
- * Arbitrary value term.
- */
-data class ValueTerm<out V>(val value: V): Term() {
-
-    override fun toString() = value.toString()
-
-    override fun toChainString() = "[$value]"
 
 }
 
@@ -70,3 +109,4 @@ data class TermChain(val terms: List<Term>): Term() {
     override fun toChainString() = "($this)"
 
 }
+
