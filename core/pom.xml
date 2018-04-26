@@ -33,9 +33,6 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 
