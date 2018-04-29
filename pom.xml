@@ -48,7 +48,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <kotlin.version>1.2.40</kotlin.version>
+    <kotlin.version>1.2.41</kotlin.version>
 
     <reactor.version>3.1.6.RELEASE</reactor.version>
     <junit-jupiter.version>5.1.1</junit-jupiter.version>
