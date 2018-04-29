@@ -5,23 +5,17 @@ package org.predicode.predicator
  *
  * Names are case insensitive and consists of [name parts][NamePart], that could be either words or digits.
  */
-class Name(val parts: List<NamePart>) {
+data class Name(val parts: List<NamePart>) {
 
-    companion object {
-        operator fun invoke(vararg parts: NamePart) = Name(listOf(*parts))
-        operator fun invoke(vararg parts: String) = Name(parts.map { NamePart(it) })
-    }
+    /**
+     * Constructs name by its parts.
+     */
+    constructor(vararg parts: NamePart) : this(listOf(*parts))
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Name
-
-        return parts == other.parts
-    }
-
-    override fun hashCode() = parts.hashCode()
+    /**
+     * Constructs name by its part texts.
+     */
+    constructor(vararg parts: String) : this(parts.map { NamePart(it) })
 
     override fun toString() = parts.joinToString(" ")
 
@@ -35,16 +29,16 @@ class Name(val parts: List<NamePart>) {
 sealed class NamePart {
 
     /**
-     * Creates new name part auto-detecting its type.
+     * Unmodified part text.
      */
-    companion object {
-        operator fun invoke(text: String): NamePart =
-                if (text.first() in '0'..'9') Digits(text) else Word(text)
-    }
-
     abstract val text: String
 
+    /**
+     * Normalized part text.
+     */
     abstract val word: String
+
+    fun component1() = this.word
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -59,7 +53,22 @@ sealed class NamePart {
 
     override fun toString() = text
 
+    companion object {
+
+        /**
+         * Creates new name part auto-detecting its type.
+         */
+        operator fun invoke(text: String): NamePart =
+                if (text.first() in '0'..'9') Digits(text) else Word(text)
+
+    }
+
 }
+
+/**
+ * Regular expression matching [word][Word].
+ */
+val WORD_REGEX = Regex("^\\p{L}+$")
 
 /**
  * Word representation.
@@ -69,15 +78,11 @@ sealed class NamePart {
  * @property text original word text.
  * @property word normalized (lower-case) word text.
  */
-class Word(override val text: String): NamePart() {
-
-    companion object {
-        val REGEX = Regex("^\\p{L}+$")
-    }
+class Word(override val text: String) : NamePart() {
 
     init {
         assert(text.isNotEmpty()) { "Word should not be empty" }
-        assert(text.matches(REGEX)) { "Word should contain letters only" }
+        assert(text.matches(WORD_REGEX)) { "Word should contain letters only" }
     }
 
     override val word = text.toLowerCase()
@@ -85,20 +90,21 @@ class Word(override val text: String): NamePart() {
 }
 
 /**
+ * Regular expression matching [digits][Digits].
+ */
+val DIGITS_REGEX = Regex("^\\d+$")
+
+/**
  * Decimal digits representation.
  *
  * @property text original word text.
  * @property word normalized (lower-case) word text.
  */
-class Digits(override val text: String): NamePart() {
-
-    companion object {
-        val REGEX = Regex("^\\d+$")
-    }
+class Digits(override val text: String) : NamePart() {
 
     init {
         assert(text.isNotEmpty()) { "Digits should not be empty" }
-        assert(text.matches(REGEX)) { "Digits expected" }
+        assert(text.matches(DIGITS_REGEX)) { "Digits expected" }
     }
 
     override val word

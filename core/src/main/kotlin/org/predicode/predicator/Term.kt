@@ -37,7 +37,7 @@ sealed class SimpleTerm: Term() {
     abstract fun match(term: SimpleTerm, knowns: Knowns): Knowns?
 
     // TODO Implement inherent value matching
-    internal fun <V> valueMatch(pattern: V, value: V?) = pattern == value
+    protected fun <V> valueMatch(pattern: V, value: V?) = pattern == value
 
 }
 
@@ -48,9 +48,10 @@ sealed class ResolvedTerm: SimpleTerm()
  */
 data class WordTerm(val word: Word): ResolvedTerm() {
 
-    companion object {
-        operator fun invoke(word: String) = WordTerm(Word(word))
-    }
+    /**
+     * Constructs word term from string.
+     */
+    constructor(word: String) : this(Word(word))
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
         is WordTerm -> knowns.takeIf { term.word == word }
@@ -84,10 +85,15 @@ data class ValueTerm<out V>(val value: V): ResolvedTerm() {
  */
 data class VariableTerm(val name: Name): SimpleTerm() {
 
-    companion object {
-        operator fun invoke(vararg parts: NamePart) = VariableTerm(Name(*parts))
-        operator fun invoke(vararg parts: String) = VariableTerm(Name(parts.map { NamePart(it) }))
-    }
+    /**
+     * Constructs variable term by variable name parts.
+     */
+    constructor(vararg parts: NamePart) : this(Name(*parts))
+
+    /**
+     * Constructs variable term by variable name part texts.
+     */
+    constructor(vararg parts: String) : this(Name(parts.map { NamePart(it) }))
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
         knowns.map(name, term)
@@ -101,9 +107,10 @@ data class VariableTerm(val name: Name): SimpleTerm() {
  */
 data class TermChain(val terms: List<Term>): Term() {
 
-    companion object {
-        operator fun invoke(vararg terms: Term) = TermChain(listOf(*terms))
-    }
+    /**
+     * Constructs term chain by its terms.
+     */
+    constructor(vararg terms: Term) : this(listOf(*terms))
 
     override fun toString() = terms.joinToString(" ") { it.toChainString() }
 
