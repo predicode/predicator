@@ -78,15 +78,14 @@ class Knowns {
      * @param name original query variable name.
      */
     fun resolve(name: Name, value: ResolvedTerm): Knowns? =
-            resolution(name).let {
-                return when (it) {
+            resolution(name).let { resolution ->
+                return when (resolution) {
                     Resolution.Unresolved -> // Not resolved yet
                         Knowns(resolutions + (name to Resolution.Resolved(value)), mappings) // Resolve
                     is Resolution.Resolved ->
-                        if (value == it.value) this // Resolution didn't change
-                        else null // Resolutions never change
+                        takeIf { value == resolution.value } // Resolution can not change
                     is Resolution.Alias ->
-                        resolve(it.aliased, value) // Resolve aliased variable
+                        resolve(resolution.aliased, value) // Resolve aliased variable
                 }
             }
 
@@ -96,8 +95,8 @@ class Knowns {
     fun update(): Knowns = Knowns(this.resolutions, emptyMap())
 
     private fun resolve(name: Name, value: SimpleTerm): Knowns? =
-            resolution(name).let {
-                return when (it) {
+            resolution(name).let { resolution ->
+                return when (resolution) {
                     Resolution.Unresolved -> // Not resolved yet
                         when (value) {
                             is ResolvedTerm -> // Resolve
@@ -108,10 +107,9 @@ class Knowns {
                                 }
                         }
                     is Resolution.Resolved ->
-                        if (value == it.value) this // Resolution didn't change
-                        else null // Resolutions never change
+                        takeIf { value == resolution.value } // Resolution can not change
                     is Resolution.Alias ->
-                        resolve(it.aliased, value) // Resolve aliased variable
+                        resolve(resolution.aliased, value) // Resolve aliased variable
                 }
             }
 

@@ -53,7 +53,7 @@ data class WordTerm(val word: Word): ResolvedTerm() {
     }
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
-        is WordTerm -> if (term.word == word) knowns else null
+        is WordTerm -> knowns.takeIf { term.word == word }
         is ValueTerm<*> -> null // Words never match values
         is VariableTerm -> knowns.resolve(term.name, this)
     }
@@ -68,7 +68,7 @@ data class WordTerm(val word: Word): ResolvedTerm() {
 data class ValueTerm<out V>(val value: V): ResolvedTerm() {
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
-        is ValueTerm<*> -> if (valueMatch(value, term.value)) knowns else null
+        is ValueTerm<*> -> knowns.takeIf { valueMatch(value, term.value) }
         is WordTerm -> null // Words never match values
         is VariableTerm -> knowns.resolve(term.name, this)
     }

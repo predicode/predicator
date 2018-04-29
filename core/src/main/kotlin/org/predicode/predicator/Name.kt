@@ -38,7 +38,8 @@ sealed class NamePart {
      * Creates new name part auto-detecting its type.
      */
     companion object {
-        operator fun invoke(text: String): NamePart = if (text.first() in '0'..'9') Digits(text) else Word(text)
+        operator fun invoke(text: String): NamePart =
+                if (text.first() in '0'..'9') Digits(text) else Word(text)
     }
 
     abstract val text: String
