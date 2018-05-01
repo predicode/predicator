@@ -49,6 +49,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <kotlin.version>1.2.41</kotlin.version>
+    <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
 
     <reactor.version>3.1.6.RELEASE</reactor.version>
     <junit-jupiter.version>5.1.1</junit-jupiter.version>
@@ -117,6 +118,12 @@
           <groupId>org.jetbrains.kotlin</groupId>
           <artifactId>kotlin-maven-plugin</artifactId>
           <version>${kotlin.version}</version>
+          <configuration>
+            <args>
+              <arg>-Xjsr305=strict</arg> <!-- Enable strict mode for JSR-305 annotations -->
+              <arg>-Xenable-jvm-default</arg>
+            </args>
+          </configuration>
           <executions>
             <execution>
               <id>compile</id>
