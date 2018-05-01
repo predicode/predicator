@@ -21,7 +21,7 @@ sealed class Term {
 /**
  * Simple (non-compound) term.
  */
-sealed class SimpleTerm: Term() {
+sealed class SimpleTerm : Term() {
 
     /**
      * Attempts to match against another term.
@@ -41,12 +41,12 @@ sealed class SimpleTerm: Term() {
 
 }
 
-sealed class ResolvedTerm: SimpleTerm()
+sealed class ResolvedTerm : SimpleTerm()
 
 /**
  * Word term.
  */
-data class WordTerm(val word: Word): ResolvedTerm() {
+data class WordTerm(val word: Word) : ResolvedTerm() {
 
     /**
      * Constructs word term from string.
@@ -66,7 +66,7 @@ data class WordTerm(val word: Word): ResolvedTerm() {
 /**
  * Arbitrary value term.
  */
-data class ValueTerm<out V>(val value: V): ResolvedTerm() {
+data class ValueTerm<out V>(val value: V) : ResolvedTerm() {
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
         is ValueTerm<*> -> knowns.takeIf { valueMatch(value, term.value) }
@@ -83,7 +83,7 @@ data class ValueTerm<out V>(val value: V): ResolvedTerm() {
 /**
  * Variable term.
  */
-data class VariableTerm(val name: Name): SimpleTerm() {
+data class VariableTerm(val name: Name) : SimpleTerm() {
 
     /**
      * Constructs variable term by variable name parts.
@@ -96,7 +96,7 @@ data class VariableTerm(val name: Name): SimpleTerm() {
     constructor(vararg parts: String) : this(Name(parts.map { NamePart(it) }))
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
-        knowns.map(name, term)
+            knowns.map(name, term)
 
     override fun toString(): String = "_${name}_"
 
@@ -105,7 +105,7 @@ data class VariableTerm(val name: Name): SimpleTerm() {
 /**
  * A chain term consisting of other terms.
  */
-data class TermChain(val terms: List<Term>): Term() {
+data class TermChain(val terms: List<Term>) : Term() {
 
     /**
      * Constructs term chain by its terms.

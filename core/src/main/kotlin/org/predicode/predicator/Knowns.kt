@@ -102,7 +102,8 @@ class Knowns {
                             is ResolvedTerm -> // Resolve
                                 Knowns(resolutions + (name to Resolution.Resolved(value)), mappings)
                             is VariableTerm -> // Create alias
-                                resolution(value.name).let { // Ensure aliased query variable exists
+                                resolution(value.name).let {
+                                    // Ensure aliased query variable exists
                                     return Knowns(resolutions + (name to Resolution.Alias(value.name)), mappings)
                                 }
                         }
