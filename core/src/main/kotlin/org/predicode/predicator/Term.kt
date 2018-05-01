@@ -26,8 +26,8 @@ sealed class SimpleTerm: Term() {
     /**
      * Attempts to match against another term.
      *
-     * This method is called for the terms of the [rule patterns][RulePattern] tested for match by
-     * [rule selector][RuleSelector].
+     * This method is called for the terms of the [rule condition][Rule.condition] with corresponding query term
+     * as argument.
      *
      * @param term a term to match against.
      * @param knowns known resolutions to update.

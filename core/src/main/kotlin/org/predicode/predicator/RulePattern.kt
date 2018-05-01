@@ -5,10 +5,12 @@ package org.predicode.predicator
  */
 data class RulePattern(val terms: List<SimpleTerm>) {
 
+    constructor(vararg terms: SimpleTerm) : this(listOf(*terms))
+
     /**
      * Attempts to match against another pattern.
      *
-     * This method is called for the patterns tested for match by [rule selector][RuleSelector].
+     * This method is called for the [rule condition][Rule.condition] with query pattern as argument.
      *
      * @param pattern a pattern to match against.
      * @param knowns known resolutions.
@@ -29,5 +31,9 @@ data class RulePattern(val terms: List<SimpleTerm>) {
 
         return result
     }
+
+    fun fact() = Rule(this, Predicate.True)
+
+    fun rule(predicate: Predicate) = Rule(this, predicate)
 
 }
