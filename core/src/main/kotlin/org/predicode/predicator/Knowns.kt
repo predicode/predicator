@@ -14,27 +14,27 @@ class Knowns {
      *
      * Query variable names are set only once via constructor. The list of query variables can not change after that.
      */
-    val resolutions: Map<Name, Resolution>
+    val resolutions: Map<Variable, Resolution>
 
     /**
      * Resolution rule variable mappings.
      *
      * These are [simple terms][SimpleTerm] passed to resolution rule. I.e. variable values local to the rule.
-     * When [variable][VariableTerm] is used as local variable value, it is the one from [original query][resolutions].
+     * When [variable][Variable] is used as local variable value, it is the one from [original query][resolutions].
      */
-    val mappings: Map<Name, SimpleTerm>
+    val mappings: Map<Variable, SimpleTerm>
 
     /**
      * Constructs knowns without any mappings and with the given query variables unresolved.
      *
-     * @param variables query variable names.
+     * @param variables query variables.
      */
-    constructor(vararg variables: Name) {
+    constructor(vararg variables: Variable) {
         this.mappings = emptyMap()
         this.resolutions = variables.associateBy({ it }, { Resolution.Unresolved })
     }
 
-    private constructor(resolutions: Map<Name, Resolution>, mappings: Map<Name, SimpleTerm>) {
+    private constructor(resolutions: Map<Variable, Resolution>, mappings: Map<Variable, SimpleTerm>) {
         this.resolutions = resolutions
         this.mappings = mappings
     }
@@ -45,18 +45,18 @@ class Knowns {
      * If the value already set it can not be updated, unless the value is a query variable. In the latter case the
      * target variable is resolved to previous value.
      *
-     * @param name variable name local to resolution rule.
+     * @param variable variable local to resolution rule.
      * @param value new variable value.
      *
      * @return updated resolutions, or `null` if they can not be updated thus making corresponding rule effectively
      * unmatched.
      */
-    fun map(name: Name, value: SimpleTerm): Knowns? =
-            mappings[name].let { prev ->
+    fun map(variable: Variable, value: SimpleTerm): Knowns? =
+            mappings[variable].let { prev ->
                 return when (prev) {
-                    null -> Knowns(resolutions, mappings + (name to value)) // New mapping
+                    null -> Knowns(resolutions, mappings + (variable to value)) // New mapping
                     value -> this // Mapping didn't change
-                    is VariableTerm -> resolve(prev.name, prev)
+                    is Variable -> resolve(prev, value)
                     else -> null // Can not update mapping
                 }
             }
@@ -64,24 +64,24 @@ class Knowns {
     /**
      * Returns the given query variable resolution.
      *
-     * @param name query variable name
+     * @param variable query variable.
      *
      * @throws NoSuchElementException if there is no such variable in original query.
      */
-    fun resolution(name: Name) = resolutions.getValue(name)
+    fun resolution(variable: Variable) = resolutions.getValue(variable)
 
     /**
      * Resolves original query variable.
      *
      * It is an error attempting to resolve non-existing variable.
      *
-     * @param name original query variable name.
+     * @param variable original query variable.
      */
-    fun resolve(name: Name, value: ResolvedTerm): Knowns? =
-            resolution(name).let { resolution ->
+    fun resolve(variable: Variable, value: ResolvedTerm): Knowns? =
+            resolution(variable).let { resolution ->
                 return when (resolution) {
                     Resolution.Unresolved -> // Not resolved yet
-                        Knowns(resolutions + (name to Resolution.Resolved(value)), mappings) // Resolve
+                        Knowns(resolutions + (variable to Resolution.Resolved(value)), mappings) // Resolve
                     is Resolution.Resolved ->
                         takeIf { value == resolution.value } // Resolution can not change
                     is Resolution.Alias ->
@@ -94,17 +94,19 @@ class Knowns {
      */
     fun update(): Knowns = Knowns(this.resolutions, emptyMap())
 
-    private fun resolve(name: Name, value: SimpleTerm): Knowns? =
-            resolution(name).let { resolution ->
+    private fun resolve(variable: Variable, value: SimpleTerm): Knowns? =
+            resolution(variable).let { resolution ->
                 return when (resolution) {
                     Resolution.Unresolved -> // Not resolved yet
                         when (value) {
                             is ResolvedTerm -> // Resolve
-                                Knowns(resolutions + (name to Resolution.Resolved(value)), mappings)
-                            is VariableTerm -> // Create alias
-                                resolution(value.name).let {
+                                Knowns(resolutions + (variable to Resolution.Resolved(value)), mappings)
+                            is Keyword -> // Keywords are never substituted as variable names
+                                null
+                            is Variable -> // Create alias
+                                resolution(value).let {
                                     // Ensure aliased query variable exists
-                                    return Knowns(resolutions + (name to Resolution.Alias(value.name)), mappings)
+                                    Knowns(resolutions + (variable to Resolution.Alias(value)), mappings)
                                 }
                         }
                     is Resolution.Resolved ->
@@ -139,9 +141,9 @@ class Knowns {
         /**
          * Query variable is an alias for [another][Alias.aliased] one.
          *
-         * @property aliased aliased query variable name.
+         * @property aliased aliased query variable.
          */
-        data class Alias(val aliased: Name) : Resolution()
+        data class Alias(val aliased: Variable) : Resolution()
 
     }
 

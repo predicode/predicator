@@ -4,9 +4,10 @@ package org.predicode.predicator
  * Basic term.
  *
  * Can be one of:
- * - [word][WordTerm],
- * - [arbitrary value][ValueTerm], or
- * - [variable][VariableTerm],
+ * - [keyword][Keyword]
+ * - [atom][Atom],
+ * - [arbitrary value][Value], or
+ * - [variable][Variable],
  * - [chain of terms][TermChain]
  */
 sealed class Term {
@@ -41,62 +42,113 @@ sealed class SimpleTerm : Term() {
 
 }
 
+/**
+ * A term the [variable][Variable] may resolve to.
+ */
 sealed class ResolvedTerm : SimpleTerm()
 
 /**
- * Word term.
+ * Keyword term.
  */
-data class WordTerm(val word: Word) : ResolvedTerm() {
+open class Keyword(val name: String) : SimpleTerm() {
 
-    /**
-     * Constructs word term from string.
-     */
-    constructor(word: String) : this(Word(word))
+    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
+            knowns.takeIf { term == this } // Keywords match only themselves
 
-    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
-        is WordTerm -> knowns.takeIf { term.word == word }
-        is ValueTerm<*> -> null // Words never match values
-        is VariableTerm -> knowns.resolve(term.name, this)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Keyword
+
+        if (name != other.name) return false
+
+        return true
     }
 
-    override fun toString() = word.toString()
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
+    override fun toString() = "<$name>"
+
+    override fun toChainString() = name
+
+}
+
+/**
+ * Atom term.
+ */
+open class Atom(val name: String) : ResolvedTerm() {
+
+    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+        is Keyword -> null // Keywords match only themselves
+        is Atom -> knowns.takeIf { term == this }
+        is Value<*> -> null // Words never match values
+        is Variable -> knowns.resolve(term, this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Atom
+
+        if (name != other.name) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
+    override fun toString() = name
+
+    override fun toChainString() = "($this)"
 
 }
 
 /**
  * Arbitrary value term.
  */
-data class ValueTerm<out V>(val value: V) : ResolvedTerm() {
+open class Value<out V>(val value: V) : ResolvedTerm() {
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
-        is ValueTerm<*> -> knowns.takeIf { valueMatch(value, term.value) }
-        is WordTerm -> null // Words never match values
-        is VariableTerm -> knowns.resolve(term.name, this)
+        is Keyword -> null // Keywords match only themselves
+        is Value<*> -> knowns.takeIf { this == term }
+        is Atom -> null // Words never match values
+        is Variable -> knowns.resolve(term, this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Value<*>
+
+        if (value != other.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return value?.hashCode() ?: 0
     }
 
     override fun toString() = value.toString()
 
-    override fun toChainString() = "[$value]"
+    override fun toChainString() = "[$this]"
 
 }
 
 /**
  * Variable term.
  */
-data class VariableTerm(val name: Name) : SimpleTerm() {
-
-    /**
-     * Constructs variable term by variable name parts.
-     */
-    constructor(vararg parts: NamePart) : this(Name(*parts))
-
-    /**
-     * Constructs variable term by variable name part texts.
-     */
-    constructor(vararg parts: String) : this(Name(parts.map { NamePart(it) }))
+data class Variable(val name: String) : SimpleTerm() {
 
     override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
-            knowns.map(name, term)
+            knowns.map(this, term)
 
     override fun toString(): String = "_${name}_"
 
