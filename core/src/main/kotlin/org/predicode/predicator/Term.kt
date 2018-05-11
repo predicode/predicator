@@ -1,3 +1,5 @@
+@file:JvmName("Terms")
+
 package org.predicode.predicator
 
 /**
@@ -17,31 +19,7 @@ sealed class Term {
      */
     open fun toChainString() = toString()
 
-    companion object {
-
-        @JvmStatic
-        fun namedKeyword(name: String): Keyword = NamedKeyword(name)
-
-        @JvmStatic
-        fun namedAtom(name: String): Atom = NamedAtom(name)
-
-        @JvmStatic
-        fun simpleValue(value: Any): Value = SimpleValue(value)
-
-        @JvmStatic
-        fun namedVariable(name: String): Variable = NamedVariable(name)
-
-    }
-
 }
-
-fun namedKeyword(name: String) = Term.namedKeyword(name)
-
-fun namedAtom(name: String) = Term.namedAtom(name)
-
-fun simpleValue(value: Any) = Term.simpleValue(value)
-
-fun namedVariable(name: String) = Term.namedVariable(name)
 
 /**
  * Simple (non-compound) term.
@@ -77,6 +55,8 @@ abstract class Keyword : SimpleTerm() {
             knowns.takeIf { term == this } // Keywords match only themselves
 
 }
+
+fun namedKeyword(name: String): Keyword = NamedKeyword(name)
 
 private class NamedKeyword(val name: String) : Keyword() {
 
@@ -115,7 +95,9 @@ abstract class Atom : ResolvedTerm() {
 
 }
 
-private class NamedAtom (val name: String) : Atom() {
+fun namedAtom(name: String): Atom = NamedAtom(name)
+
+private class NamedAtom(val name: String) : Atom() {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -154,6 +136,8 @@ abstract class Value : ResolvedTerm() {
 
 }
 
+fun simpleValue(value: Any): Value = SimpleValue(value)
+
 private class SimpleValue<out V>(val value: V) : Value() {
 
     override fun equals(other: Any?): Boolean {
@@ -187,6 +171,8 @@ abstract class Variable : SimpleTerm() {
             knowns.map(this, term)
 
 }
+
+fun namedVariable(name: String): Variable = NamedVariable(name)
 
 private class NamedVariable(val name: String) : Variable() {
 

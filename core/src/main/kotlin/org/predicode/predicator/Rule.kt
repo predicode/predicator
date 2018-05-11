@@ -1,3 +1,5 @@
+@file:JvmName("Rules")
+
 package org.predicode.predicator
 
 import reactor.core.publisher.Flux
