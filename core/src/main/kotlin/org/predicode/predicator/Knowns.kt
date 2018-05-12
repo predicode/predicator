@@ -14,7 +14,7 @@ class Knowns {
      *
      * Query variable names are set only once via constructor. The list of query variables can not change after that.
      */
-    val resolutions: Map<Variable, Resolution>
+    private val resolutions: Map<Variable, Resolution>
 
     /**
      * Resolution rule variable mappings.
@@ -22,7 +22,7 @@ class Knowns {
      * These are [simple terms][SimpleTerm] passed to resolution rule. I.e. variable values local to the rule.
      * When [variable][Variable] is used as local variable value, it is the one from [original query][resolutions].
      */
-    val mappings: Map<Variable, SimpleTerm>
+    private val mappings: Map<Variable, SimpleTerm>
 
     /**
      * Constructs knowns without any mappings and with the given query variables unresolved.
@@ -38,6 +38,16 @@ class Knowns {
         this.resolutions = resolutions
         this.mappings = mappings
     }
+
+    /**
+     * Returns the given local resolution rule variable resolution.
+     *
+     * @param variable a variable, local to resolution rule.
+     *
+     * @throws UnknownVariable if variable is not mapped.
+     */
+    fun mapping(variable: Variable): SimpleTerm =
+            mappings.getOrElse(variable) { throw UnknownVariable(variable, "Unmapped variable $variable") }
 
     /**
      * Maps local resolution rule variable to the new value.
@@ -90,9 +100,11 @@ class Knowns {
             }
 
     /**
-     * Creates knowns to update while [matching the rules][]
+     * Creates knowns to update while [matching the rules][].
+     *
+     * Such knowns contain no mappings.
      */
-    fun update(): Knowns = Knowns(this.resolutions, emptyMap())
+    fun update(): Knowns = takeIf { mappings.isEmpty() } ?: Knowns(resolutions, emptyMap())
 
     private fun resolve(variable: Variable, value: SimpleTerm): Knowns? =
             resolution(variable).let { resolution ->

@@ -1,18 +1,6 @@
-@file:JvmName("Rules")
-
 package org.predicode.predicator
 
 import reactor.core.publisher.Flux
-import java.util.function.Function
-
-/**
- * A selector of predicate resolution rules.
- *
- * Searches for the matching predicate resolution rule.
- *
- * This is a function that takes a rule query as the only parameter and returning a [Flux] resolving to matching rules.
- */
-typealias RuleSelector = Function<RulePattern, Flux<Rule>>
 
 /**
  * Predicate resolution rule.
@@ -25,5 +13,24 @@ typealias RuleSelector = Function<RulePattern, Flux<Rule>>
 data class Rule(val condition: RulePattern, val predicate: Predicate) {
 
     override fun toString() = "$condition :- $predicate"
+
+    /**
+     * A selector of predicate resolution rules.
+     */
+    @FunctionalInterface
+    interface Selector {
+
+        /**
+         * Searches for the matching predicate resolution rules.
+         *
+         * @param pattern rule search pattern.
+         *
+         * @return a [Flux] of [rule matches][Match].
+         */
+        fun matchingRules(pattern: RulePattern): Flux<Match>
+
+    }
+
+    data class Match(val rule: Rule, val knowns: Knowns);
 
 }

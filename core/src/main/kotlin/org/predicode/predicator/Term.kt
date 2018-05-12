@@ -1,6 +1,8 @@
 package org.predicode.predicator
 
+import reactor.core.publisher.Flux
 import java.util.*
+import java.util.function.UnaryOperator
 
 /**
  * Basic term.
@@ -14,10 +16,16 @@ import java.util.*
  */
 sealed class Term {
 
+    abstract fun expand(resolver: PredicateResolver): Expansion
+
     /**
      * Returns a string representation of this term for inclusion into chain string representation.
      */
     open fun toChainString() = toString()
+
+    data class Expansion(
+            val expanded: SimpleTerm,
+            val updatePredicate: UnaryOperator<Predicate> = UnaryOperator.identity())
 
 }
 
@@ -46,7 +54,11 @@ sealed class SimpleTerm : Term() {
 /**
  * A term the [variable][Variable] may resolve to.
  */
-sealed class ResolvedTerm : SimpleTerm()
+sealed class ResolvedTerm : SimpleTerm() {
+
+    final override fun expand(resolver: PredicateResolver) = Expansion(this)
+
+}
 
 /**
  * Keyword term.
@@ -57,6 +69,8 @@ abstract class Keyword : SimpleTerm() {
 
     final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
             knowns.takeIf { term == this } // Keywords match only themselves
+
+    final override fun expand(resolver: PredicateResolver) = Expansion(this)
 
 }
 
@@ -116,21 +130,50 @@ abstract class Variable : SimpleTerm() {
     final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
             knowns.map(this, term)
 
+    final override fun expand(resolver: PredicateResolver) =
+            resolver.knowns
+                    .mapping(this)
+                    .let { Expansion(it) }
+
 }
 
 /**
  * A chain term consisting of other terms.
  *
- * A term chain can not be part of [rule patterns][RulePattern] and thus should be expanded into
- * [simple terms][SimpleTerm] prior to being matched.
+ * A term chain can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] to
+ * [simple term][SimpleTerm] prior to being matched.
  */
-class TermChain(vararg _terms: Term) : Term() {
+class TermChain(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
 
     private val terms: Array<out Term> = _terms
 
     override fun toString() = terms.joinToString(" ") { it.toChainString() }
 
     override fun toChainString() = "($this)"
+
+    override fun expand(resolver: PredicateResolver): Expansion {
+        TODO("Chain expansion is not implemented")
+    }
+
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> {
+        return terms
+                .fold(alwaysTrue() to mutableListOf<SimpleTerm>()) { (pred, terms), term ->
+
+                    val expansion: Expansion = try {
+                        term.expand(resolver)
+                    } catch (ex: Exception) {
+                        return Flux.error(ex)
+                    }
+
+                    terms.add(expansion.expanded)
+
+                    expansion.updatePredicate.apply(pred) to terms
+                }.let { (pred, terms) ->
+                    pred and simplePredicate(*terms.toTypedArray())
+                }.resolve(resolver)
+    }
+
+    override fun iterator(): Iterator<Term> = this.terms.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

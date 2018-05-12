@@ -1,11 +1,13 @@
 package org.predicode.predicator
 
+import reactor.core.publisher.Flux
 import java.util.*
+import java.util.function.Function
 
 /**
  * Resolution rule match pattern.
  */
-class RulePattern(vararg _terms: SimpleTerm) {
+class RulePattern(vararg _terms: SimpleTerm) : Iterable<SimpleTerm> {
 
     private val terms: Array<out SimpleTerm> = _terms
 
@@ -35,16 +37,24 @@ class RulePattern(vararg _terms: SimpleTerm) {
     }
 
     /**
-     * Creates a fact with this pattern as its [condition][Rule.condition].
-     */
-    fun fact() = Rule(this, TRUE)
-
-    /**
      * Creates a resolution rule with this pattern as its [condition][Rule.condition].
      *
      * @param predicate predicate the constructed rule resolves to if this pattern matches.
      */
     fun rule(predicate: Predicate) = Rule(this, predicate)
+
+    /**
+     * Creates a fact with this pattern as its [condition][Rule.condition].
+     */
+    fun fact() = rule(alwaysTrue())
+
+    fun resolveBy(resolve: Function<PredicateResolver, Flux<Knowns>>) = rule(resolvingPredicate(resolve))
+
+    fun resolveBy(vararg terms: Term) = rule(TermChain(*terms))
+
+    override fun iterator() = terms.iterator()
+
+    override fun toString() = terms.joinToString(" ") { it.toChainString() }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
