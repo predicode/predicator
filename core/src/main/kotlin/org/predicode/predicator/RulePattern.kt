@@ -1,11 +1,13 @@
 package org.predicode.predicator
 
+import java.util.*
+
 /**
  * Resolution rule match pattern.
  */
-data class RulePattern(val terms: List<SimpleTerm>) {
+class RulePattern(vararg _terms: SimpleTerm) {
 
-    constructor(vararg terms: SimpleTerm) : this(listOf(*terms))
+    private val terms: Array<out SimpleTerm> = _terms
 
     /**
      * Attempts to match against another pattern.
@@ -32,8 +34,30 @@ data class RulePattern(val terms: List<SimpleTerm>) {
         return result
     }
 
+    /**
+     * Creates a fact with this pattern as its [condition][Rule.condition].
+     */
     fun fact() = Rule(this, Predicate.True)
 
+    /**
+     * Creates a resolution rule with this pattern as its [condition][Rule.condition].
+     *
+     * @param predicate predicate the constructed rule resolves to if this pattern matches.
+     */
     fun rule(predicate: Predicate) = Rule(this, predicate)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RulePattern
+
+        return Arrays.equals(terms, other.terms)
+
+    }
+
+    override fun hashCode(): Int {
+        return Arrays.hashCode(terms)
+    }
 
 }

@@ -1,6 +1,6 @@
-@file:JvmName("Terms")
-
 package org.predicode.predicator
+
+import java.util.*
 
 /**
  * Basic term.
@@ -23,6 +23,8 @@ sealed class Term {
 
 /**
  * Simple (non-compound) term.
+ *
+ * [Rule patterns][RulePattern] may contain simple terms only.
  */
 sealed class SimpleTerm : Term() {
 
@@ -48,43 +50,24 @@ sealed class ResolvedTerm : SimpleTerm()
 
 /**
  * Keyword term.
+ *
+ * Keywords match only themselves. They can not be mapped to variables.
  */
 abstract class Keyword : SimpleTerm() {
 
-    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
+    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
             knowns.takeIf { term == this } // Keywords match only themselves
-
-}
-
-fun namedKeyword(name: String): Keyword = NamedKeyword(name)
-
-private class NamedKeyword(val name: String) : Keyword() {
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as NamedKeyword
-
-        if (name != other.name) return false
-
-        return true
-    }
-
-    override fun hashCode() = name.hashCode()
-
-    override fun toString() = "'$name'"
-
-    override fun toChainString() = name
 
 }
 
 /**
  * Atom term.
+ *
+ * Atoms match only themselves and can be mapped to variables.
  */
 abstract class Atom : ResolvedTerm() {
 
-    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
         is Keyword -> null // Keywords match only themselves
         is Atom -> knowns.takeIf { term == this }
         is Value -> null // Words never match values
@@ -95,35 +78,14 @@ abstract class Atom : ResolvedTerm() {
 
 }
 
-fun namedAtom(name: String): Atom = NamedAtom(name)
-
-private class NamedAtom(val name: String) : Atom() {
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as NamedAtom
-
-        if (name != other.name) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return name.hashCode()
-    }
-
-    override fun toString() = name
-
-}
-
 /**
  * Arbitrary value term.
+ *
+ * Values match only [matching][valueMatch] values and can be mapped to variables.
  */
 abstract class Value : ResolvedTerm() {
 
-    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
         is Keyword -> null // Keywords match only themselves
         is Value -> valueMatch(term, knowns)
         is Atom -> null // Words never match values
@@ -132,33 +94,17 @@ abstract class Value : ResolvedTerm() {
 
     override fun toChainString() = "[$this]"
 
-    protected abstract fun valueMatch(other: Value, knowns: Knowns): Knowns?;
-
-}
-
-fun simpleValue(value: Any): Value = SimpleValue(value)
-
-private class SimpleValue<out V>(val value: V) : Value() {
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as SimpleValue<*>
-
-        if (value != other.value) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return value?.hashCode() ?: 0
-    }
-
-    override fun toString() = value.toString()
-
-    override fun valueMatch(other: Value, knowns: Knowns) =
-            knowns.takeIf { this == other }
+    /**
+     * Attempts to match against another value.
+     *
+     * This method is called from [match] one when the term to match is a value.
+     *
+     * @param other another value to match against.
+     * @param knowns known resolutions to update.
+     *
+     * @return updated knowns if the term matches, or `null` otherwise.
+     */
+    protected abstract fun valueMatch(other: Value, knowns: Knowns): Knowns?
 
 }
 
@@ -167,31 +113,37 @@ private class SimpleValue<out V>(val value: V) : Value() {
  */
 abstract class Variable : SimpleTerm() {
 
-    override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
+    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
             knowns.map(this, term)
-
-}
-
-fun namedVariable(name: String): Variable = NamedVariable(name)
-
-private class NamedVariable(val name: String) : Variable() {
-
-    override fun toString(): String = "_${name}_"
 
 }
 
 /**
  * A chain term consisting of other terms.
+ *
+ * A term chain can not be part of [rule patterns][RulePattern] and thus should be expanded into
+ * [simple terms][SimpleTerm] prior to being matched.
  */
-data class TermChain(val terms: List<Term>) : Term() {
+class TermChain(vararg _terms: Term) : Term() {
 
-    /**
-     * Constructs term chain by its terms.
-     */
-    constructor(vararg terms: Term) : this(listOf(*terms))
+    private val terms: Array<out Term> = _terms
 
     override fun toString() = terms.joinToString(" ") { it.toChainString() }
 
     override fun toChainString() = "($this)"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as TermChain
+
+        return Arrays.equals(terms, other.terms)
+
+    }
+
+    override fun hashCode(): Int {
+        return Arrays.hashCode(terms)
+    }
 
 }
