@@ -3,6 +3,12 @@ package org.predicode.predicator
 import reactor.core.publisher.Flux
 import java.util.function.Function
 
+/**
+ * Resolvable predicate.
+ *
+ * When predicate resolution rule [condition][Rule.condition] matches, the [known mappings][Knowns] are applied
+ * to matching rule's [predicate][Rule.predicate] in order to resolve it.
+ */
 @FunctionalInterface
 interface Predicate : Function<Knowns, Flux<Knowns>> {
 
@@ -54,14 +60,6 @@ interface Predicate : Function<Knowns, Flux<Knowns>> {
                         .flux()
 
         override fun toString() = "\\+ $negated"
-
-    }
-
-    object True : Predicate {
-
-        override fun resolve(knowns: Knowns): Flux<Knowns> = Flux.just(knowns)
-
-        override fun toString() = "true"
 
     }
 

@@ -37,7 +37,7 @@ class RulePattern(vararg _terms: SimpleTerm) {
     /**
      * Creates a fact with this pattern as its [condition][Rule.condition].
      */
-    fun fact() = Rule(this, Predicate.True)
+    fun fact() = Rule(this, TRUE)
 
     /**
      * Creates a resolution rule with this pattern as its [condition][Rule.condition].
