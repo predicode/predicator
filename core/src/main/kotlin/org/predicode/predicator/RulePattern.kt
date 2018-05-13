@@ -50,11 +50,11 @@ class RulePattern(vararg _terms: SimpleTerm) : Iterable<SimpleTerm> {
 
     fun resolveBy(resolve: Function<PredicateResolver, Flux<Knowns>>) = rule(resolvingPredicate(resolve))
 
-    fun resolveBy(vararg terms: Term) = rule(TermChain(*terms))
+    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms))
 
     override fun iterator() = terms.iterator()
 
-    override fun toString() = terms.joinToString(" ") { it.toChainString() }
+    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

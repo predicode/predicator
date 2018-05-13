@@ -12,16 +12,16 @@ import java.util.function.UnaryOperator
  * - [atom][Atom],
  * - [arbitrary value][Value], or
  * - [variable][Variable],
- * - [chain of terms][TermChain]
+ * - [phrase][Phrase]
  */
 sealed class Term {
 
     abstract fun expand(resolver: PredicateResolver): Expansion
 
     /**
-     * Returns a string representation of this term for inclusion into chain string representation.
+     * Returns a string representation of this term for inclusion into phrase string representation.
      */
-    open fun toChainString() = toString()
+    open fun toPhraseString() = toString()
 
     data class Expansion(
             val expanded: SimpleTerm,
@@ -88,7 +88,7 @@ abstract class Atom : ResolvedTerm() {
         is Variable -> knowns.resolve(term, this)
     }
 
-    override fun toChainString() = "($this)"
+    override fun toPhraseString() = "($this)"
 
 }
 
@@ -106,7 +106,7 @@ abstract class Value : ResolvedTerm() {
         is Variable -> knowns.resolve(term, this)
     }
 
-    override fun toChainString() = "[$this]"
+    override fun toPhraseString() = "[$this]"
 
     /**
      * Attempts to match against another value.
@@ -138,39 +138,34 @@ abstract class Variable : SimpleTerm() {
 }
 
 /**
- * A chain term consisting of other terms.
+ * A phrase consisting of other terms.
  *
- * A term chain can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] to
+ * A phrase can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] to
  * [simple term][SimpleTerm] prior to being matched.
  */
-class TermChain(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
+class Phrase(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
 
     private val terms: Array<out Term> = _terms
 
-    override fun toString() = terms.joinToString(" ") { it.toChainString() }
+    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
-    override fun toChainString() = "($this)"
+    override fun toPhraseString() = "($this)"
 
     override fun expand(resolver: PredicateResolver): Expansion {
-        TODO("Chain expansion is not implemented")
+        TODO("Phrase expansion is not implemented")
     }
 
     override fun resolve(resolver: PredicateResolver): Flux<Knowns> {
         return terms
-                .fold(alwaysTrue() to mutableListOf<SimpleTerm>()) { (pred, terms), term ->
-
-                    val expansion: Expansion = try {
-                        term.expand(resolver)
-                    } catch (ex: Exception) {
-                        return Flux.error(ex)
+                .withIndex()
+                .fold(PhraseResolution(resolver, terms.size)) { resolution, (index, term) ->
+                    try {
+                        resolution.expand(index, term)
+                    } catch (e: Exception) {
+                        return Flux.error(e)
                     }
-
-                    terms.add(expansion.expanded)
-
-                    expansion.updatePredicate.apply(pred) to terms
-                }.let { (pred, terms) ->
-                    pred and simplePredicate(*terms.toTypedArray())
-                }.resolve(resolver)
+                }
+                .resolve()
     }
 
     override fun iterator(): Iterator<Term> = this.terms.iterator()
@@ -179,7 +174,7 @@ class TermChain(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TermChain
+        other as Phrase
 
         return Arrays.equals(terms, other.terms)
 
@@ -187,6 +182,28 @@ class TermChain(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
 
     override fun hashCode(): Int {
         return Arrays.hashCode(terms)
+    }
+
+    private class PhraseResolution(val resolver: PredicateResolver, size: Int) {
+
+        private var predicate: Predicate = alwaysTrue()
+        private val terms: Array<Term?> = arrayOfNulls(size)
+
+        fun expand(index: Int, term: Term): PhraseResolution {
+
+            val expansion: Expansion = term.expand(resolver)
+
+            terms[index] = expansion.expanded
+
+            predicate = expansion.updatePredicate.apply(predicate)
+
+            return this
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        fun resolve(): Flux<Knowns> =
+                (predicate and simplePredicate(*(terms as Array<SimpleTerm>))).resolve(resolver)
+
     }
 
 }

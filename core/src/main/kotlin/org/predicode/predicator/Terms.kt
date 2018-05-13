@@ -28,7 +28,7 @@ private class NamedKeyword(val name: String) : Keyword() {
 
     override fun toString() = "'$name'"
 
-    override fun toChainString() = name
+    override fun toPhraseString() = name
 
 }
 
