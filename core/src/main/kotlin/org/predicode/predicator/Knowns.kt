@@ -128,6 +128,31 @@ class Knowns {
                 }
             }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Knowns
+
+        if (resolutions != other.resolutions) return false
+        if (mappings != other.mappings) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+
+        var result = resolutions.hashCode()
+
+        result = 31 * result + mappings.hashCode()
+
+        return result
+    }
+
+    override fun toString(): String {
+        return "Knowns(resolutions=$resolutions, mappings=$mappings)"
+    }
+
     /**
      * Query variable resolution.
      *
@@ -141,21 +166,33 @@ class Knowns {
         /**
          * Query variable is not resolved.
          */
-        object Unresolved : Resolution()
+        object Unresolved : Resolution() {
+
+            override fun toString() = "Unresolved"
+
+        }
 
         /**
          * Query variable is resolved to the given [term][Resolved.value].
          *
          * @property value resolved term.
          */
-        data class Resolved(val value: ResolvedTerm) : Resolution()
+        data class Resolved(val value: ResolvedTerm) : Resolution() {
+
+            override fun toString() = "Resolved(value=$value)"
+
+        }
 
         /**
          * Query variable is an alias for [another][Alias.aliased] one.
          *
          * @property aliased aliased query variable.
          */
-        data class Alias(val aliased: Variable) : Resolution()
+        data class Alias(val aliased: Variable) : Resolution() {
+
+            override fun toString() = "Alias(aliased=$aliased)"
+
+        }
 
     }
 

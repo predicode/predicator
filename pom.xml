@@ -53,8 +53,21 @@
 
     <reactor.version>3.1.6.RELEASE</reactor.version>
     <junit-jupiter.version>5.1.1</junit-jupiter.version>
-    <assertj.version>3.9.1</assertj.version>
+    <atrium.version>0.6.0</atrium.version>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>springio-plugins-release</id>
+      <name>Spring Plugins</name>
+      <url>http://repo.spring.io/plugins-release/</url>
+    </repository>
+  </repositories>
 
   <modules>
     <module>core</module>
@@ -97,9 +110,15 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
+        <groupId>ch.tutteli</groupId>
+        <artifactId>atrium-cc-en_UK-robstoll</artifactId>
+        <version>${atrium.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-reflect</artifactId>
+        <version>${kotlin.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
