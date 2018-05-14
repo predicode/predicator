@@ -61,10 +61,14 @@ class Knowns {
      * @return updated resolutions, or `null` if they can not be updated thus making corresponding rule effectively
      * unmatched.
      */
-    fun map(variable: Variable, value: SimpleTerm): Knowns? =
+    fun map(variable: Variable, value: MappedTerm): Knowns? =
             mappings[variable].let { prev ->
                 return when (prev) {
-                    null -> Knowns(resolutions, mappings + (variable to value)) // New mapping
+                    null -> Knowns(
+                            resolutions,
+                            mappings + (variable to value.also {
+                                if (it is Variable) resolution(it) // Ensure query variable exists
+                            })) // New mapping
                     value -> this // Mapping didn't change
                     is Variable -> resolve(prev, value)
                     else -> null // Can not update mapping
@@ -106,16 +110,14 @@ class Knowns {
      */
     fun update(): Knowns = takeIf { mappings.isEmpty() } ?: Knowns(resolutions, emptyMap())
 
-    private fun resolve(variable: Variable, value: SimpleTerm): Knowns? =
+    private fun resolve(variable: Variable, value: MappedTerm): Knowns? =
             resolution(variable).let { resolution ->
                 return when (resolution) {
                     Resolution.Unresolved -> // Not resolved yet
                         when (value) {
                             is ResolvedTerm -> // Resolve
                                 Knowns(resolutions + (variable to Resolution.Resolved(value)), mappings)
-                            is Keyword -> // Keywords are never substituted as variable names
-                                null
-                            is Variable -> // Create alias
+                            is Variable -> // Create an alias
                                 resolution(value).let {
                                     // Ensure aliased query variable exists
                                     Knowns(resolutions + (variable to Resolution.Alias(value)), mappings)

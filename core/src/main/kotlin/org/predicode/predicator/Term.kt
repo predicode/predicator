@@ -52,9 +52,14 @@ sealed class SimpleTerm : Term() {
 }
 
 /**
- * A term the [variable][Variable] may resolve to.
+ * A term the local [variable][Variable] may be mapped to.
  */
-sealed class ResolvedTerm : SimpleTerm() {
+sealed class MappedTerm : SimpleTerm()
+
+/**
+ * A term the query [variable][Variable] may resolve to.
+ */
+sealed class ResolvedTerm : MappedTerm() {
 
     final override fun expand(resolver: PredicateResolver) = Expansion(this)
 
@@ -124,11 +129,17 @@ abstract class Value : ResolvedTerm() {
 
 /**
  * Variable term.
+ *
+ * Variable can be either local to rule, or global, i.e. present in original query. The former should be
+ * [mapped][Knowns.map] to their values prior to [predicate resolution][Predicate.resolve].
+ * All of the latter should be specified when [constructing knowns][Knowns] and are to be [resolved][Knowns.resolve].
  */
-abstract class Variable : SimpleTerm() {
+abstract class Variable : MappedTerm() {
 
-    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
-            knowns.map(this, term)
+    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+        is MappedTerm -> knowns.map(this, term)
+        is Keyword -> null // Keywords are not acceptable as variable values
+    }
 
     final override fun expand(resolver: PredicateResolver) =
             resolver.knowns
