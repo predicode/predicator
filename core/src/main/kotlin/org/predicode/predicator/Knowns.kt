@@ -1,7 +1,7 @@
 package org.predicode.predicator
 
 /**
- * Known mappings and resolutions.
+ * Known local variable mappings and query variable resolutions.
  *
  * Instances of this class are immutable. Every modification method returns a new instance based on current one.
  */
@@ -19,10 +19,10 @@ class Knowns {
     /**
      * Resolution rule variable mappings.
      *
-     * These are [simple terms][SimpleTerm] passed to resolution rule. I.e. variable values local to the rule.
+     * These are [plain terms][PlainTerm] passed to resolution rule. I.e. variable values local to the rule.
      * When [variable][Variable] is used as local variable value, it is the one from [original query][resolutions].
      */
-    private val mappings: Map<Variable, SimpleTerm>
+    private val mappings: Map<Variable, PlainTerm>
 
     /**
      * Constructs knowns without any mappings and with the given query variables unresolved.
@@ -34,7 +34,7 @@ class Knowns {
         this.resolutions = variables.associateBy({ it }, { Resolution.Unresolved })
     }
 
-    private constructor(resolutions: Map<Variable, Resolution>, mappings: Map<Variable, SimpleTerm>) {
+    private constructor(resolutions: Map<Variable, Resolution>, mappings: Map<Variable, PlainTerm>) {
         this.resolutions = resolutions
         this.mappings = mappings
     }
@@ -46,7 +46,7 @@ class Knowns {
      *
      * @throws UnknownVariable if variable is not mapped.
      */
-    fun mapping(variable: Variable): SimpleTerm =
+    fun mapping(variable: Variable): PlainTerm =
             mappings.getOrElse(variable) { throw UnknownVariable(variable, "Unmapped variable $variable") }
 
     /**

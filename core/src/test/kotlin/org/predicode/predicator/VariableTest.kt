@@ -42,7 +42,7 @@ class VariableTest {
     fun `maps to value`() {
 
         val variable = namedVariable("variable")
-        val value = simpleValue("value")
+        val value = rawValue("value")
 
         assert(variable.match(value, knowns)).isNotNull {
             assert(subject.mapping(variable))
@@ -54,7 +54,7 @@ class VariableTest {
     fun `does not remap the same term`() {
 
         val variable = namedVariable("variable")
-        val value = simpleValue(12345)
+        val value = rawValue(12345)
 
         knowns = knowns.map(variable, value)!!
 
@@ -69,7 +69,7 @@ class VariableTest {
 
         val variable = namedVariable("variable")
 
-        knowns = knowns.map(variable, simpleValue(12345))!!
+        knowns = knowns.map(variable, rawValue(12345))!!
 
         assert(variable.match(namedAtom("atom"), knowns))
                 .isNull()
@@ -195,7 +195,7 @@ class VariableTest {
     fun `expands to mapping`() {
 
         val variable = namedVariable("variable")
-        val value = simpleValue(12345)
+        val value = rawValue(12345)
 
         assert(knowns.map(variable, value)).isNotNull {
             resolver = resolver.withKnowns(subject)

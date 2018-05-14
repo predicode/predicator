@@ -5,7 +5,7 @@ import reactor.core.publisher.Flux
 import java.util.function.Function
 
 /**
- * A predicate always resolved to true.
+ * Returns predicate always resolved without modifying the original resolution.
  *
  * This is used as the only predicate of the [fact][RulePattern.fact].
  */
@@ -15,21 +15,40 @@ private object True : Predicate {
 
     override fun resolve(resolver: PredicateResolver): Flux<Knowns> = Flux.just(resolver.knowns)
 
+    override fun and(other: Predicate) = other
+
+    override fun or(other: Predicate) = this
+
+    override fun not() = False
+
     override fun toString() = "."
 
 }
 
-fun resolvingPredicate(_resolve: Function<PredicateResolver, Flux<Knowns>>): Predicate = object : Predicate {
-    override fun resolve(resolver: PredicateResolver) = _resolve.apply(resolver)
+/**
+ * Returns predicate that is never resolved.
+ */
+fun alwaysFalse(): Predicate = False
+
+private object False : Predicate {
+
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> = Flux.empty()
+
+    override fun and(other: Predicate) = this
+
+    override fun or(other: Predicate) = other
+
+    override fun not() = True
+
+    override fun toString() = "\\+."
+
 }
 
-fun simplePredicate(vararg terms: SimpleTerm): Predicate =
-        RulePattern(*terms).let { pattern ->
-            object : Predicate {
-                override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                        resolver.ruleSelector.matchingRules(pattern)
-                                .flatMap { (rule, knowns) ->
-                                    rule.predicate.resolve(resolver.withKnowns(knowns))
-                                }
-            }
-        }
+/**
+ * Creates predicate resolved by the given function.
+ *
+ * @param resolve predicate resolution function.
+ */
+fun resolvingPredicate(resolve: Function<PredicateResolver, Flux<Knowns>>): Predicate = object : Predicate {
+    override fun resolve(resolver: PredicateResolver) = resolve.apply(resolver)
+}

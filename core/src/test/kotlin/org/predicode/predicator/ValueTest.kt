@@ -21,21 +21,21 @@ class ValueTest {
 
     @Test
     fun `matches the same value`() {
-        assert(simpleValue("value1").match(simpleValue("value1"), knowns)).isNotNull {
+        assert(rawValue("value1").match(rawValue("value1"), knowns)).isNotNull {
             toBe(knowns)
         }
     }
 
     @Test
     fun `does not match another value`() {
-        assert(simpleValue("value1").match(simpleValue(123), knowns))
+        assert(rawValue("value1").match(rawValue(123), knowns))
                 .isNull()
     }
 
     @Test
     fun `resolves variable`() {
 
-        val value = simpleValue("name")
+        val value = rawValue("name")
         val variable = namedVariable("var")
 
         knowns = Knowns(variable)
@@ -49,7 +49,7 @@ class ValueTest {
     @Test
     fun `does not match other terms`() {
 
-        val value = simpleValue("name")
+        val value = rawValue("name")
 
         assert(value.match(namedKeyword("name"), knowns))
                 .isNull()
@@ -61,7 +61,7 @@ class ValueTest {
     @Test
     fun `expands to itself`() {
 
-        val value = simpleValue("name")
+        val value = rawValue("name")
 
         assert(value.expand(resolver))
                 .toBe(Term.Expansion(value))

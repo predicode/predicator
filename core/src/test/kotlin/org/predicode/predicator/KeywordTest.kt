@@ -39,7 +39,7 @@ class KeywordTest {
 
         assert(keyword.match(namedAtom("name"), knowns))
                 .isNull()
-        assert(keyword.match(simpleValue(123), knowns))
+        assert(keyword.match(rawValue(123), knowns))
                 .isNull()
         assert(keyword.match(namedVariable("name"), knowns))
                 .isNull()

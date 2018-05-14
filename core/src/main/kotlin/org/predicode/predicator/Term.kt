@@ -16,6 +16,18 @@ import java.util.function.UnaryOperator
  */
 sealed class Term {
 
+    /**
+     * Expands this term replacing it with plain one.
+     *
+     * Expansion happens e.g. when [resolving a phrase][Phrase.resolve].
+     *
+     * Plain terms typically expand to themselves, except for [variables][Variable], that are expanded to their
+     * [mappings][Knowns.mapping].
+     *
+     * @param resolver predicate resolver instance to resolve/expand against.
+     *
+     * @return this term expansion.
+     */
     abstract fun expand(resolver: PredicateResolver): Expansion
 
     /**
@@ -23,18 +35,27 @@ sealed class Term {
      */
     open fun toPhraseString() = toString()
 
+    /**
+     * Term [expansion][expand] result.
+     *
+     * @property expanded a plain term the original term is expanded to.
+     * @property updatePredicate an operator to apply to original predicate.
+     *
+     * This may be used e.g. to recursively resolve additional predicates. E.g. when expanding compound
+     * [phrase][Phrase].
+     */
     data class Expansion(
-            val expanded: SimpleTerm,
+            val expanded: PlainTerm,
             val updatePredicate: UnaryOperator<Predicate> = UnaryOperator.identity())
 
 }
 
 /**
- * Simple (non-compound) term.
+ * A plain, non-compound term.
  *
- * [Rule patterns][RulePattern] may contain simple terms only.
+ * [Rule patterns][RulePattern] may contain plain terms only.
  */
-sealed class SimpleTerm : Term() {
+sealed class PlainTerm : Term() {
 
     /**
      * Attempts to match against another term.
@@ -47,14 +68,14 @@ sealed class SimpleTerm : Term() {
      *
      * @return updated knowns if the term matches, or `null` otherwise.
      */
-    abstract fun match(term: SimpleTerm, knowns: Knowns): Knowns?
+    abstract fun match(term: PlainTerm, knowns: Knowns): Knowns?
 
 }
 
 /**
  * A term the local [variable][Variable] may be mapped to.
  */
-sealed class MappedTerm : SimpleTerm()
+sealed class MappedTerm : PlainTerm()
 
 /**
  * A term the query [variable][Variable] may resolve to.
@@ -70,9 +91,9 @@ sealed class ResolvedTerm : MappedTerm() {
  *
  * Keywords match only themselves. They can not be mapped to variables.
  */
-abstract class Keyword : SimpleTerm() {
+abstract class Keyword : PlainTerm() {
 
-    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? =
+    final override fun match(term: PlainTerm, knowns: Knowns): Knowns? =
             knowns.takeIf { term == this } // Keywords match only themselves
 
     final override fun expand(resolver: PredicateResolver) = Expansion(this)
@@ -86,7 +107,7 @@ abstract class Keyword : SimpleTerm() {
  */
 abstract class Atom : ResolvedTerm() {
 
-    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+    final override fun match(term: PlainTerm, knowns: Knowns): Knowns? = when (term) {
         is Keyword -> null // Keywords match only themselves
         is Atom -> knowns.takeIf { term == this }
         is Value -> null // Words never match values
@@ -104,7 +125,7 @@ abstract class Atom : ResolvedTerm() {
  */
 abstract class Value : ResolvedTerm() {
 
-    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+    final override fun match(term: PlainTerm, knowns: Knowns): Knowns? = when (term) {
         is Keyword -> null // Keywords match only themselves
         is Value -> valueMatch(term, knowns)
         is Atom -> null // Words never match values
@@ -136,7 +157,7 @@ abstract class Value : ResolvedTerm() {
  */
 abstract class Variable : MappedTerm() {
 
-    final override fun match(term: SimpleTerm, knowns: Knowns): Knowns? = when (term) {
+    final override fun match(term: PlainTerm, knowns: Knowns): Knowns? = when (term) {
         is MappedTerm -> knowns.map(this, term)
         is Keyword -> null // Keywords are not acceptable as variable values
     }
@@ -152,11 +173,14 @@ abstract class Variable : MappedTerm() {
  * A phrase consisting of other terms.
  *
  * A phrase can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] to
- * [simple term][SimpleTerm] prior to being matched.
+ * [plain term][PlainTerm] prior to being matched.
+ *
+ * This is also a predicate that [expands][Term.expand] all of its predicates, and then corresponding
+ * [resolution rules][Rule] are searched and applied.
+ *
+ * @param terms terms this phrase consists of.
  */
-class Phrase(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
-
-    private val terms: Array<out Term> = _terms
+class Phrase(private vararg val terms: Term) : Term(), Iterable<Term>, Predicate {
 
     override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
@@ -168,10 +192,9 @@ class Phrase(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
 
     override fun resolve(resolver: PredicateResolver): Flux<Knowns> {
         return terms
-                .withIndex()
-                .fold(PhraseResolution(resolver, terms.size)) { resolution, (index, term) ->
+                .fold(PhraseResolution(resolver, terms.size)) { resolution, term ->
                     try {
-                        resolution.expand(index, term)
+                        resolution.expandTerm(term)
                     } catch (e: Exception) {
                         return Flux.error(e)
                     }
@@ -198,23 +221,38 @@ class Phrase(vararg _terms: Term) : Term(), Iterable<Term>, Predicate {
     private class PhraseResolution(val resolver: PredicateResolver, size: Int) {
 
         private var predicate: Predicate = alwaysTrue()
-        private val terms: Array<Term?> = arrayOfNulls(size)
+        private val terms: Array<PlainTerm?> = arrayOfNulls(size)
+        private var index = 0
 
-        fun expand(index: Int, term: Term): PhraseResolution {
+        fun expandTerm(term: Term) = also {
 
             val expansion: Expansion = term.expand(resolver)
 
-            terms[index] = expansion.expanded
+            terms[index++] = expansion.expanded
 
             predicate = expansion.updatePredicate.apply(predicate)
-
-            return this
         }
 
         @Suppress("UNCHECKED_CAST")
         fun resolve(): Flux<Knowns> =
-                (predicate and simplePredicate(*(terms as Array<SimpleTerm>))).resolve(resolver)
+                (predicate and plainPredicate()).resolve(resolver)
+
+        fun plainPredicate(): Predicate =
+                RulePattern(*expandedTerms()).let { pattern ->
+                    object : Predicate {
+                        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
+                                resolver.ruleSelector.matchingRules(pattern)
+                                        .flatMap { (rule, knowns) ->
+                                            rule.predicate.resolve(resolver.withKnowns(knowns))
+                                        }
+                    }
+                }
+
+        @Suppress("UNCHECKED_CAST")
+        fun expandedTerms(): Array<out PlainTerm> =
+                terms as Array<out PlainTerm>
 
     }
 
 }
+

@@ -31,6 +31,13 @@ data class Rule(val condition: RulePattern, val predicate: Predicate) {
 
     }
 
-    data class Match(val rule: Rule, val knowns: Knowns);
+    /**
+     * Selected rule match.
+     *
+     * @param rule matching rule.
+     * @param knowns known variable mappings and resolutions returned from [rule condition][Rule.condition]
+     * [match][RulePattern.match].
+     */
+    data class Match(val rule: Rule, val knowns: Knowns)
 
 }

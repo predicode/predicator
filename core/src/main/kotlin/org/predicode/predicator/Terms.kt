@@ -63,15 +63,15 @@ private class NamedAtom(val name: String) : Atom() {
 }
 
 /**
- * Creates a simple [value][Value].
+ * Creates a raw [value][Value].
  *
  * This value matches another one only if the latter is constructed with this function with equal [value].
  *
  * @param value target value.
  */
-fun simpleValue(value: Any): Value = SimpleValue(value)
+fun rawValue(value: Any): Value = RawValue(value)
 
-private class SimpleValue<out V>(val value: V) : Value() {
+private class RawValue<out V>(val value: V) : Value() {
 
     override fun toString() = value.toString()
 
@@ -82,7 +82,7 @@ private class SimpleValue<out V>(val value: V) : Value() {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as SimpleValue<*>
+        other as RawValue<*>
 
         return value == other.value
 

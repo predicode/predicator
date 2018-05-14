@@ -53,7 +53,7 @@ class AtomTest {
 
         assert(atom.match(namedKeyword("name"), knowns))
                 .isNull()
-        assert(atom.match(simpleValue(123), knowns))
+        assert(atom.match(rawValue(123), knowns))
                 .isNull()
 
     }

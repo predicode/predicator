@@ -7,9 +7,9 @@ import java.util.function.Function
 /**
  * Resolution rule match pattern.
  */
-class RulePattern(vararg _terms: SimpleTerm) : Iterable<SimpleTerm> {
+class RulePattern(vararg _terms: PlainTerm) : Iterable<PlainTerm> {
 
-    private val terms: Array<out SimpleTerm> = _terms
+    private val terms: Array<out PlainTerm> = _terms
 
     /**
      * Attempts to match against another pattern.
@@ -48,13 +48,21 @@ class RulePattern(vararg _terms: SimpleTerm) : Iterable<SimpleTerm> {
      */
     fun fact() = rule(alwaysTrue())
 
+    /**
+     * Creates a rule resolved by the given predicate resolution function.
+     *
+     * @param resolve predicate resolution function.
+     */
     fun resolveBy(resolve: Function<PredicateResolver, Flux<Knowns>>) = rule(resolvingPredicate(resolve))
 
+    /**
+     * Creates a rule resolved by [phrase][Phrase] consisting of the given terms.
+     *
+     * @param terms terms the phrase consists of.
+     */
     fun resolveBy(vararg terms: Term) = rule(Phrase(*terms))
 
     override fun iterator() = terms.iterator()
-
-    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -66,8 +74,8 @@ class RulePattern(vararg _terms: SimpleTerm) : Iterable<SimpleTerm> {
 
     }
 
-    override fun hashCode(): Int {
-        return Arrays.hashCode(terms)
-    }
+    override fun hashCode() = Arrays.hashCode(terms)
+
+    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
 }
