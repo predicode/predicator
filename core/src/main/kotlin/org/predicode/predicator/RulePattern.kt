@@ -56,11 +56,18 @@ class RulePattern(vararg _terms: PlainTerm) : Iterable<PlainTerm> {
     fun resolveBy(resolve: Function<PredicateResolver, Flux<Knowns>>) = rule(resolvingPredicate(resolve))
 
     /**
-     * Creates a rule resolved by [phrase][Phrase] consisting of the given terms.
+     * Creates a rule resolved by [rule application][applyRules].
+     *
+     * @param terms terms the rule search pattern consists of.
+     */
+    fun resolveBy(vararg terms: PlainTerm) = rule(RulePattern(*terms).applyRules())
+
+    /**
+     * Creates a rule resolved by [phrase predicate][Phrase.predicate] consisting of the given terms.
      *
      * @param terms terms the phrase consists of.
      */
-    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms))
+    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms).predicate())
 
     /**
      * Creates predicate that searches for the rules matching this pattern and applies them.

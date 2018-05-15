@@ -19,7 +19,7 @@ sealed class Term {
     /**
      * Expands this term replacing it with plain one.
      *
-     * Expansion happens e.g. when [resolving a phrase][Phrase.resolve].
+     * Expansion happens e.g. when resolving a [phrase predicate][Phrase.predicate].
      *
      * Plain terms typically expand to themselves, except for [variables][Variable], that are expanded to their
      * [mappings][Knowns.mapping].
@@ -175,23 +175,21 @@ abstract class Variable : MappedTerm() {
  * A phrase can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] to
  * [plain term][PlainTerm] prior to being matched.
  *
- * This is also a predicate that [expands][Term.expand] all of its predicates, and then corresponding
- * [resolution rules][Rule] are searched and applied.
- *
  * @param terms terms this phrase consists of.
  */
-class Phrase(private vararg val terms: Term) : Term(), Iterable<Term>, Predicate {
-
-    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
-
-    override fun toPhraseString() = "($this)"
+class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
 
     override fun expand(resolver: PredicateResolver): Expansion {
         TODO("Phrase expansion is not implemented")
     }
 
-    override fun resolve(resolver: PredicateResolver): Flux<Knowns> {
-        return terms
+    /**
+     * Creates a phrase predicate that [expands][Term.expand] all of its terms, then searches for corresponding
+     * [resolution rules][Rule], and applies them.
+     */
+    fun predicate() = object : Predicate {
+
+        override fun resolve(resolver: PredicateResolver): Flux<Knowns> = terms
                 .fold(PhraseResolution(resolver, terms.size)) { resolution, term ->
                     try {
                         resolution.expandTerm(term)
@@ -200,9 +198,12 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term>, Predicate
                     }
                 }
                 .resolve()
+
+        override fun toString() = this@Phrase.toString()
+
     }
 
-    override fun iterator(): Iterator<Term> = this.terms.iterator()
+    override fun iterator() = this.terms.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -214,9 +215,11 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term>, Predicate
 
     }
 
-    override fun hashCode(): Int {
-        return Arrays.hashCode(terms)
-    }
+    override fun hashCode() = Arrays.hashCode(terms)
+
+    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
+
+    override fun toPhraseString() = "($this)"
 
     private class PhraseResolution(val resolver: PredicateResolver, size: Int) {
 
@@ -233,12 +236,10 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term>, Predicate
             predicate = expansion.updatePredicate.apply(predicate)
         }
 
-        fun resolve(): Flux<Knowns> =
-                (predicate and RulePattern(*expandedTerms()).applyRules()).resolve(resolver)
+        fun resolve() = (predicate and RulePattern(*expandedTerms()).applyRules()).resolve(resolver)
 
         @Suppress("UNCHECKED_CAST")
-        fun expandedTerms(): Array<out PlainTerm> =
-                terms as Array<out PlainTerm>
+        fun expandedTerms() = terms as Array<out PlainTerm>
 
     }
 
