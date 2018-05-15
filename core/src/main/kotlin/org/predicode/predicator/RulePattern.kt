@@ -62,6 +62,21 @@ class RulePattern(vararg _terms: PlainTerm) : Iterable<PlainTerm> {
      */
     fun resolveBy(vararg terms: Term) = rule(Phrase(*terms))
 
+    /**
+     * Creates predicate that searches for the rules matching this pattern and applies them.
+     */
+    fun applyRules() = object : Predicate {
+
+        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
+                resolver.ruleSelector.matchingRules(this@RulePattern)
+                        .flatMap { (rule, knowns) ->
+                            rule.predicate.resolve(resolver.withKnowns(knowns))
+                        }
+
+        override fun toString() = this@RulePattern.toString()
+
+    }
+
     override fun iterator() = terms.iterator()
 
     override fun equals(other: Any?): Boolean {

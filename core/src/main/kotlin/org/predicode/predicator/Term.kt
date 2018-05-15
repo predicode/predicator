@@ -233,20 +233,8 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term>, Predicate
             predicate = expansion.updatePredicate.apply(predicate)
         }
 
-        @Suppress("UNCHECKED_CAST")
         fun resolve(): Flux<Knowns> =
-                (predicate and plainPredicate()).resolve(resolver)
-
-        fun plainPredicate(): Predicate =
-                RulePattern(*expandedTerms()).let { pattern ->
-                    object : Predicate {
-                        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                                resolver.ruleSelector.matchingRules(pattern)
-                                        .flatMap { (rule, knowns) ->
-                                            rule.predicate.resolve(resolver.withKnowns(knowns))
-                                        }
-                    }
-                }
+                (predicate and RulePattern(*expandedTerms()).applyRules()).resolve(resolver)
 
         @Suppress("UNCHECKED_CAST")
         fun expandedTerms(): Array<out PlainTerm> =
