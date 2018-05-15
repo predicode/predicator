@@ -52,7 +52,7 @@
     <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
 
     <reactor.version>3.1.6.RELEASE</reactor.version>
-    <junit-jupiter.version>5.1.1</junit-jupiter.version>
+    <junit-jupiter.version>5.2.0</junit-jupiter.version>
     <atrium.version>0.6.0</atrium.version>
   </properties>
 
@@ -133,6 +133,7 @@
   <build>
     <pluginManagement>
       <plugins>
+        <!-- Compile Kotlin sources -->
         <plugin>
           <groupId>org.jetbrains.kotlin</groupId>
           <artifactId>kotlin-maven-plugin</artifactId>
@@ -140,7 +141,7 @@
           <configuration>
             <args>
               <arg>-Xjsr305=strict</arg> <!-- Enable strict mode for JSR-305 annotations -->
-              <arg>-Xenable-jvm-default</arg>
+              <arg>-Xenable-jvm-default</arg> <!-- Enable @JvmDefault annotation support -->
             </args>
           </configuration>
           <executions>
@@ -165,6 +166,19 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+
+        <!-- Test execution -->
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.21.0</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-surefire-provider</artifactId>
+              <version>1.2.0</version>
+            </dependency>
+          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>
