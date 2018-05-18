@@ -44,10 +44,10 @@ class Knowns {
      *
      * @param variable a variable, local to resolution rule.
      *
-     * @throws UnknownVariable if variable is not mapped.
+     * @throws UnmappedVariableException if variable is not mapped.
      */
     fun mapping(variable: Variable): PlainTerm =
-            mappings.getOrElse(variable) { throw UnknownVariable(variable, "Unmapped variable $variable") }
+            mappings.getOrElse(variable) { throw UnmappedVariableException(variable) }
 
     /**
      * Maps local resolution rule variable to the new value.
@@ -80,9 +80,10 @@ class Knowns {
      *
      * @param variable query variable.
      *
-     * @throws NoSuchElementException if there is no such variable in original query.
+     * @throws UnknownVariableException if there is no such variable in original query.
      */
-    fun resolution(variable: Variable) = resolutions.getValue(variable)
+    fun resolution(variable: Variable) =
+            resolutions.getOrElse(variable) { throw UnknownVariableException(variable) }
 
     /**
      * Resolves original query variable.

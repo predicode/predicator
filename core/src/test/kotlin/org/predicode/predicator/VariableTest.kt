@@ -82,7 +82,7 @@ class VariableTest {
         val queryVar = namedVariable("queryVar")
 
         expect { localVar.match(queryVar, knowns) }
-                .toThrow<NoSuchElementException>()
+                .toThrow<UnknownVariableException>()
     }
 
     @Test

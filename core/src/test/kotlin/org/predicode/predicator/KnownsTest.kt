@@ -18,7 +18,7 @@ class KnownsTest {
             val knowns = Knowns()
 
             expect { knowns.resolve(namedVariable("unknown"), namedAtom("resolution")) }
-                    .toThrow<NoSuchElementException>()
+                    .toThrow<UnknownVariableException>()
         }
 
         @Test
