@@ -24,10 +24,11 @@ data class Rule(val condition: RulePattern, val predicate: Predicate) {
          * Searches for the matching predicate resolution rules.
          *
          * @param pattern rule search pattern.
+         * @param knowns known resolutions.
          *
          * @return a [Flux] of [rule matches][Match].
          */
-        fun matchingRules(pattern: RulePattern): Flux<Match>
+        fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Match>
 
     }
 

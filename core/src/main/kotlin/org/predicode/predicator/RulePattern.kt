@@ -75,7 +75,7 @@ class RulePattern(vararg _terms: PlainTerm) : Iterable<PlainTerm> {
     fun applyRules() = object : Predicate {
 
         override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                resolver.ruleSelector.matchingRules(this@RulePattern)
+                resolver.ruleSelector.matchingRules(this@RulePattern, resolver.knowns)
                         .flatMap { (rule, knowns) ->
                             rule.predicate.resolve(resolver.withKnowns(knowns))
                         }
