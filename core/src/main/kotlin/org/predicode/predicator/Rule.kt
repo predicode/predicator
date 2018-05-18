@@ -12,6 +12,19 @@ import reactor.core.publisher.Flux
  */
 data class Rule(val condition: RulePattern, val predicate: Predicate) {
 
+    /**
+     * Attempts to match this rule [condition] against the given [pattern].
+     *
+     * @param pattern rule pattern to match against.
+     * @param knowns known resolutions.
+     *
+     * @return rule match, or `null` if the rule condition does not match.
+     */
+    fun match(pattern: RulePattern, knowns: Knowns): Match? =
+            condition.match(pattern, knowns)?.let { updatedKnowns ->
+                Rule.Match(this, updatedKnowns)
+            }
+
     override fun toString() = "$condition :- $predicate"
 
     /**

@@ -18,9 +18,7 @@ private class SequentialRuleSelector(private val rules: Array<out Rule>) : Rule.
 
     override fun ruleMatches(pattern: RulePattern, knowns: Knowns) =
             rules.toFlux().flatMap { rule ->
-                Mono.justOrEmpty(rule.condition.match(pattern, knowns)?.let { updatedKnowns ->
-                    Rule.Match(rule, updatedKnowns)
-                })
+                Mono.justOrEmpty(rule.match(pattern, knowns))
             }
 
 
