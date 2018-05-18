@@ -15,20 +15,20 @@ data class Rule(val condition: RulePattern, val predicate: Predicate) {
     override fun toString() = "$condition :- $predicate"
 
     /**
-     * A selector of predicate resolution rules.
+     * A selector of matching predicate resolution rules.
      */
     @FunctionalInterface
     interface Selector {
 
         /**
-         * Searches for the matching predicate resolution rules.
+         * Selects matching predicate resolution rules.
          *
          * @param pattern rule search pattern.
          * @param knowns known resolutions.
          *
          * @return a [Flux] of [rule matches][Match].
          */
-        fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Match>
+        fun ruleMatches(pattern: RulePattern, knowns: Knowns): Flux<Match>
 
     }
 

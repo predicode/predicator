@@ -6,6 +6,6 @@ class TestPredicateResolver(override val knowns: Knowns) : PredicateResolver, Ru
 
     override val ruleSelector: Rule.Selector = this
 
-    override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> = Flux.empty()
+    override fun ruleMatches(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> = Flux.empty()
 
 }
