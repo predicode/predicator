@@ -12,9 +12,9 @@ import java.util.*
  *
  * @param rules rules to scan.
  */
-fun ruleSelector(vararg rules: Rule): Rule.Selector = SequentialRuleSelector(rules)
+fun ruleSelector(vararg rules: Rule): Rule.Selector = ScanningRuleSelector(rules)
 
-private class SequentialRuleSelector(private val rules: Array<out Rule>) : Rule.Selector {
+private class ScanningRuleSelector(private val rules: Array<out Rule>) : Rule.Selector {
 
     override fun ruleMatches(pattern: RulePattern, knowns: Knowns) =
             rules.toFlux().flatMap { rule ->
@@ -26,7 +26,7 @@ private class SequentialRuleSelector(private val rules: Array<out Rule>) : Rule.
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as SequentialRuleSelector
+        other as ScanningRuleSelector
 
         return Arrays.equals(rules, other.rules)
     }
