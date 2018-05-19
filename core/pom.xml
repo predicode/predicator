@@ -40,6 +40,10 @@
       <artifactId>atrium-cc-en_UK-robstoll</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.mockk</groupId>
+      <artifactId>mockk</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-test</artifactId>
     </dependency>

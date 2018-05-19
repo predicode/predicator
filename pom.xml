@@ -54,6 +54,7 @@
     <reactor.version>3.1.7.RELEASE</reactor.version>
     <junit-jupiter.version>5.2.0</junit-jupiter.version>
     <atrium.version>0.6.0</atrium.version>
+    <mockk.version>1.8</mockk.version>
   </properties>
 
   <repositories>
@@ -119,6 +120,12 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-reflect</artifactId>
         <version>${kotlin.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.mockk</groupId>
+        <artifactId>mockk</artifactId>
+        <version>${mockk.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
