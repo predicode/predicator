@@ -12,7 +12,7 @@ import java.util.*
  *
  * @param rules rules to scan.
  */
-fun ruleMatcher(vararg rules: Rule): Rule.Selector = SequentialRuleSelector(rules)
+fun ruleSelector(vararg rules: Rule): Rule.Selector = SequentialRuleSelector(rules)
 
 private class SequentialRuleSelector(private val rules: Array<out Rule>) : Rule.Selector {
 
