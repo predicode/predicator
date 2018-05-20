@@ -177,7 +177,7 @@ abstract class Variable : MappedTerm() {
  *
  * @param terms terms this phrase consists of.
  */
-class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
+class Phrase(private vararg val terms: Term) : Term(), List<Term> by terms.asList() {
 
     override fun expand(resolver: PredicateResolver): Expansion = Expansion(
             tempVariable("phrase expansion"),
@@ -198,8 +198,6 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
         override fun toString() = this@Phrase.toString()
 
     }
-
-    override fun iterator() = this.terms.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
