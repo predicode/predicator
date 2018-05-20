@@ -179,9 +179,9 @@ abstract class Variable : MappedTerm() {
  */
 class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
 
-    override fun expand(resolver: PredicateResolver): Expansion {
-        TODO("Phrase expansion is not implemented")
-    }
+    override fun expand(resolver: PredicateResolver): Expansion = Expansion(
+            tempVariable("phrase expansion"),
+            UnaryOperator { expansion(resolver).predicate() and it })
 
     /**
      * Creates a phrase predicate that [expands][Term.expand] all of its terms, then searches for corresponding
@@ -189,15 +189,11 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
      */
     fun predicate() = object : Predicate {
 
-        override fun resolve(resolver: PredicateResolver): Flux<Knowns> = terms
-                .fold(PhraseResolution(resolver, terms.size)) { resolution, term ->
-                    try {
-                        resolution.expandTerm(term)
-                    } catch (e: Exception) {
-                        return Flux.error(e)
-                    }
-                }
-                .resolve()
+        override fun resolve(resolver: PredicateResolver): Flux<Knowns> = try {
+            expansion(resolver).resolve()
+        } catch (e: Exception) {
+            Flux.error(e)
+        }
 
         override fun toString() = this@Phrase.toString()
 
@@ -212,7 +208,6 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
         other as Phrase
 
         return Arrays.equals(terms, other.terms)
-
     }
 
     override fun hashCode() = Arrays.hashCode(terms)
@@ -221,7 +216,12 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
 
     override fun toPhraseString() = "($this)"
 
-    private class PhraseResolution(val resolver: PredicateResolver, size: Int) {
+    private fun expansion(resolver: PredicateResolver) = terms
+            .fold(PhraseExpansion(resolver, terms.size)) { resolution, term ->
+                resolution.expandTerm(term)
+            }
+
+    private class PhraseExpansion(val resolver: PredicateResolver, size: Int) {
 
         private var predicate: Predicate = alwaysTrue()
         private val terms: Array<PlainTerm?> = arrayOfNulls(size)
@@ -236,7 +236,9 @@ class Phrase(private vararg val terms: Term) : Term(), Iterable<Term> {
             predicate = expansion.updatePredicate.apply(predicate)
         }
 
-        fun resolve() = (predicate and RulePattern(*expandedTerms()).applyRules()).resolve(resolver)
+        fun resolve() = predicate().resolve(resolver)
+
+        fun predicate() = predicate and RulePattern(*expandedTerms()).applyRules()
 
         @Suppress("UNCHECKED_CAST")
         fun expandedTerms() = terms as Array<out PlainTerm>

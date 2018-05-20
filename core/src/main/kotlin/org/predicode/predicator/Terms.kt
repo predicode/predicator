@@ -35,6 +35,22 @@ private class NamedKeyword(val name: String) : Keyword() {
 }
 
 /**
+ * A keyword designating definition of something.
+ *
+ * This is used to build phrase expansion rules. When expanding a phrase, it is replaced by (temporary) variable,
+ * while predicate constructed to find a definition rule.
+ *
+ * A definition rule pattern consists of a variable, followed by this keyword, followed by predicate terms.
+ */
+fun definitionOf(): Keyword = DefinitionOf
+
+private object DefinitionOf : Keyword() {
+
+    override fun toString() = ":="
+
+}
+
+/**
  * Creates an [atom][Atom] with the given name.
  *
  * This atom matches another one only if the latter is constructed with this function and has the same [name].
