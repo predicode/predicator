@@ -93,10 +93,21 @@ sealed class ResolvedTerm : MappedTerm() {
  */
 abstract class Keyword : PlainTerm() {
 
+    /**
+     * Keyword name.
+     *
+     * This is used generally for representation only.
+     */
+    abstract val name: String
+
     final override fun match(term: PlainTerm, knowns: Knowns): Knowns? =
             knowns.takeIf { term == this } // Keywords match only themselves
 
     final override fun expand(resolver: PredicateResolver) = Expansion(this)
+
+    override fun toString() = "'$name'"
+
+    override fun toPhraseString() = name
 
 }
 
@@ -107,6 +118,13 @@ abstract class Keyword : PlainTerm() {
  */
 abstract class Atom : ResolvedTerm() {
 
+    /**
+     * Atom name.
+     *
+     * This is used generally for representation only.
+     */
+    abstract val name: String
+
     final override fun match(term: PlainTerm, knowns: Knowns): Knowns? = when (term) {
         is Keyword -> null // Keywords match only themselves
         is Atom -> knowns.takeIf { term == this }
@@ -114,7 +132,9 @@ abstract class Atom : ResolvedTerm() {
         is Variable -> knowns.resolve(term, this)
     }
 
-    override fun toPhraseString() = "($this)"
+    override fun toString() = name
+
+    override fun toPhraseString() = "($name)"
 
 }
 
@@ -157,6 +177,13 @@ abstract class Value : ResolvedTerm() {
  */
 abstract class Variable : MappedTerm() {
 
+    /**
+     * Variable name.
+     *
+     * This is used generally for representation only.
+     */
+    abstract val name: String
+
     final override fun match(term: PlainTerm, knowns: Knowns): Knowns? = when (term) {
         is MappedTerm -> knowns.map(this, term)
         is Keyword -> null // Keywords are not acceptable as variable values
@@ -166,6 +193,8 @@ abstract class Variable : MappedTerm() {
             resolver.knowns
                     .mapping(this)
                     .let { Expansion(it) }
+
+    override fun toString(): String = "_${name}_"
 
 }
 

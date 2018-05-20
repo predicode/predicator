@@ -1,5 +1,4 @@
 @file:JvmName("Terms")
-
 package org.predicode.predicator
 
 import java.util.*
@@ -13,7 +12,7 @@ import java.util.*
  */
 fun namedKeyword(name: String): Keyword = NamedKeyword(name)
 
-private class NamedKeyword(val name: String) : Keyword() {
+private class NamedKeyword(override val name: String) : Keyword() {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -27,10 +26,6 @@ private class NamedKeyword(val name: String) : Keyword() {
     }
 
     override fun hashCode() = name.hashCode()
-
-    override fun toString() = "'$name'"
-
-    override fun toPhraseString() = name
 
 }
 
@@ -46,7 +41,8 @@ fun definitionOf(): Keyword = DefinitionOf
 
 private object DefinitionOf : Keyword() {
 
-    override fun toString() = ":="
+    override val name: String
+        get() = ":="
 
 }
 
@@ -59,7 +55,7 @@ private object DefinitionOf : Keyword() {
  */
 fun namedAtom(name: String): Atom = NamedAtom(name)
 
-private class NamedAtom(val name: String) : Atom() {
+private class NamedAtom(override val name: String) : Atom() {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -75,8 +71,6 @@ private class NamedAtom(val name: String) : Atom() {
     override fun hashCode(): Int {
         return name.hashCode()
     }
-
-    override fun toString() = name
 
 }
 
@@ -121,9 +115,8 @@ private class RawValue<out V>(val value: V) : Value() {
  */
 fun namedVariable(name: String): Variable = NamedVariable(name)
 
-private class NamedVariable(val name: String) : Variable() {
+private class NamedVariable(override val name: String) : Variable() {
 
-    override fun toString(): String = "_${name}_"
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -154,8 +147,6 @@ private val tempNameRandom = Random()
 
 private class TempVariable(prefix: String) : Variable() {
 
-    val name = "_$prefix ${tempNameRandom.nextInt()}_"
-
-    override fun toString(): String = name
+    override val name = "$prefix ${tempNameRandom.nextInt()}"
 
 }

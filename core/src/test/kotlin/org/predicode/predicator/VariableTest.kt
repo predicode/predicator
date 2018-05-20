@@ -222,10 +222,8 @@ class VariableTest {
             val prefix = "temp variable prefix"
             val variable = tempVariable(prefix)
 
-            assert(variable.toString())
-                    .startsWith("_$prefix ")
-            assert(variable.toString())
-                    .endsWith("_")
+            assert(variable.name)
+                    .startsWith("$prefix ")
         }
 
     }
