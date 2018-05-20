@@ -2,6 +2,8 @@
 
 package org.predicode.predicator
 
+import java.util.*
+
 /**
  * Creates a [keyword][Keyword] with the given name.
  *
@@ -119,5 +121,25 @@ private class NamedVariable(val name: String) : Variable() {
     override fun hashCode(): Int {
         return name.hashCode()
     }
+
+}
+
+/**
+ * Create temporary [variable][Variable].
+ *
+ * Temporary variables are compared by their identity. In contrast to [named variables][namedVariable] the name of
+ * temporary one is used only for its representation.
+ *
+ * @param prefix temporary variable name prefix.
+ */
+fun tempVariable(prefix: String): Variable = TempVariable(prefix)
+
+private val tempNameRandom = Random()
+
+private class TempVariable(prefix: String) : Variable() {
+
+    val name = "_$prefix ${tempNameRandom.nextInt()}_"
+
+    override fun toString(): String = name
 
 }

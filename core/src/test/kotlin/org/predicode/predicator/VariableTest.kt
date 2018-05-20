@@ -1,12 +1,11 @@
 package org.predicode.predicator
 
-import ch.tutteli.atrium.api.cc.en_UK.isNotNull
-import ch.tutteli.atrium.api.cc.en_UK.isNull
-import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.api.cc.en_UK.toThrow
+import ch.tutteli.atrium.api.cc.en_UK.*
 import ch.tutteli.atrium.assert
 import ch.tutteli.atrium.expect
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class VariableTest {
@@ -202,6 +201,33 @@ class VariableTest {
             assert(variable.expand(resolver))
                     .toBe(Term.Expansion(value))
         }
+    }
+
+    @Nested
+    @DisplayName("Temporary variable")
+    inner class TempVariableTests {
+
+        @Test
+        fun `compared by identity`() {
+
+            val variable = tempVariable("t")
+
+            assert(variable).toBe(variable)
+            assert(variable).notToBe(tempVariable("t"))
+        }
+
+        @Test
+        fun `has a name with the given prefix`() {
+
+            val prefix = "temp variable prefix"
+            val variable = tempVariable(prefix)
+
+            assert(variable.toString())
+                    .startsWith("_$prefix ")
+            assert(variable.toString())
+                    .endsWith("_")
+        }
+
     }
 
 }
