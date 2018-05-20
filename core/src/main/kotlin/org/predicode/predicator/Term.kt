@@ -292,7 +292,11 @@ class Phrase(private vararg val terms: Term) : Term(), List<Term> by terms.asLis
 
         fun resolve() = predicate().resolve(resolver)
 
-        fun definition(variable: Variable) = predicate and variable.definitionOf(*expandedTerms()).applyRules()
+        fun definition(variable: Variable): Predicate =
+                resolver.knowns.declareLocal(variable) { local, knowns ->
+                    resolver = resolver.withKnowns(knowns)
+                    predicate and local.definitionOf(*expandedTerms()).applyRules()
+                }
 
         private fun predicate() = predicate and RulePattern(*expandedTerms()).applyRules()
 

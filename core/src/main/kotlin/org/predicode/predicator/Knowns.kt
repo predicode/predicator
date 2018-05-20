@@ -60,19 +60,31 @@ class Knowns {
      *
      * @param variable a variable, local to resolution rule.
      * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
+     *
+     * @return the value returned by [handler], or `null` if mapping is impossible.
      */
-    fun <R : Any> mapping(variable: Variable, handler: BiFunction<PlainTerm, Knowns, R?>): R? =
+    fun <R : Any> mapping(variable: Variable, handler: BiFunction<in PlainTerm, in Knowns, out R>): R? =
             mappings[variable]
                     ?.let { mapping -> handler.apply(mapping, this) }
-                    ?: run {
-                        LocalVariable(variable, rev).let { local ->
-                            declareLocal(local).let {
-                                knowns -> handler.apply(
-                                    local,
-                                    Knowns(knowns, mappings = knowns.mappings + (variable to local)))
-                            }
-                        }
-                    }
+                    ?: declareLocal(variable, handler)
+
+    /**
+     * Declares the given variable as local, if not declared yet.
+     *
+     * @param variable a variable to declare as local one.
+     * @param handler a handler function accepting declared local and updated knowns as argument and returning arbitrary
+     * value.
+     *
+     * @return the value returned by [handler].
+     */
+    fun <R> declareLocal(variable: Variable, handler: BiFunction<in Variable, in Knowns, out R>): R =
+            LocalVariable(variable, rev).let { local ->
+                declareLocal(local).let {
+                    knowns -> handler.apply(
+                        local,
+                        Knowns(knowns, mappings = knowns.mappings + (variable to local)))
+                }
+            }
 
     /**
      * Maps local resolution rule variable to the new value.
@@ -255,7 +267,23 @@ class Knowns {
  *
  * @see [Knowns.mapping]
  */
-fun <R : Any> Knowns.mapping(variable: Variable, handler: (PlainTerm, Knowns) -> R?): R? =
+fun <R : Any> Knowns.mapping(variable: Variable, handler: (PlainTerm, Knowns) -> R): R? =
         mapping(
                 variable,
-                BiFunction<PlainTerm, Knowns, R?> { mapping, knowns -> handler(mapping, knowns) })
+                BiFunction { mapping, knowns -> handler(mapping, knowns) })
+
+/**
+ * Handles the given local variable mapping.
+ *
+ * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+ * The updated knowns are passed to [handler].
+ *
+ * @param variable a variable, local to resolution rule.
+ * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
+ *
+ * @see [Knowns.mapping]
+ */
+fun <R> Knowns.declareLocal(variable: Variable, handler: (Variable, Knowns) -> R): R =
+        declareLocal(
+                variable,
+                BiFunction { mapping, knowns -> handler(mapping, knowns) })
