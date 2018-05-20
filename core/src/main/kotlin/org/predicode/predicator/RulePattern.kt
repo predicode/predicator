@@ -7,9 +7,7 @@ import java.util.function.Function
 /**
  * Resolution rule match pattern.
  */
-class RulePattern(vararg _terms: PlainTerm) : Iterable<PlainTerm> {
-
-    private val terms: Array<out PlainTerm> = _terms
+class RulePattern(private vararg val terms: PlainTerm) : List<PlainTerm> by terms.asList() {
 
     /**
      * Attempts to match against another pattern.
@@ -83,8 +81,6 @@ class RulePattern(vararg _terms: PlainTerm) : Iterable<PlainTerm> {
         override fun toString() = this@RulePattern.toString()
 
     }
-
-    override fun iterator() = terms.iterator()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
