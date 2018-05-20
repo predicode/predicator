@@ -51,7 +51,7 @@ class KeywordTest {
         val keyword = namedKeyword("name")
 
         assert(keyword.expand(resolver))
-                .toBe(Term.Expansion(keyword))
+                .toBe(Term.Expansion(keyword, knowns))
     }
 
 }

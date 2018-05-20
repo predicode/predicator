@@ -30,16 +30,16 @@ private class NamedKeyword(override val name: String) : Keyword() {
 }
 
 /**
- * A keyword designating definition of something.
+ * A keyword designating definition of expression.
  *
  * This is used to build phrase expansion rules. When expanding a phrase, it is replaced by (temporary) variable,
  * while predicate constructed to find a definition rule.
  *
- * A definition rule pattern consists of a variable, followed by this keyword, followed by predicate terms.
+ * A definition rule pattern consists of a variable, followed by this keyword, followed by expression terms.
  */
-fun definitionOf(): Keyword = DefinitionOf
+fun definitionKeyword(): Keyword = DefinitionKeyword
 
-private object DefinitionOf : Keyword() {
+private object DefinitionKeyword : Keyword() {
 
     override val name: String
         get() = ":="

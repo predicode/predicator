@@ -77,8 +77,10 @@ class KnownsTest {
                         .toBe(Knowns.Resolution.Alias(queryVar2))
                 assert(subject.resolution(queryVar2))
                         .toBe(Knowns.Resolution.Resolved(resolution))
-                assert(subject.mapping(localVar))
-                        .toBe(queryVar1)
+                subject.mapping(localVar) { mapping, _ ->
+                    assert(mapping)
+                            .toBe(queryVar1)
+                }
             }
         }
 

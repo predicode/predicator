@@ -22,7 +22,7 @@ class RulePattern(private vararg val terms: PlainTerm) : List<PlainTerm> by term
     fun match(pattern: RulePattern, knowns: Knowns): Knowns? {
         if (pattern.terms.size != terms.size) return null
 
-        var result = knowns.update()
+        var result = knowns.startMatching()
         var index = 0
 
         @Suppress("UseWithIndex")

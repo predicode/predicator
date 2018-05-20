@@ -64,7 +64,7 @@ class AtomTest {
         val atom = namedAtom("name")
 
         assert(atom.expand(resolver))
-                .toBe(Term.Expansion(atom))
+                .toBe(Term.Expansion(atom, knowns))
     }
 
 }

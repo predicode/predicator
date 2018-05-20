@@ -1,4 +1,9 @@
+@file:JvmMultifileClass
+@file:JvmName("KotlinExtensions")
 package org.predicode.predicator
+
+import org.predicode.predicator.Knowns.Resolution.*
+import java.util.function.BiFunction
 
 /**
  * Known local variable mappings and query variable resolutions.
@@ -24,6 +29,8 @@ class Knowns {
      */
     private val mappings: Map<Variable, PlainTerm>
 
+    private val rev: Int
+
     /**
      * Constructs knowns without any mappings and with the given query variables unresolved.
      *
@@ -32,22 +39,40 @@ class Knowns {
     constructor(vararg variables: Variable) {
         this.mappings = emptyMap()
         this.resolutions = variables.associateBy({ it }, { Resolution.Unresolved })
+        this.rev = 0
     }
 
-    private constructor(resolutions: Map<Variable, Resolution>, mappings: Map<Variable, PlainTerm>) {
+    private constructor(
+            proto: Knowns,
+            resolutions: Map<Variable, Resolution> = proto.resolutions,
+            mappings: Map<Variable, PlainTerm> = proto.mappings,
+            rev: Int = proto.rev) {
         this.resolutions = resolutions
         this.mappings = mappings
+        this.rev = rev
     }
 
     /**
-     * Returns the given local resolution rule variable resolution.
+     * Handles the given local variable mapping.
+     *
+     * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+     * The updated knowns are passed to [handler].
      *
      * @param variable a variable, local to resolution rule.
-     *
-     * @throws UnmappedVariableException if variable is not mapped.
+     * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
      */
-    fun mapping(variable: Variable): PlainTerm =
-            mappings.getOrElse(variable) { throw UnmappedVariableException(variable) }
+    fun <R : Any> mapping(variable: Variable, handler: BiFunction<PlainTerm, Knowns, R?>): R? =
+            mappings[variable]
+                    ?.let { mapping -> handler.apply(mapping, this) }
+                    ?: run {
+                        LocalVariable(variable, rev).let { local ->
+                            declareLocal(local).let {
+                                knowns -> handler.apply(
+                                    local,
+                                    Knowns(knowns, mappings = knowns.mappings + (variable to local)))
+                            }
+                        }
+                    }
 
     /**
      * Maps local resolution rule variable to the new value.
@@ -65,8 +90,8 @@ class Knowns {
             mappings[variable].let { prev ->
                 return when (prev) {
                     null -> Knowns(
-                            resolutions,
-                            mappings + (variable to value.also {
+                            this,
+                            mappings = mappings + (variable to value.also {
                                 if (it is Variable) resolution(it) // Ensure query variable exists
                             })) // New mapping
                     value -> this // Mapping didn't change
@@ -82,7 +107,7 @@ class Knowns {
      *
      * @throws UnknownVariableException if there is no such variable in original query.
      */
-    fun resolution(variable: Variable) =
+    fun resolution(variable: Variable): Resolution =
             resolutions.getOrElse(variable) { throw UnknownVariableException(variable) }
 
     /**
@@ -96,7 +121,7 @@ class Knowns {
             resolution(variable).let { resolution ->
                 return when (resolution) {
                     Resolution.Unresolved -> // Not resolved yet
-                        Knowns(resolutions + (variable to Resolution.Resolved(value)), mappings) // Resolve
+                        Knowns(this, resolutions = resolutions + (variable to Resolution.Resolved(value))) // Resolve
                     is Resolution.Resolved ->
                         takeIf { value == resolution.value } // Resolution can not change
                     is Resolution.Alias ->
@@ -109,7 +134,8 @@ class Knowns {
      *
      * Such knowns contain no mappings.
      */
-    fun update(): Knowns = takeIf { mappings.isEmpty() } ?: Knowns(resolutions, emptyMap())
+    fun startMatching(): Knowns =
+            Knowns(this, mappings = emptyMap(), rev = rev + 1)
 
     private fun resolve(variable: Variable, value: MappedTerm): Knowns? =
             resolution(variable).let { resolution ->
@@ -117,11 +143,11 @@ class Knowns {
                     Resolution.Unresolved -> // Not resolved yet
                         when (value) {
                             is ResolvedTerm -> // Resolve
-                                Knowns(resolutions + (variable to Resolution.Resolved(value)), mappings)
+                                Knowns(this, resolutions = resolutions + (variable to Resolution.Resolved(value)))
                             is Variable -> // Create an alias
                                 resolution(value).let {
                                     // Ensure aliased query variable exists
-                                    Knowns(resolutions + (variable to Resolution.Alias(value)), mappings)
+                                    Knowns(this, resolutions = resolutions + (variable to Resolution.Alias(value)))
                                 }
                         }
                     is Resolution.Resolved ->
@@ -130,6 +156,15 @@ class Knowns {
                         resolve(resolution.aliased, value) // Resolve aliased variable
                 }
             }
+
+    private fun declareLocal(local: LocalVariable): Knowns =
+            resolutions[local]
+                    ?.let { this }
+                    ?: Knowns(
+                            this,
+                            mappings = mappings + (local.variable to local),
+                            resolutions = resolutions + (local to Resolution.Unresolved))
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -153,7 +188,7 @@ class Knowns {
     }
 
     override fun toString(): String {
-        return "Knowns(resolutions=$resolutions, mappings=$mappings)"
+        return "Knowns(resolutions=$resolutions, mappings=$mappings, rev. $rev)"
     }
 
     /**
@@ -199,4 +234,28 @@ class Knowns {
 
     }
 
+    private data class LocalVariable(val variable: Variable, val rev: Int) : Variable() {
+
+        override val name = variable.name
+
+        override fun toString(): String = "$name #iteration"
+
+    }
+
 }
+
+/**
+ * Handles the given local variable mapping.
+ *
+ * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+ * The updated knowns are passed to [handler].
+ *
+ * @param variable a variable, local to resolution rule.
+ * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
+ *
+ * @see [Knowns.mapping]
+ */
+fun <R : Any> Knowns.mapping(variable: Variable, handler: (PlainTerm, Knowns) -> R?): R? =
+        mapping(
+                variable,
+                BiFunction<PlainTerm, Knowns, R?> { mapping, knowns -> handler(mapping, knowns) })

@@ -64,7 +64,7 @@ class ValueTest {
         val value = rawValue("name")
 
         assert(value.expand(resolver))
-                .toBe(Term.Expansion(value))
+                .toBe(Term.Expansion(value, knowns))
     }
 
 }

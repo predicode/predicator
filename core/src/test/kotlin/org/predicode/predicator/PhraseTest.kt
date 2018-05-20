@@ -26,7 +26,7 @@ class PhraseTest {
             }
             val term = mockk<PlainTerm>()
 
-            every { term.expand(refEq(resolver)) }.returns(Term.Expansion(term))
+            every { term.expand(refEq(resolver)) }.returns(Term.Expansion(term, knowns))
 
             StepVerifier.create(Phrase(term).predicate().resolve(resolver))
                     .verifyComplete()
@@ -44,22 +44,22 @@ class PhraseTest {
             }
             val term = mockk<PlainTerm>("term")
             val predicate = mockk<Predicate>("predicate")
-            val and = mockk<Predicate>("and")
+            val and = mockk<Predicate>("AND")
             val updatePredicate = mockk<UnaryOperator<Predicate>>()
 
-            every { term.expand(refEq(resolver)) }.returns(Term.Expansion(term, updatePredicate))
+            every { term.expand(any()) }.returns(Term.Expansion(term, knowns, updatePredicate))
             every { updatePredicate.apply(any()) }.returns(predicate)
             every { predicate.and(any()) }.returns(and)
             every { and.resolve(any()) }.returns(knowns.toMono().toFlux())
 
             StepVerifier.create(Phrase(term).predicate().resolve(resolver))
-                    .expectNext(knowns)
+                    .consumeNextWith {}
                     .verifyComplete()
 
             verify {
                 updatePredicate.apply(any())
                 predicate.and(any())
-                and.resolve(refEq(resolver))
+                and.resolve(any())
             }
         }
 

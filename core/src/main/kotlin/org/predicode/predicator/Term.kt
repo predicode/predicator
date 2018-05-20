@@ -28,7 +28,7 @@ sealed class Term {
      *
      * @return this term expansion.
      */
-    abstract fun expand(resolver: PredicateResolver): Expansion
+    abstract fun expand(resolver: PredicateResolver): Expansion?
 
     /**
      * Returns a string representation of this term for inclusion into phrase string representation.
@@ -39,6 +39,7 @@ sealed class Term {
      * Term [expansion][expand] result.
      *
      * @property expanded a plain term the original term is expanded to.
+     * @property knowns updated knowns.
      * @property updatePredicate an operator to apply to original predicate.
      *
      * This may be used e.g. to recursively resolve additional predicates. E.g. when expanding compound
@@ -46,6 +47,7 @@ sealed class Term {
      */
     data class Expansion(
             val expanded: PlainTerm,
+            val knowns: Knowns,
             val updatePredicate: UnaryOperator<Predicate> = UnaryOperator.identity())
 
 }
@@ -82,7 +84,8 @@ sealed class MappedTerm : PlainTerm()
  */
 sealed class ResolvedTerm : MappedTerm() {
 
-    final override fun expand(resolver: PredicateResolver) = Expansion(this)
+    final override fun expand(resolver: PredicateResolver) =
+            Expansion(this, resolver.knowns)
 
 }
 
@@ -100,10 +103,11 @@ abstract class Keyword : PlainTerm() {
      */
     abstract val name: String
 
-    final override fun match(term: PlainTerm, knowns: Knowns): Knowns? =
+    final override fun match(term: PlainTerm, knowns: Knowns) =
             knowns.takeIf { term == this } // Keywords match only themselves
 
-    final override fun expand(resolver: PredicateResolver) = Expansion(this)
+    final override fun expand(resolver: PredicateResolver) =
+            Expansion(this, resolver.knowns)
 
     override fun toString() = "'$name'"
 
@@ -190,9 +194,19 @@ abstract class Variable : MappedTerm() {
     }
 
     final override fun expand(resolver: PredicateResolver) =
-            resolver.knowns
-                    .mapping(this)
-                    .let { Expansion(it) }
+            resolver.knowns.mapping(this) { mapping, knowns ->
+                Expansion(mapping, knowns)
+            }
+
+    /**
+     * Builds rule pattern corresponding to definition of some expression.
+     *
+     * @param terms expression terms.
+     *
+     * @return rule pattern matching expression definition.
+     */
+    fun definitionOf(vararg terms: PlainTerm) =
+            RulePattern(*(arrayOf(this, definitionKeyword()) + terms))
 
     override fun toString(): String = "_${name}_"
 
@@ -208,9 +222,15 @@ abstract class Variable : MappedTerm() {
  */
 class Phrase(private vararg val terms: Term) : Term(), List<Term> by terms.asList() {
 
-    override fun expand(resolver: PredicateResolver): Expansion = Expansion(
-            tempVariable("phrase expansion"),
-            UnaryOperator { expansion(resolver).predicate() and it })
+    override fun expand(resolver: PredicateResolver): Expansion? =
+            expansion(resolver)?.let { expansion ->
+                tempVariable("phrase expansion").let { tempVar ->
+                    Expansion(
+                            tempVar,
+                            expansion.resolver.knowns,
+                            UnaryOperator { expansion.definition(tempVar) and it })
+                }
+            }
 
     /**
      * Creates a phrase predicate that [expands][Term.expand] all of its terms, then searches for corresponding
@@ -219,7 +239,7 @@ class Phrase(private vararg val terms: Term) : Term(), List<Term> by terms.asLis
     fun predicate() = object : Predicate {
 
         override fun resolve(resolver: PredicateResolver): Flux<Knowns> = try {
-            expansion(resolver).resolve()
+            expansion(resolver)?.resolve() ?: Flux.empty()
         } catch (e: Exception) {
             Flux.error(e)
         }
@@ -243,32 +263,41 @@ class Phrase(private vararg val terms: Term) : Term(), List<Term> by terms.asLis
 
     override fun toPhraseString() = "($this)"
 
-    private fun expansion(resolver: PredicateResolver) = terms
-            .fold(PhraseExpansion(resolver, terms.size)) { resolution, term ->
-                resolution.expandTerm(term)
-            }
+    private fun expansion(resolver: PredicateResolver): PhraseExpansion? {
 
-    private class PhraseExpansion(val resolver: PredicateResolver, size: Int) {
+        val expansion = PhraseExpansion(resolver, terms.size)
+
+        terms.forEach { term ->
+            if (!expansion.expandTerm(term)) return null
+        }
+
+        return expansion
+    }
+
+    private class PhraseExpansion(var resolver: PredicateResolver, size: Int) {
 
         private var predicate: Predicate = alwaysTrue()
         private val terms: Array<PlainTerm?> = arrayOfNulls(size)
         private var index = 0
 
-        fun expandTerm(term: Term) = also {
-
-            val expansion: Expansion = term.expand(resolver)
-
-            terms[index++] = expansion.expanded
-
-            predicate = expansion.updatePredicate.apply(predicate)
-        }
+        fun expandTerm(term: Term): Boolean =
+                term.expand(resolver)
+                        ?.let { (expanded, knowns, updatePredicate) ->
+                            terms[index++] = expanded
+                            predicate = updatePredicate.apply(predicate)
+                            resolver = resolver.withKnowns(knowns)
+                            true
+                        }
+                        ?: false
 
         fun resolve() = predicate().resolve(resolver)
 
-        fun predicate() = predicate and RulePattern(*expandedTerms()).applyRules()
+        fun definition(variable: Variable) = predicate and variable.definitionOf(*expandedTerms()).applyRules()
+
+        private fun predicate() = predicate and RulePattern(*expandedTerms()).applyRules()
 
         @Suppress("UNCHECKED_CAST")
-        fun expandedTerms() = terms as Array<out PlainTerm>
+        private fun expandedTerms() = terms as Array<out PlainTerm>
 
     }
 
