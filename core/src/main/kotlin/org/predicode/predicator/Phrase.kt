@@ -1,15 +1,23 @@
 package org.predicode.predicator
 
 import reactor.core.publisher.Flux
-import java.util.*
 import java.util.function.UnaryOperator
 
 /**
  * A phrase consisting of other terms.
  *
- * @param terms terms this phrase consists of.
+ * @constructor constructs new phrase.
+ *
+ * @property terms list of terms this phrase consists of.
  */
-class Phrase(private vararg val terms: Term) : CompoundTerm(), List<Term> by terms.asList() {
+class Phrase(val terms: List<Term>) : CompoundTerm() {
+
+    /**
+     * Constructs new phrase out of terms array.
+     *
+     * @param terms array of terms this phrase consists of.
+     */
+    constructor(vararg terms: Term) : this(terms.asList())
 
     override fun expand(resolver: PredicateResolver): Expansion? =
             expansion(resolver)?.let { expansion ->
@@ -43,10 +51,14 @@ class Phrase(private vararg val terms: Term) : CompoundTerm(), List<Term> by ter
 
         other as Phrase
 
-        return Arrays.equals(terms, other.terms)
+        if (terms != other.terms) return false
+
+        return true
     }
 
-    override fun hashCode() = Arrays.hashCode(terms)
+    override fun hashCode(): Int {
+        return terms.hashCode()
+    }
 
     override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
