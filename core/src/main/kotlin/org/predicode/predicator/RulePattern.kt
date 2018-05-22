@@ -1,13 +1,23 @@
 package org.predicode.predicator
 
 import reactor.core.publisher.Flux
-import java.util.*
 import java.util.function.Function
 
 /**
  * Resolution rule match pattern.
+ *
+ * @constructor constructs rule pattern.
+ *
+ * @property terms list of terms this pattern consists of.
  */
-class RulePattern(private vararg val terms: PlainTerm) : List<PlainTerm> by terms.asList() {
+class RulePattern(val terms: List<PlainTerm>) {
+
+    /**
+     * Constructs new rule pattern out of terms array.
+     *
+     * @param terms array of terms this pattern consists of.
+     */
+    constructor(vararg terms: PlainTerm) : this(terms.asList())
 
     /**
      * Attempts to match against another pattern.
@@ -88,11 +98,14 @@ class RulePattern(private vararg val terms: PlainTerm) : List<PlainTerm> by term
 
         other as RulePattern
 
-        return Arrays.equals(terms, other.terms)
+        if (terms != other.terms) return false
 
+        return true
     }
 
-    override fun hashCode() = Arrays.hashCode(terms)
+    override fun hashCode(): Int {
+        return terms.hashCode()
+    }
 
     override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
 
