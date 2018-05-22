@@ -10,7 +10,7 @@ import java.util.function.UnaryOperator
  * - [atom][Atom],
  * - [arbitrary value][Value],
  * - [variable][Variable], or
- * - any [compound term][CompoundTerm], such as [phrase][Phrase]
+ * - any [compound term][CompoundTerm], such as [phrase][Phrase].
  */
 sealed class Term {
 
@@ -38,7 +38,8 @@ sealed class Term {
      *
      * @property expanded a plain term the original term is expanded to.
      * @property knowns updated knowns.
-     * @property updatePredicate an operator to apply to original predicate.
+     * @property updatePredicate an operator to apply to original predicate. When the term is expanded to variable,
+     * this can be used to add predicates for that variable.
      *
      * This may be used e.g. to recursively resolve additional predicates. E.g. when expanding compound
      * [phrase][Phrase].
@@ -54,6 +55,12 @@ sealed class Term {
  * A plain, non-compound term.
  *
  * [Rule patterns][RulePattern] may contain plain terms only.
+ *
+ * Can be one of:
+ * - [keyword][Keyword]
+ * - [atom][Atom],
+ * - [arbitrary value][Value], or
+ * - [variable][Variable].
  */
 sealed class PlainTerm : Term() {
 
@@ -73,12 +80,20 @@ sealed class PlainTerm : Term() {
 }
 
 /**
- * A term the local [variable][Variable] may be mapped to.
+ * A compound term that may contain other terms.
+ *
+ * A compound terms can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] and replaced
+ * with [plain term][PlainTerm] (with [temporary variable][tempVariable] typically) prior to being matched.
+ */
+abstract class CompoundTerm : Term()
+
+/**
+ * A plain term the local [variable][Variable] may be mapped to.
  */
 sealed class MappedTerm : PlainTerm()
 
 /**
- * A term the query [variable][Variable] may resolve to.
+ * A plain term the query [variable][Variable] may resolve to.
  */
 sealed class ResolvedTerm : MappedTerm() {
 
@@ -209,12 +224,3 @@ abstract class Variable : MappedTerm() {
     override fun toString(): String = "_${name}_"
 
 }
-
-/**
- * A compound term that may contain other terms.
- *
- * A compound terms can not be part of [rule patterns][RulePattern] and thus should be [expanded][expand] to
- * [plain term][PlainTerm] prior to being matched.
- */
-abstract class CompoundTerm : Term()
-
