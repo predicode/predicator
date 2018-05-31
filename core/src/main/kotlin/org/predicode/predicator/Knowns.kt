@@ -1,5 +1,3 @@
-@file:JvmMultifileClass
-@file:JvmName("KotlinExtensions")
 package org.predicode.predicator
 
 import org.predicode.predicator.Knowns.Resolution.*
