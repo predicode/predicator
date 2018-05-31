@@ -107,6 +107,8 @@ class RulePattern(val terms: List<PlainTerm>) {
         return terms.hashCode()
     }
 
-    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
+    override fun toString() = StringBuilder().apply {
+        termPrinter { append(it) }.print(terms)
+    }.toString()
 
 }

@@ -45,6 +45,9 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
 
     }
 
+    override fun print(out: TermPrinter) =
+        out.startCompound().print(terms).endCompound()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -60,9 +63,9 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
         return terms.hashCode()
     }
 
-    override fun toString() = terms.joinToString(" ") { it.toPhraseString() }
-
-    override fun toPhraseString() = "($this)"
+    override fun toString() = StringBuilder().apply {
+        termPrinter { append(it) }.print(terms)
+    }.toString()
 
     private fun expansion(resolver: PredicateResolver): PhraseExpansion? {
 

@@ -29,9 +29,13 @@ sealed class Term {
     abstract fun expand(resolver: PredicateResolver): Expansion?
 
     /**
-     * Returns a string representation of this term for inclusion into phrase string representation.
+     * Prints this term representation with the given term printer.
+     *
+     * @param out term printer to print this term representation with.
+     *
+     * @return updated term printer.
      */
-    open fun toPhraseString() = toString()
+    abstract fun print(out: TermPrinter): TermPrinter
 
     /**
      * Term [expansion][expand] result.
@@ -122,9 +126,9 @@ abstract class Keyword : PlainTerm() {
     final override fun expand(resolver: PredicateResolver) =
             Expansion(this, resolver.knowns)
 
-    override fun toString() = "'$name'"
+    override fun print(out: TermPrinter) = out.keyword(name)
 
-    override fun toPhraseString() = name
+    override fun toString() = name
 
 }
 
@@ -149,9 +153,9 @@ abstract class Atom : ResolvedTerm() {
         is Variable -> knowns.resolve(term, this)
     }
 
-    override fun toString() = name
+    override fun print(out: TermPrinter) = out.atom(name)
 
-    override fun toPhraseString() = "($name)"
+    override fun toString() = "\'$name'"
 
 }
 
@@ -169,7 +173,7 @@ abstract class Value : ResolvedTerm() {
         is Variable -> knowns.resolve(term, this)
     }
 
-    override fun toPhraseString() = "[$this]"
+    override fun print(out: TermPrinter) = out.value(toString())
 
     /**
      * Attempts to match against another value.
@@ -210,6 +214,8 @@ abstract class Variable : MappedTerm() {
             resolver.knowns.mapping(this) { mapping, knowns ->
                 Expansion(mapping, knowns)
             }
+
+    override fun print(out: TermPrinter) = out.variable(name)
 
     /**
      * Builds rule pattern corresponding to definition of some expression.
