@@ -1,8 +1,17 @@
 package org.predicode.predicator
 
-import java.util.function.Consumer
+import java.util.function.IntConsumer
 
-sealed class TermPrinter(protected val print: Consumer<CharSequence>) {
+const val BACKSLASH = '\\'.toInt()
+const val SPACE = ' '.toInt()
+const val SINGLE_QUOTE = '\''.toInt()
+const val UNDERSCORE = '_'.toInt()
+const val OPENING_BRACE = '['.toInt()
+const val CLOSING_BRACE = ']'.toInt()
+const val OPENING_PARENT = '('.toInt()
+const val CLOSING_PARENT = ')'.toInt()
+
+sealed class TermPrinter(protected val print: IntConsumer) {
 
     fun print(terms: Iterable<Term>): TermPrinter =
             terms.fold(this) { out, term -> term.print(out) }
@@ -15,41 +24,41 @@ sealed class TermPrinter(protected val print: Consumer<CharSequence>) {
     }
 
     fun atom(name: CharSequence): TermPrinter = separate().apply {
-        out("'")
+        out(SINGLE_QUOTE)
         name(name)
-    }.quoted("'")
+    }.quoted(SINGLE_QUOTE)
 
     fun variable(name: CharSequence): TermPrinter = separate().apply {
-        out("_")
+        out(UNDERSCORE)
         name(name)
-    }.quoted("_")
+    }.quoted(UNDERSCORE)
 
     fun value(value: CharSequence): TermPrinter = separate().apply {
-        out("[")
-        out(value)
-        out("]")
+        out(OPENING_BRACE)
+        value.codePoints().forEach { out(it) }
+        out(CLOSING_BRACE)
     }
 
     fun startCompound(): TermPrinter = endQuoted().separate().let {
-        out("(")
+        out(OPENING_PARENT)
         InitialTermPrinter(print)
     }
 
-    fun endCompound(): TermPrinter = endQuoted().apply { out(")") }
+    fun endCompound(): TermPrinter = endQuoted().apply { out(CLOSING_PARENT) }
 
     private fun name(name: CharSequence) {
         NameStart(print).name(name)
     }
 
-    private fun quoted(quote: CharSequence): TermPrinter = QuotedTermPrinter(print, quote)
+    private fun quoted(quote: Int): TermPrinter = QuotedTermPrinter(print, quote)
 
     protected abstract fun separate(): TermPrinter
 
     protected abstract fun endQuoted(): TermPrinter
 
-    protected fun out(text: CharSequence) = print.accept(text)
+    protected fun out(codePoint: Int) = print.accept(codePoint)
 
-    private class InitialTermPrinter(print: Consumer<CharSequence>) : TermPrinter(print) {
+    private class InitialTermPrinter(print: IntConsumer) : TermPrinter(print) {
 
         override fun separate() = UnquotedTermPrinter(print)
 
@@ -58,10 +67,10 @@ sealed class TermPrinter(protected val print: Consumer<CharSequence>) {
     }
 
     private class QuotedTermPrinter(
-            print: Consumer<CharSequence>,
-            val quote: CharSequence) : TermPrinter(print) {
+            print: IntConsumer,
+            val quote: Int) : TermPrinter(print) {
 
-        override fun separate() = endQuoted().apply { out(" ") }
+        override fun separate() = endQuoted().apply { out(SPACE) }
 
         override fun keyword(name: CharSequence): TermPrinter {
             out(quote)
@@ -72,47 +81,54 @@ sealed class TermPrinter(protected val print: Consumer<CharSequence>) {
 
     }
 
-    private class UnquotedTermPrinter(print: Consumer<CharSequence>) : TermPrinter(print) {
+    private class UnquotedTermPrinter(print: IntConsumer) : TermPrinter(print) {
 
-        override fun separate() = apply { out(" ") }
+        override fun separate() = apply { out(SPACE) }
 
         override fun endQuoted() = this
 
     }
 
-    private abstract class NamePrinter(protected val print: Consumer<CharSequence>) {
+    private abstract class NamePrinter(protected val print: IntConsumer) {
 
         fun name(name: CharSequence) {
-            name.fold(this) { out, c ->
-                if (c.isWhitespace()) out.space()
-                else when (c.category.code[0]) {
-                    'L', 'N' -> out.nonSpace().apply {
-                        // Letter, number
-                        out(c.toString())
-                    }
-                    'P', 'S', 'M' -> out.nonSpace().apply {
-                        // Punctuation, symbol, mark
-                        out("\\$c")
-                    }
-                    else -> out.nonSpace().apply {
-                        out(when {
-                            c.toInt() < 32 -> "\\${c.toInt()}"
-                            else -> "\\u${c.toInt().toString(16).padStart(4, '0')}"
-                        })
-                    }
-                }
-            }
+            name.codePoints().mapToObj { it }.reduce(
+                    this,
+                    { out, c ->
+                        if (Character.isWhitespace(c)) out.space()
+                        else when (Character.getType(c)) {
+                            in Character.DECIMAL_DIGIT_NUMBER..Character.LETTER_NUMBER, // Letters
+                            in Character.UPPERCASE_LETTER..Character.OTHER_LETTER -> // Numbers
+                                out.nonSpace().apply {
+                                    // Letter, number
+                                    out(c)
+                                }
+                            in Character.DASH_PUNCTUATION..Character.OTHER_PUNCTUATION, // Punctuation
+                            in Character.MATH_SYMBOL..Character.OTHER_SYMBOL, // Symbols
+                            in Character.NON_SPACING_MARK..Character.COMBINING_SPACING_MARK -> // Marks
+                                out.nonSpace().apply {
+                                    out(BACKSLASH)
+                                    out(c)
+                                }
+                            else ->
+                                out.nonSpace().apply {
+                                    out(BACKSLASH)
+                                    Integer.toHexString(c).forEach { out(it.toInt()) }
+                                    out(BACKSLASH)
+                                }
+                        }
+                    }) { _, s -> s }
         }
 
         protected abstract fun space(): NamePrinter
 
         protected abstract fun nonSpace(): NamePrinter
 
-        protected fun out(text: CharSequence) = print.accept(text)
+        protected fun out(codePoint: Int) = print.accept(codePoint)
 
     }
 
-    private class NameStart(print: Consumer<CharSequence>) : NamePrinter(print) {
+    private class NameStart(print: IntConsumer) : NamePrinter(print) {
 
         override fun space() = this
 
@@ -120,7 +136,7 @@ sealed class TermPrinter(protected val print: Consumer<CharSequence>) {
 
     }
 
-    private class NameBody(print: Consumer<CharSequence>) : NamePrinter(print) {
+    private class NameBody(print: IntConsumer) : NamePrinter(print) {
 
         override fun space(): NamePrinter = NameSpace(print)
 
@@ -128,21 +144,21 @@ sealed class TermPrinter(protected val print: Consumer<CharSequence>) {
 
     }
 
-    private class NameSpace(print: Consumer<CharSequence>) : NamePrinter(print) {
+    private class NameSpace(print: IntConsumer) : NamePrinter(print) {
 
         override fun space(): NamePrinter = this
 
-        override fun nonSpace() = NameBody(print).apply { out(" ") }
+        override fun nonSpace() = NameBody(print).apply { out(SPACE) }
 
     }
 
     companion object {
 
         @JvmStatic
-        fun termPrinter(print: Consumer<CharSequence>): TermPrinter = InitialTermPrinter(print)
+        fun termPrinter(print: IntConsumer): TermPrinter = InitialTermPrinter(print)
 
     }
 
 }
 
-fun termPrinter(print: (CharSequence) -> Unit): TermPrinter = TermPrinter.termPrinter(Consumer { print(it) })
+fun termPrinter(print: (Int) -> Unit): TermPrinter = TermPrinter.termPrinter(IntConsumer { print(it) })

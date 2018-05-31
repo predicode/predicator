@@ -108,7 +108,7 @@ class RulePattern(val terms: List<PlainTerm>) {
     }
 
     override fun toString() = StringBuilder().apply {
-        termPrinter { append(it) }.print(terms)
+        termPrinter { appendCodePoint(it) }.print(terms)
     }.toString()
 
 }

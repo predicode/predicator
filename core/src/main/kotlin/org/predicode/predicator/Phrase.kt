@@ -64,7 +64,7 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
     }
 
     override fun toString() = StringBuilder().apply {
-        termPrinter { append(it) }.print(terms)
+        termPrinter { appendCodePoint(it) }.print(terms)
     }.toString()
 
     private fun expansion(resolver: PredicateResolver): PhraseExpansion? {
