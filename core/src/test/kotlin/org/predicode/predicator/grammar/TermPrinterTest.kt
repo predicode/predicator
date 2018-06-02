@@ -1,8 +1,9 @@
-package org.predicode.predicator
+package org.predicode.predicator.grammar
 
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.*
 
 
 internal class TermPrinterTest {
@@ -27,7 +28,10 @@ internal class TermPrinterTest {
 
     @Test
     fun phrase() {
-        assert(print(Phrase(namedKeyword("keyword"), namedAtom("atom"))))
+        assert(print(
+                Phrase(
+                        namedKeyword("keyword"),
+                        namedAtom("atom"))))
                 .toBe("(keyword 'atom)")
     }
 
@@ -77,7 +81,9 @@ internal class TermPrinterTest {
     fun `closes quotes before keywords`() {
         assert(print(namedAtom("atom"), namedKeyword("keyword")))
                 .toBe("'atom' keyword")
-        assert(print(namedVariable("variable"), namedKeyword("keyword")))
+        assert(print(
+                namedVariable("variable"),
+                namedKeyword("keyword")))
                 .toBe("_variable_ keyword")
     }
 
@@ -102,7 +108,9 @@ internal class TermPrinterTest {
     @Test
     fun `separates phrases from quoted terms`() {
 
-        val phrase = Phrase(namedKeyword("keyword"), rawValue("value"))
+        val phrase = Phrase(
+                namedKeyword("keyword"),
+                rawValue("value"))
 
         assert(print(phrase, namedAtom("atom")))
                 .toBe("(keyword [value]) 'atom")
@@ -125,7 +133,9 @@ internal class TermPrinterTest {
     @Test
     fun `separates phrases from keywords`() {
 
-        val phrase = Phrase(namedKeyword("keyword"), rawValue("value"))
+        val phrase = Phrase(
+                namedKeyword("keyword"),
+                rawValue("value"))
 
         assert(print(phrase, namedKeyword("keyword")))
                 .toBe("(keyword [value]) keyword")
@@ -141,7 +151,9 @@ internal class TermPrinterTest {
 
     @Test
     fun `separates phrases`() {
-        assert(print(Phrase(namedKeyword("phrase 1")), Phrase(namedKeyword("phrase 2"))))
+        assert(print(
+                Phrase(namedKeyword("phrase 1")),
+                Phrase(namedKeyword("phrase 2"))))
                 .toBe("(phrase 1) (phrase 2)")
     }
 

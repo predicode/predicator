@@ -1,5 +1,6 @@
 package org.predicode.predicator
 
+import org.predicode.predicator.grammar.termPrinter
 import reactor.core.publisher.Flux
 import java.util.function.Function
 

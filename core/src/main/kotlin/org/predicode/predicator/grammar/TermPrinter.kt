@@ -1,5 +1,6 @@
-package org.predicode.predicator
+package org.predicode.predicator.grammar
 
+import org.predicode.predicator.Term
 import java.util.function.IntConsumer
 
 const val BACKSLASH = '\\'.toInt()
@@ -50,7 +51,8 @@ sealed class TermPrinter(protected val print: IntConsumer) {
         NameStart(print).name(name)
     }
 
-    private fun quoted(quote: Int): TermPrinter = QuotedTermPrinter(print, quote)
+    private fun quoted(quote: Int): TermPrinter =
+            QuotedTermPrinter(print, quote)
 
     protected abstract fun separate(): TermPrinter
 
@@ -138,7 +140,8 @@ sealed class TermPrinter(protected val print: IntConsumer) {
 
     private class NameBody(print: IntConsumer) : NamePrinter(print) {
 
-        override fun space(): NamePrinter = NameSpace(print)
+        override fun space(): NamePrinter =
+                NameSpace(print)
 
         override fun nonSpace(): NamePrinter = this
 
@@ -155,10 +158,12 @@ sealed class TermPrinter(protected val print: IntConsumer) {
     companion object {
 
         @JvmStatic
-        fun termPrinter(print: IntConsumer): TermPrinter = InitialTermPrinter(print)
+        fun termPrinter(print: IntConsumer): TermPrinter =
+                InitialTermPrinter(print)
 
     }
 
 }
 
-fun termPrinter(print: (Int) -> Unit): TermPrinter = TermPrinter.termPrinter(IntConsumer { print(it) })
+fun termPrinter(print: (Int) -> Unit): TermPrinter =
+        TermPrinter.termPrinter(IntConsumer { print(it) })

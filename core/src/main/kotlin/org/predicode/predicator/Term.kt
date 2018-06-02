@@ -1,5 +1,6 @@
 package org.predicode.predicator
 
+import org.predicode.predicator.grammar.TermPrinter
 import java.util.function.UnaryOperator
 
 /**
