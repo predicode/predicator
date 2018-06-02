@@ -3,15 +3,6 @@ package org.predicode.predicator.grammar
 import org.predicode.predicator.Term
 import java.util.function.IntConsumer
 
-const val BACKSLASH = '\\'.toInt()
-const val SPACE = ' '.toInt()
-const val SINGLE_QUOTE = '\''.toInt()
-const val UNDERSCORE = '_'.toInt()
-const val OPENING_BRACE = '['.toInt()
-const val CLOSING_BRACE = ']'.toInt()
-const val OPENING_PARENT = '('.toInt()
-const val CLOSING_PARENT = ')'.toInt()
-
 sealed class TermPrinter(protected val print: IntConsumer) {
 
     fun print(terms: Iterable<Term>): TermPrinter =
@@ -21,17 +12,15 @@ sealed class TermPrinter(protected val print: IntConsumer) {
             terms.fold(this) { out, term -> term.print(out) }
 
     open fun keyword(name: CharSequence): TermPrinter = endQuoted().separate().apply {
-        name(name)
+        printName(name, print, '`')
     }
 
     fun atom(name: CharSequence): TermPrinter = separate().apply {
-        out(SINGLE_QUOTE)
-        name(name)
+        printName(name, print, '\'', openQuote = true)
     }.quoted(SINGLE_QUOTE)
 
     fun variable(name: CharSequence): TermPrinter = separate().apply {
-        out(UNDERSCORE)
-        name(name)
+        printName(name, print, '_', openQuote = true)
     }.quoted(UNDERSCORE)
 
     fun value(value: CharSequence): TermPrinter = separate().apply {
@@ -46,10 +35,6 @@ sealed class TermPrinter(protected val print: IntConsumer) {
     }
 
     fun endCompound(): TermPrinter = endQuoted().apply { out(CLOSING_PARENT) }
-
-    private fun name(name: CharSequence) {
-        NameStart(print).name(name)
-    }
 
     private fun quoted(quote: Int): TermPrinter =
             QuotedTermPrinter(print, quote)
@@ -88,70 +73,6 @@ sealed class TermPrinter(protected val print: IntConsumer) {
         override fun separate() = apply { out(SPACE) }
 
         override fun endQuoted() = this
-
-    }
-
-    private abstract class NamePrinter(protected val print: IntConsumer) {
-
-        fun name(name: CharSequence) {
-            name.codePoints().mapToObj { it }.reduce(
-                    this,
-                    { out, c ->
-                        if (Character.isWhitespace(c)) out.space()
-                        else when (Character.getType(c)) {
-                            in Character.DECIMAL_DIGIT_NUMBER..Character.LETTER_NUMBER, // Letters
-                            in Character.UPPERCASE_LETTER..Character.OTHER_LETTER -> // Numbers
-                                out.nonSpace().apply {
-                                    // Letter, number
-                                    out(c)
-                                }
-                            in Character.DASH_PUNCTUATION..Character.OTHER_PUNCTUATION, // Punctuation
-                            in Character.MATH_SYMBOL..Character.OTHER_SYMBOL, // Symbols
-                            in Character.NON_SPACING_MARK..Character.COMBINING_SPACING_MARK -> // Marks
-                                out.nonSpace().apply {
-                                    out(BACKSLASH)
-                                    out(c)
-                                }
-                            else ->
-                                out.nonSpace().apply {
-                                    out(BACKSLASH)
-                                    Integer.toHexString(c).forEach { out(it.toInt()) }
-                                    out(BACKSLASH)
-                                }
-                        }
-                    }) { _, s -> s }
-        }
-
-        protected abstract fun space(): NamePrinter
-
-        protected abstract fun nonSpace(): NamePrinter
-
-        protected fun out(codePoint: Int) = print.accept(codePoint)
-
-    }
-
-    private class NameStart(print: IntConsumer) : NamePrinter(print) {
-
-        override fun space() = this
-
-        override fun nonSpace() = NameBody(print)
-
-    }
-
-    private class NameBody(print: IntConsumer) : NamePrinter(print) {
-
-        override fun space(): NamePrinter =
-                NameSpace(print)
-
-        override fun nonSpace(): NamePrinter = this
-
-    }
-
-    private class NameSpace(print: IntConsumer) : NamePrinter(print) {
-
-        override fun space(): NamePrinter = this
-
-        override fun nonSpace() = NameBody(print).apply { out(SPACE) }
 
     }
 

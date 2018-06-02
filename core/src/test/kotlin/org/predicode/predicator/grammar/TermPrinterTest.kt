@@ -36,59 +36,18 @@ internal class TermPrinterTest {
     }
 
     @Test
-    fun `removes leading whitespaces`() {
-        assert(print(namedKeyword(" \t keyword")))
-                .toBe("keyword")
-        assert(print(namedAtom(" \r atom")))
-                .toBe("'atom")
-        assert(print(namedVariable(" \n variable")))
-                .toBe("_variable")
-    }
-
-    @Test
-    fun `removes trailing whitespaces`() {
-        assert(print(namedKeyword("keyword \t ")))
-                .toBe("keyword")
-        assert(print(namedAtom("atom \r ")))
-                .toBe("'atom")
-        assert(print(namedVariable("variable \n ")))
-                .toBe("_variable")
-    }
-
-    @Test
-    fun `removes extra whitespaces`() {
-        assert(print(namedKeyword("keyword \r name")))
-                .toBe("keyword name")
-        assert(print(namedAtom("atom \n name")))
-                .toBe("'atom name")
-        assert(print(namedVariable("variable \t name ")))
-                .toBe("_variable name")
-    }
-
-    @Test
-    fun `escapes symbols`() {
-        assert(print(namedKeyword("keyword:name")))
-                .toBe("keyword\\:name")
-        assert(print(namedKeyword("keyword\\name")))
-                .toBe("keyword\\\\name")
-        assert(print(namedAtom("atom'name")))
-                .toBe("'atom\\'name")
-        assert(print(namedVariable("variable_name")))
-                .toBe("_variable\\_name")
-    }
-
-    @Test
     fun `closes quotes before keywords`() {
-        assert(print(namedAtom("atom"), namedKeyword("keyword")))
+        ch.tutteli.atrium.assert(print(namedAtom("atom"), namedKeyword("keyword")))
                 .toBe("'atom' keyword")
-        assert(print(
-                namedVariable("variable"),
-                namedKeyword("keyword")))
+        ch.tutteli.atrium.assert(
+                print(
+                        namedVariable("variable"),
+                        namedKeyword("keyword")))
                 .toBe("_variable_ keyword")
     }
 
     @Test
-    fun `separate keywords`() {
+    fun `separates keywords`() {
         assert(print(namedKeyword("first"), namedKeyword("second")))
                 .toBe("first second")
     }
@@ -154,7 +113,7 @@ internal class TermPrinterTest {
         assert(print(
                 Phrase(namedKeyword("phrase 1")),
                 Phrase(namedKeyword("phrase 2"))))
-                .toBe("(phrase 1) (phrase 2)")
+                .toBe("(phrase1) (phrase2)")
     }
 
     private fun print(vararg terms: Term) = StringBuilder().apply {
