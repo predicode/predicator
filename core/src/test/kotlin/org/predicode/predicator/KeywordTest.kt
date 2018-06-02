@@ -20,6 +20,12 @@ class KeywordTest {
     }
 
     @Test
+    fun `string representation`() {
+        assert(namedKeyword("keyword").toString())
+                .toBe("`keyword`")
+    }
+
+    @Test
     fun `matches keyword with the same name`() {
         assert(namedKeyword("name1").match(namedKeyword("name1"), knowns)).isNotNull {
             toBe(knowns)

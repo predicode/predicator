@@ -20,6 +20,12 @@ class ValueTest {
     }
 
     @Test
+    fun `string representation`() {
+        assert(namedVariable("variable").toString())
+                .toBe("_variable_")
+    }
+
+    @Test
     fun `matches the same value`() {
         assert(rawValue("value1").match(rawValue("value1"), knowns)).isNotNull {
             toBe(knowns)

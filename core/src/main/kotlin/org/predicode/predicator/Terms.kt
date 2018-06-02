@@ -85,8 +85,6 @@ fun rawValue(value: Any): Value = RawValue(value)
 
 private class RawValue<out V>(val value: V) : Value() {
 
-    override fun toString() = value.toString()
-
     override fun valueMatch(other: Value, knowns: Knowns) =
             knowns.takeIf { this == other }
 
@@ -103,6 +101,8 @@ private class RawValue<out V>(val value: V) : Value() {
     override fun hashCode(): Int {
         return value?.hashCode() ?: 0
     }
+
+    override fun toString() = value.toString()
 
 }
 

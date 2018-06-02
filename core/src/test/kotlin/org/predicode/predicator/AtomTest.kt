@@ -20,6 +20,12 @@ class AtomTest {
     }
 
     @Test
+    fun `string representation`() {
+        assert(namedAtom("atom").toString())
+                .toBe("'atom'")
+    }
+
+    @Test
     fun `matches atom with the same name`() {
         assert(namedAtom("name1").match(namedAtom("name1"), knowns)).isNotNull {
             toBe(knowns)

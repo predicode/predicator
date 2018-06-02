@@ -6,7 +6,8 @@ internal class NamePrinter(
         val name: CharSequence,
         private val print: IntConsumer,
         val quote: CodePoint,
-        val openQuote: Boolean) {
+        val openQuote: Boolean,
+        val closeQuote: Boolean) {
 
     var lastNonSeparating: CharClass = CharClass.START_CHAR_CLASS
 
@@ -20,7 +21,7 @@ internal class NamePrinter(
                 },
                 { _, s -> s })
         // Close quote if the name does not end with allowed symbol
-        if (!lastNonSeparating.nameEnd) out(quote)
+        if (closeQuote || !lastNonSeparating.nameEnd) out(quote)
     }
 
     fun out(codePoint: Int) = print.accept(codePoint)
@@ -31,10 +32,21 @@ fun printName(
         name: CharSequence,
         print: IntConsumer,
         quote: Char,
-        openQuote: Boolean = false) = NamePrinter(name, print, quote.toInt(), openQuote).print()
+        openQuote: Boolean = false,
+        closeQuote: Boolean = false) = NamePrinter(
+        name,
+        print = print,
+        quote = quote.toInt(),
+        openQuote = openQuote, closeQuote = closeQuote).print()
 
 fun printName(
         name: CharSequence,
-        print: (CodePoint) -> Unit,
         quote: Char,
-        openQuote: Boolean = false) = printName(name, IntConsumer(print), quote, openQuote)
+        openQuote: Boolean = false,
+        closeQuote: Boolean = false,
+        print: (CodePoint) -> Unit) = printName(
+        name,
+        print = IntConsumer(print),
+        quote = quote,
+        openQuote = openQuote,
+        closeQuote = closeQuote)

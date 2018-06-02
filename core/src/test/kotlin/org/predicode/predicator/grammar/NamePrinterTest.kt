@@ -78,9 +78,13 @@ internal class NamePrinterTest {
     }
 
     @Test
-    fun `opens quote unconditionally`() {
+    fun `quotes unconditionally`() {
         assert(print("atom", quote = '\'', openQuote = true))
                 .toBe("\'atom")
+        assert(print("atom", quote = '\'', closeQuote = true))
+                .toBe("atom\'")
+        assert(print("atom", quote = '\'', openQuote = true, closeQuote = true))
+                .toBe("\'atom\'")
     }
 
     @Test
@@ -92,8 +96,9 @@ internal class NamePrinterTest {
     private fun print(
             name: String,
             quote: Char = '`',
-            openQuote: Boolean = false): String = StringBuilder().let { out ->
-        printName(name, { out.appendCodePoint(it) }, quote, openQuote)
+            openQuote: Boolean = false,
+            closeQuote: Boolean = false): String = StringBuilder().let { out ->
+        printName(name, quote = quote, openQuote = openQuote, closeQuote = closeQuote) { out.appendCodePoint(it) }
         out.toString()
     }
 

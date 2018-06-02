@@ -1,6 +1,7 @@
 package org.predicode.predicator
 
 import org.predicode.predicator.grammar.TermPrinter
+import org.predicode.predicator.grammar.printName
 import org.predicode.predicator.grammar.printTerms
 import java.util.function.UnaryOperator
 
@@ -132,6 +133,10 @@ abstract class Keyword : PlainTerm() {
 
     override fun print(out: TermPrinter) = out.keyword(name)
 
+    override fun toString() = StringBuilder().apply {
+        printName(name, quote = '`', openQuote = true, closeQuote = true) { appendCodePoint(it) }
+    }.toString()
+
 }
 
 /**
@@ -156,6 +161,10 @@ abstract class Atom : ResolvedTerm() {
     }
 
     override fun print(out: TermPrinter) = out.atom(name)
+
+    override fun toString() = StringBuilder().apply {
+        printName(name, quote = '\'', openQuote = true, closeQuote = true) { appendCodePoint(it) }
+    }.toString()
 
 }
 
@@ -226,5 +235,9 @@ abstract class Variable : MappedTerm() {
      */
     fun definitionOf(vararg terms: PlainTerm) =
             RulePattern(*(arrayOf(this, definitionKeyword()) + terms))
+
+    override fun toString() = StringBuilder().apply {
+        printName(name, quote = '_', openQuote = true, closeQuote = true) { appendCodePoint(it) }
+    }.toString()
 
 }

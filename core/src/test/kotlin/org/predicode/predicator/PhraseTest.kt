@@ -1,5 +1,7 @@
 package org.predicode.predicator
 
+import ch.tutteli.atrium.api.cc.en_UK.toBe
+import ch.tutteli.atrium.assert
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,6 +14,12 @@ import java.util.function.UnaryOperator
 
 
 class PhraseTest {
+
+    @Test
+    fun `string representation`() {
+        assert(Phrase(namedKeyword("keyword"), namedVariable("variable")).toString())
+                .toBe("keyword _variable")
+    }
 
     @Nested
     inner class PhrasePredicate {
