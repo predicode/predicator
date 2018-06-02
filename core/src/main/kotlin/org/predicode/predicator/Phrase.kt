@@ -1,7 +1,7 @@
 package org.predicode.predicator
 
 import org.predicode.predicator.grammar.TermPrinter
-import org.predicode.predicator.grammar.termPrinter
+import org.predicode.predicator.grammar.printTerms
 import reactor.core.publisher.Flux
 import java.util.function.UnaryOperator
 
@@ -47,8 +47,13 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
 
     }
 
-    override fun print(out: TermPrinter) =
-        out.startCompound().print(terms).endCompound()
+    override fun print(out: TermPrinter) {
+        out.apply {
+            startCompound()
+            print(terms)
+            endCompound()
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -66,7 +71,7 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
     }
 
     override fun toString() = StringBuilder().apply {
-        termPrinter { appendCodePoint(it) }.print(terms)
+        printTerms(terms) { appendCodePoint(it) }
     }.toString()
 
     private fun expansion(resolver: PredicateResolver): PhraseExpansion? {

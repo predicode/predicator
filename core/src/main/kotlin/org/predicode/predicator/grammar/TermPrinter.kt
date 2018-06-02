@@ -3,88 +3,124 @@ package org.predicode.predicator.grammar
 import org.predicode.predicator.Term
 import java.util.function.IntConsumer
 
-sealed class TermPrinter(protected val print: IntConsumer) {
+class TermPrinter private constructor(private val print: IntConsumer) {
 
-    fun print(terms: Iterable<Term>): TermPrinter =
-            terms.fold(this) { out, term -> term.print(out) }
+    private var partPrinter: PartPrinter = InitialTermPrinter
 
-    fun print(vararg terms: Term): TermPrinter =
-            terms.fold(this) { out, term -> term.print(out) }
-
-    open fun keyword(name: CharSequence): TermPrinter = endQuoted().separate().apply {
-        printName(name, print, '`')
+    fun print(terms: Iterable<Term>) {
+        terms.forEach { term -> term.print(this) }
     }
 
-    fun atom(name: CharSequence): TermPrinter = separate().apply {
-        printName(name, print, '\'', openQuote = true)
-    }.quoted(SINGLE_QUOTE)
-
-    fun variable(name: CharSequence): TermPrinter = separate().apply {
-        printName(name, print, '_', openQuote = true)
-    }.quoted(UNDERSCORE)
-
-    fun value(value: CharSequence): TermPrinter = separate().apply {
-        out(OPENING_BRACE)
-        value.codePoints().forEach { out(it) }
-        out(CLOSING_BRACE)
+    fun print(vararg terms: Term) {
+        terms.forEach { term -> term.print(this) }
     }
 
-    fun startCompound(): TermPrinter = endQuoted().separate().let {
-        out(OPENING_PARENT)
-        InitialTermPrinter(print)
+    fun keyword(name: CharSequence) {
+        partPrinter = partPrinter.keyword(this, name)
     }
 
-    fun endCompound(): TermPrinter = endQuoted().apply { out(CLOSING_PARENT) }
+    fun atom(name: CharSequence) {
+        this.partPrinter = this.partPrinter.separate(this).apply {
+            printName(name, print, '\'', openQuote = true)
+        }.quoted(SINGLE_QUOTE)
+    }
 
-    private fun quoted(quote: Int): TermPrinter =
-            QuotedTermPrinter(print, quote)
+    fun variable(name: CharSequence) {
+        this.partPrinter = this.partPrinter.separate(this).apply {
+            printName(name, print, '_', openQuote = true)
+        }.quoted(UNDERSCORE)
+    }
 
-    protected abstract fun separate(): TermPrinter
+    fun value(value: CharSequence) {
+        this.partPrinter = this.partPrinter.separate(this).apply {
+            out(OPENING_BRACE)
+            value.codePoints().forEach { out(it) }
+            out(CLOSING_BRACE)
+        }
+    }
 
-    protected abstract fun endQuoted(): TermPrinter
+    fun startCompound() {
+        this.partPrinter = this.partPrinter.endQuoted(this).separate(this).let {
+            out(OPENING_PARENT)
+            InitialTermPrinter
+        }
+    }
 
-    protected fun out(codePoint: Int) = print.accept(codePoint)
+    fun endCompound() {
+        this.partPrinter = this.partPrinter.endQuoted(this).apply {
+            out(CLOSING_PARENT)
+        }
+    }
 
-    private class InitialTermPrinter(print: IntConsumer) : TermPrinter(print) {
+    private fun out(codePoint: Int) = print.accept(codePoint)
 
-        override fun separate() = UnquotedTermPrinter(print)
+    private interface PartPrinter {
 
-        override fun endQuoted() = this
+        fun separate(printer: TermPrinter): PartPrinter
+
+        fun endQuoted(printer: TermPrinter): PartPrinter
+
+        @JvmDefault
+        fun keyword(printer: TermPrinter, name: CharSequence): PartPrinter =
+                endQuoted(printer).separate(printer).apply {
+                    printName(name, printer.print, '`')
+                }
+
+        @JvmDefault
+        fun quoted(quote: CodePoint): PartPrinter =
+                QuotedTermPrinter(quote)
 
     }
 
-    private class QuotedTermPrinter(
-            print: IntConsumer,
-            val quote: Int) : TermPrinter(print) {
+    private object InitialTermPrinter : PartPrinter {
 
-        override fun separate() = endQuoted().apply { out(SPACE) }
+        override fun separate(printer: TermPrinter) = UnquotedTermPrinter
 
-        override fun keyword(name: CharSequence): TermPrinter {
-            out(quote)
-            return super.keyword(name).endQuoted()
+        override fun endQuoted(printer: TermPrinter) = this
+
+    }
+
+    private class QuotedTermPrinter(val quote: Int) : PartPrinter {
+
+        override fun separate(printer: TermPrinter) = endQuoted(printer).apply { printer.out(SPACE) }
+
+        override fun keyword(printer: TermPrinter, name: CharSequence): PartPrinter {
+            printer.out(quote)
+            return super.keyword(printer, name).endQuoted(printer)
         }
 
-        override fun endQuoted() = UnquotedTermPrinter(print)
+        override fun endQuoted(printer: TermPrinter) = UnquotedTermPrinter
 
     }
 
-    private class UnquotedTermPrinter(print: IntConsumer) : TermPrinter(print) {
+    private object UnquotedTermPrinter : PartPrinter {
 
-        override fun separate() = apply { out(SPACE) }
+        override fun separate(printer: TermPrinter) = apply { printer.out(SPACE) }
 
-        override fun endQuoted() = this
+        override fun endQuoted(printer: TermPrinter) = this
 
     }
 
     companion object {
 
         @JvmStatic
-        fun termPrinter(print: IntConsumer): TermPrinter =
-                InitialTermPrinter(print)
+        fun printTerms(print: IntConsumer, terms: Iterable<Term>) {
+            TermPrinter(print).print(terms)
+        }
+
+        @JvmStatic
+        fun printTerms(print: IntConsumer, vararg terms: Term) {
+            TermPrinter(print).print(*terms)
+        }
 
     }
 
 }
 
-fun termPrinter(print: (Int) -> Unit): TermPrinter =
-        TermPrinter.termPrinter(IntConsumer { print(it) })
+fun printTerms(terms: Iterable<Term>, print: (CodePoint) -> Unit) {
+    TermPrinter.printTerms(IntConsumer(print), terms)
+}
+
+fun printTerms(vararg terms: Term, print: (CodePoint) -> Unit) {
+    TermPrinter.printTerms(IntConsumer(print), *terms)
+}

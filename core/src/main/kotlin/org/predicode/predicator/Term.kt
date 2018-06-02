@@ -1,6 +1,7 @@
 package org.predicode.predicator
 
 import org.predicode.predicator.grammar.TermPrinter
+import org.predicode.predicator.grammar.printTerms
 import java.util.function.UnaryOperator
 
 /**
@@ -33,10 +34,8 @@ sealed class Term {
      * Prints this term representation with the given term printer.
      *
      * @param out term printer to print this term representation with.
-     *
-     * @return updated term printer.
      */
-    abstract fun print(out: TermPrinter): TermPrinter
+    abstract fun print(out: TermPrinter)
 
     /**
      * Term [expansion][expand] result.
@@ -53,6 +52,10 @@ sealed class Term {
             val expanded: PlainTerm,
             val knowns: Knowns,
             val updatePredicate: UnaryOperator<Predicate> = UnaryOperator.identity())
+
+    override fun toString() = StringBuilder().also { out ->
+        printTerms(this) { out.appendCodePoint(it) }
+    }.toString()
 
 }
 
@@ -129,8 +132,6 @@ abstract class Keyword : PlainTerm() {
 
     override fun print(out: TermPrinter) = out.keyword(name)
 
-    override fun toString() = name
-
 }
 
 /**
@@ -155,8 +156,6 @@ abstract class Atom : ResolvedTerm() {
     }
 
     override fun print(out: TermPrinter) = out.atom(name)
-
-    override fun toString() = "\'$name'"
 
 }
 
@@ -227,7 +226,5 @@ abstract class Variable : MappedTerm() {
      */
     fun definitionOf(vararg terms: PlainTerm) =
             RulePattern(*(arrayOf(this, definitionKeyword()) + terms))
-
-    override fun toString(): String = "_${name}_"
 
 }

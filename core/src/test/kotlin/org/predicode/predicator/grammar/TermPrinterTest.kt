@@ -117,7 +117,7 @@ internal class TermPrinterTest {
     }
 
     private fun print(vararg terms: Term) = StringBuilder().apply {
-        termPrinter { appendCodePoint(it) }.print(*terms)
+        printTerms(*terms) { appendCodePoint(it) }
     }.toString()
 
 }

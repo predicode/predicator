@@ -19,7 +19,7 @@ internal class NamePrinter(
                     }
                 },
                 { _, s -> s })
-        // Close quote if the name does not end with allowed start symbol
+        // Close quote if the name does not end with allowed symbol
         if (!lastNonSeparating.nameEnd) out(quote)
     }
 

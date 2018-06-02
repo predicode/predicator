@@ -1,6 +1,6 @@
 package org.predicode.predicator
 
-import org.predicode.predicator.grammar.termPrinter
+import org.predicode.predicator.grammar.printTerms
 import reactor.core.publisher.Flux
 import java.util.function.Function
 
@@ -109,7 +109,7 @@ class RulePattern(val terms: List<PlainTerm>) {
     }
 
     override fun toString() = StringBuilder().apply {
-        termPrinter { appendCodePoint(it) }.print(terms)
+        printTerms(terms) { appendCodePoint(it) }
     }.toString()
 
 }
