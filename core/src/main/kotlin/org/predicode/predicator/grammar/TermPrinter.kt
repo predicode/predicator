@@ -21,13 +21,13 @@ class TermPrinter private constructor(private val print: IntConsumer) {
 
     fun atom(name: CharSequence) {
         this.partPrinter = this.partPrinter.separate(this).apply {
-            printName(name, print, '\'', openQuote = true)
+            printName(name, print, SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE)
         }.quoted(SINGLE_QUOTE)
     }
 
     fun variable(name: CharSequence) {
         this.partPrinter = this.partPrinter.separate(this).apply {
-            printName(name, print, '_', openQuote = true)
+            printName(name, print, UNDERSCORE, quoting = QuotingStyle.OPEN_QUOTE)
         }.quoted(UNDERSCORE)
     }
 
@@ -52,7 +52,7 @@ class TermPrinter private constructor(private val print: IntConsumer) {
         }
     }
 
-    private fun out(codePoint: Int) = print.accept(codePoint)
+    private fun out(codePoint: CodePoint) = print.accept(codePoint)
 
     private interface PartPrinter {
 
@@ -63,7 +63,7 @@ class TermPrinter private constructor(private val print: IntConsumer) {
         @JvmDefault
         fun keyword(printer: TermPrinter, name: CharSequence): PartPrinter =
                 endQuoted(printer).separate(printer).apply {
-                    printName(name, printer.print, '`')
+                    printName(name, printer.print, BACKTICK)
                 }
 
         @JvmDefault
@@ -109,9 +109,19 @@ class TermPrinter private constructor(private val print: IntConsumer) {
         }
 
         @JvmStatic
+        fun printTerms(terms: Iterable<Term>): String = StringBuilder().apply {
+            printTerms(print = IntConsumer { appendCodePoint(it) }, terms = terms)
+        }.toString()
+
+        @JvmStatic
         fun printTerms(print: IntConsumer, vararg terms: Term) {
             TermPrinter(print).print(*terms)
         }
+
+        @JvmStatic
+        fun printTerms(vararg terms: Term): String = StringBuilder().apply {
+            printTerms(print = IntConsumer { appendCodePoint(it) }, terms = *terms)
+        }.toString()
 
     }
 
@@ -121,6 +131,10 @@ fun printTerms(terms: Iterable<Term>, print: (CodePoint) -> Unit) {
     TermPrinter.printTerms(IntConsumer(print), terms)
 }
 
+fun printTerms(terms: Iterable<Term>): String = TermPrinter.printTerms(terms)
+
 fun printTerms(vararg terms: Term, print: (CodePoint) -> Unit) {
     TermPrinter.printTerms(IntConsumer(print), *terms)
 }
+
+fun printTerms(vararg terms: Term): String = TermPrinter.printTerms(*terms)

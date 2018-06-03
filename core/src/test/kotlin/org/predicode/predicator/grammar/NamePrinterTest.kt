@@ -79,11 +79,9 @@ internal class NamePrinterTest {
 
     @Test
     fun `quotes unconditionally`() {
-        assert(print("atom", quote = '\'', openQuote = true))
+        assert(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE))
                 .toBe("\'atom")
-        assert(print("atom", quote = '\'', closeQuote = true))
-                .toBe("atom\'")
-        assert(print("atom", quote = '\'', openQuote = true, closeQuote = true))
+        assert(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.ALWAYS_QUOTE))
                 .toBe("\'atom\'")
     }
 
@@ -95,11 +93,8 @@ internal class NamePrinterTest {
 
     private fun print(
             name: String,
-            quote: Char = '`',
-            openQuote: Boolean = false,
-            closeQuote: Boolean = false): String = StringBuilder().let { out ->
-        printName(name, quote = quote, openQuote = openQuote, closeQuote = closeQuote) { out.appendCodePoint(it) }
-        out.toString()
-    }
+            quote: CodePoint = BACKTICK,
+            quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE): String =
+            printName(name, quote = quote, quoting = quoting)
 
 }

@@ -108,8 +108,6 @@ class RulePattern(val terms: List<PlainTerm>) {
         return terms.hashCode()
     }
 
-    override fun toString() = StringBuilder().apply {
-        printTerms(terms) { appendCodePoint(it) }
-    }.toString()
+    override fun toString() = printTerms(terms)
 
 }

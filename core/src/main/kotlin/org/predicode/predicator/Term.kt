@@ -1,8 +1,6 @@
 package org.predicode.predicator
 
-import org.predicode.predicator.grammar.TermPrinter
-import org.predicode.predicator.grammar.printName
-import org.predicode.predicator.grammar.printTerms
+import org.predicode.predicator.grammar.*
 import java.util.function.UnaryOperator
 
 /**
@@ -54,9 +52,7 @@ sealed class Term {
             val knowns: Knowns,
             val updatePredicate: UnaryOperator<Predicate> = UnaryOperator.identity())
 
-    override fun toString() = StringBuilder().also { out ->
-        printTerms(this) { out.appendCodePoint(it) }
-    }.toString()
+    override fun toString() = printTerms(this)
 
 }
 
@@ -133,9 +129,7 @@ abstract class Keyword : PlainTerm() {
 
     override fun print(out: TermPrinter) = out.keyword(name)
 
-    override fun toString() = StringBuilder().apply {
-        printName(name, quote = '`', openQuote = true, closeQuote = true) { appendCodePoint(it) }
-    }.toString()
+    override fun toString() = printName(name, quote = BACKTICK, quoting = QuotingStyle.ALWAYS_QUOTE)
 
 }
 
@@ -162,9 +156,7 @@ abstract class Atom : ResolvedTerm() {
 
     override fun print(out: TermPrinter) = out.atom(name)
 
-    override fun toString() = StringBuilder().apply {
-        printName(name, quote = '\'', openQuote = true, closeQuote = true) { appendCodePoint(it) }
-    }.toString()
+    override fun toString() = printName(name, quote = SINGLE_QUOTE, quoting = QuotingStyle.ALWAYS_QUOTE)
 
 }
 
@@ -236,8 +228,6 @@ abstract class Variable : MappedTerm() {
     fun definitionOf(vararg terms: PlainTerm) =
             RulePattern(*(arrayOf(this, definitionKeyword()) + terms))
 
-    override fun toString() = StringBuilder().apply {
-        printName(name, quote = '_', openQuote = true, closeQuote = true) { appendCodePoint(it) }
-    }.toString()
+    override fun toString() = printName(name, quote = UNDERSCORE, quoting = QuotingStyle.ALWAYS_QUOTE)
 
 }

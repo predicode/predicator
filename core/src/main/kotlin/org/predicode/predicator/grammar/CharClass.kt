@@ -2,16 +2,7 @@ package org.predicode.predicator.grammar
 
 import java.util.*
 
-internal const val BACKTICK = '`'.toInt()
-internal const val SINGLE_QUOTE = '\''.toInt()
-internal const val DOUBLE_QUOTE = '"'.toInt()
-internal const val BACKSLASH = '\\'.toInt()
-internal const val SPACE = ' '.toInt()
-internal const val UNDERSCORE = '_'.toInt()
-internal const val OPENING_BRACE = '['.toInt()
-internal const val CLOSING_BRACE = ']'.toInt()
-internal const val OPENING_PARENT = '('.toInt()
-internal const val CLOSING_PARENT = ')'.toInt()
+
 
 private val OPERATORS: BitSet = BitSet(128).apply {
     set('%'.toInt())
@@ -91,7 +82,7 @@ enum class CharClass(
                 if (next.separating) current // Skip leading separators
                 else {
                     // Open quote if the name does not start with allowed start symbol
-                    if (out.openQuote || !next.nameStart) out.out(out.quote)
+                    if (out.quoting.openQuote || !next.nameStart) out.out(out.quote)
                     next
                 }
 

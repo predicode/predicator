@@ -70,9 +70,7 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
         return terms.hashCode()
     }
 
-    override fun toString() = StringBuilder().apply {
-        printTerms(terms) { appendCodePoint(it) }
-    }.toString()
+    override fun toString() = printTerms(terms)
 
     private fun expansion(resolver: PredicateResolver): PhraseExpansion? {
 
