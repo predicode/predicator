@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux
  *
  * @property terms list of terms this pattern consists of.
  */
-class RulePattern(val terms: List<PlainTerm>) {
+class RulePattern(val terms: List<PlainTerm>) : Predicate {
 
     /**
      * Constructs new rule pattern out of terms array.
@@ -64,33 +64,27 @@ class RulePattern(val terms: List<PlainTerm>) {
     fun fact() = rule(True)
 
     /**
-     * Creates a rule resolved by [rule application][applyRules].
+     * Creates a rule resolved by [rules application][resolve].
      *
      * @param terms terms the rule search pattern consists of.
      */
-    fun resolveBy(vararg terms: PlainTerm) = rule(RulePattern(*terms).applyRules())
+    fun resolveBy(vararg terms: PlainTerm) = rule(RulePattern(*terms))
 
     /**
      * Creates a rule [resolved by phrase predicate][Phrase.resolve] consisting of the given terms.
      *
      * @param terms terms the phrase consists of.
      */
-    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms)::resolve)
+    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms))
 
     /**
-     * Creates predicate that searches for the rules matching this pattern and applies them.
+     * Searches for the rules matching this pattern and applies them.
      */
-    fun applyRules() = object : Predicate {
-
-        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
-                resolver.matchingRules(this@RulePattern, resolver.knowns)
-                        .flatMap { (rule, knowns) ->
-                            rule.predicate(resolver.withKnowns(knowns))
-                        }
-
-        override fun toString() = this@RulePattern.toString()
-
-    }
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
+            resolver.matchingRules(this@RulePattern, resolver.knowns)
+                    .flatMap { (rule, knowns) ->
+                        rule.predicate(resolver.withKnowns(knowns))
+                    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

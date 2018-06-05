@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux
  */
 object True : Predicate {
 
-    override fun invoke(resolver: PredicateResolver): Flux<Knowns> = Flux.just(resolver.knowns)
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> = Flux.just(resolver.knowns)
 
     override fun and(other: Predicate) = other
 
@@ -26,7 +26,7 @@ object True : Predicate {
  */
 object False : Predicate {
 
-    override fun invoke(resolver: PredicateResolver): Flux<Knowns> = Flux.empty()
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> = Flux.empty()
 
     override fun and(other: Predicate) = this
 

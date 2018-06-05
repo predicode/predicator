@@ -12,7 +12,7 @@ import java.util.function.UnaryOperator
  *
  * @property terms list of terms this phrase consists of.
  */
-class Phrase(val terms: List<Term>) : CompoundTerm() {
+class Phrase(val terms: List<Term>) : CompoundTerm(), Predicate {
 
     /**
      * Constructs new phrase out of terms array.
@@ -37,7 +37,7 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
      * [expands][Term.expand] all of the phrase terms, then searches for corresponding [resolution rules][Rule]
      * and applies them.
      */
-    fun resolve(resolver: PredicateResolver): Flux<Knowns> = try {
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> = try {
         expansion(resolver)?.resolve() ?: Flux.empty()
     } catch (e: Exception) {
         Flux.error(e)
@@ -100,10 +100,10 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
         fun definition(variable: Variable): Predicate =
                 resolver.knowns.declareLocal(variable) { local, knowns ->
                     resolver = resolver.withKnowns(knowns)
-                    predicate and local.definitionOf(*expandedTerms()).applyRules()
+                    predicate and local.definitionOf(*expandedTerms())
                 }
 
-        private fun predicate() = predicate and RulePattern(*expandedTerms()).applyRules()
+        private fun predicate() = predicate and RulePattern(*expandedTerms())
 
         @Suppress("UNCHECKED_CAST")
         private fun expandedTerms() = terms as Array<out PlainTerm>

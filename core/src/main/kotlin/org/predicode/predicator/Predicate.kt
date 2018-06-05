@@ -13,7 +13,7 @@ typealias PredicateFn = (PredicateResolver) -> Flux<Knowns>
  * When predicate resolution rule [condition][Rule.condition] matches, the [known mappings][Knowns] are applied
  * to matching rule's [predicate][Rule.predicate] in order to resolve it.
  */
-interface Predicate : PredicateFn {
+interface Predicate {
 
     /**
      * Resolves this predicate.
@@ -24,7 +24,7 @@ interface Predicate : PredicateFn {
      *
      * @return a [flux][Flux] emitting resolved mappings, if any.
      */
-    override fun invoke(resolver: PredicateResolver): Flux<Knowns>
+    fun resolve(resolver: PredicateResolver): Flux<Knowns>
 
     /**
      * Constructs predicates conjunction.
@@ -56,7 +56,7 @@ interface Predicate : PredicateFn {
 
     private data class And(val first: Predicate, val second: Predicate) : Predicate {
 
-        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
                 first(resolver)
                         .flatMap { resolved -> second(resolver.withKnowns(resolved)) }
 
@@ -66,7 +66,7 @@ interface Predicate : PredicateFn {
 
     private data class Or(val first: Predicate, val second: Predicate) : Predicate {
 
-        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
                 Flux.merge(first(resolver), second(resolver))
 
         override fun toString() = "$first; $second"
@@ -75,7 +75,7 @@ interface Predicate : PredicateFn {
 
     private data class Not(val negated: Predicate) : Predicate {
 
-        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
                 negated(resolver)
                         .next()
                         .map { true }
@@ -94,5 +94,16 @@ interface Predicate : PredicateFn {
  * Converts this predicate function to predicate.
  */
 fun PredicateFn.asPredicate() = object : Predicate {
-    override fun invoke(resolver: PredicateResolver): Flux<Knowns> = this@asPredicate(resolver)
+    override fun resolve(resolver: PredicateResolver): Flux<Knowns> = this@asPredicate(resolver)
 }
+
+/**
+ * Resolves this predicate.
+ *
+ * Resolution may involve term [expansion][Term.expand] and applying other resolution rules.
+ *
+ * @param resolver predicate resolver to resolve against.
+ *
+ * @return a [flux][Flux] emitting resolved mappings, if any.
+ */
+operator fun Predicate.invoke(resolver: PredicateResolver) = resolve(resolver)
