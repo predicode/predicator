@@ -1,13 +1,10 @@
-@file:JvmName("TermNames")
 package org.predicode.predicator.grammar
-
-import java.util.function.IntConsumer
 
 internal class NamePrinter(
         val name: CharSequence,
-        private val print: IntConsumer,
         val quote: CodePoint,
-        val quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE) {
+        val quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE,
+        private val print: CodePointConsumer) {
 
     var lastNonSeparating: CharClass = CharClass.START_CHAR_CLASS
 
@@ -24,15 +21,15 @@ internal class NamePrinter(
         if (quoting.closeQuote || !lastNonSeparating.nameEnd) out(quote)
     }
 
-    fun out(codePoint: Int) = print.accept(codePoint)
+    fun out(codePoint: Int) = print(codePoint)
 
 }
 
 fun printName(
         name: CharSequence,
-        print: IntConsumer,
         quote: CodePoint,
-        quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE) = NamePrinter(
+        quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE,
+        print: CodePointConsumer) = NamePrinter(
         name,
         print = print,
         quote = quote,
@@ -42,5 +39,5 @@ fun printName(
         name: CharSequence,
         quote: CodePoint,
         quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE): String = StringBuilder().apply {
-    printName(name, print = IntConsumer { appendCodePoint(it) }, quote = quote, quoting = quoting)
+    printName(name, quote = quote, quoting = quoting) { appendCodePoint(it) }
 }.toString()

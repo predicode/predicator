@@ -1,9 +1,8 @@
 package org.predicode.predicator.grammar
 
 import org.predicode.predicator.Term
-import java.util.function.IntConsumer
 
-class TermPrinter private constructor(private val print: IntConsumer) {
+class TermPrinter internal constructor(private val print: CodePointConsumer) {
 
     private var partPrinter: PartPrinter = InitialTermPrinter
 
@@ -21,13 +20,13 @@ class TermPrinter private constructor(private val print: IntConsumer) {
 
     fun atom(name: CharSequence) {
         this.partPrinter = this.partPrinter.separate(this).apply {
-            printName(name, print, SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE)
+            printName(name, quote = SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE, print = print)
         }.quoted(SINGLE_QUOTE)
     }
 
     fun variable(name: CharSequence) {
         this.partPrinter = this.partPrinter.separate(this).apply {
-            printName(name, print, UNDERSCORE, quoting = QuotingStyle.OPEN_QUOTE)
+            printName(name, quote = UNDERSCORE, quoting = QuotingStyle.OPEN_QUOTE, print = print)
         }.quoted(UNDERSCORE)
     }
 
@@ -52,7 +51,7 @@ class TermPrinter private constructor(private val print: IntConsumer) {
         }
     }
 
-    private fun out(codePoint: CodePoint) = print.accept(codePoint)
+    private fun out(codePoint: CodePoint) = print(codePoint)
 
     private interface PartPrinter {
 
@@ -63,7 +62,7 @@ class TermPrinter private constructor(private val print: IntConsumer) {
         @JvmDefault
         fun keyword(printer: TermPrinter, name: CharSequence): PartPrinter =
                 endQuoted(printer).separate(printer).apply {
-                    printName(name, printer.print, BACKTICK)
+                    printName(name, quote = BACKTICK, print = printer.print)
                 }
 
         @JvmDefault
@@ -101,40 +100,20 @@ class TermPrinter private constructor(private val print: IntConsumer) {
 
     }
 
-    companion object {
-
-        @JvmStatic
-        fun printTerms(print: IntConsumer, terms: Iterable<Term>) {
-            TermPrinter(print).print(terms)
-        }
-
-        @JvmStatic
-        fun printTerms(terms: Iterable<Term>): String = StringBuilder().apply {
-            printTerms(print = IntConsumer { appendCodePoint(it) }, terms = terms)
-        }.toString()
-
-        @JvmStatic
-        fun printTerms(print: IntConsumer, vararg terms: Term) {
-            TermPrinter(print).print(*terms)
-        }
-
-        @JvmStatic
-        fun printTerms(vararg terms: Term): String = StringBuilder().apply {
-            printTerms(print = IntConsumer { appendCodePoint(it) }, terms = *terms)
-        }.toString()
-
-    }
-
 }
 
-fun printTerms(terms: Iterable<Term>, print: (CodePoint) -> Unit) {
-    TermPrinter.printTerms(IntConsumer(print), terms)
+fun printTerms(terms: Iterable<Term>, print: CodePointConsumer) {
+    TermPrinter(print).print(terms)
 }
 
-fun printTerms(terms: Iterable<Term>): String = TermPrinter.printTerms(terms)
+fun printTerms(terms: Iterable<Term>): String = StringBuilder().apply {
+    printTerms(terms) { appendCodePoint(it) }
+}.toString()
 
-fun printTerms(vararg terms: Term, print: (CodePoint) -> Unit) {
-    TermPrinter.printTerms(IntConsumer(print), *terms)
+fun printTerms(vararg terms: Term, print: CodePointConsumer) {
+    TermPrinter(print).print(*terms)
 }
 
-fun printTerms(vararg terms: Term): String = TermPrinter.printTerms(*terms)
+fun printTerms(vararg terms: Term): String = StringBuilder().apply {
+    printTerms(*terms) { appendCodePoint(it) }
+}.toString()

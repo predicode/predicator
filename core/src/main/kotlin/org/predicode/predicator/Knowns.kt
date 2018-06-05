@@ -1,7 +1,6 @@
 package org.predicode.predicator
 
 import org.predicode.predicator.Knowns.Resolution.*
-import java.util.function.BiFunction
 
 /**
  * Known local variable mappings and query variable resolutions.
@@ -59,26 +58,28 @@ class Knowns {
      * @param variable a variable, local to resolution rule.
      * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
      *
-     * @return the value returned by [handler], or `null` if mapping is impossible.
+     * @see [Knowns.mapping]
      */
-    fun <R : Any> mapping(variable: Variable, handler: BiFunction<in PlainTerm, in Knowns, out R>): R? =
+    fun <R : Any> mapping(variable: Variable, handler: (PlainTerm, Knowns) -> R): R? =
             mappings[variable]
-                    ?.let { mapping -> handler.apply(mapping, this) }
+                    ?.let { mapping -> handler(mapping, this) }
                     ?: declareLocal(variable, handler)
 
     /**
-     * Declares the given variable as local, if not declared yet.
+     * Handles the given local variable mapping.
      *
-     * @param variable a variable to declare as local one.
-     * @param handler a handler function accepting declared local and updated knowns as argument and returning arbitrary
-     * value.
+     * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+     * The updated knowns are passed to [handler].
      *
-     * @return the value returned by [handler].
+     * @param variable a variable, local to resolution rule.
+     * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
+     *
+     * @see [Knowns.mapping]
      */
-    fun <R> declareLocal(variable: Variable, handler: BiFunction<in Variable, in Knowns, out R>): R =
+    fun <R> declareLocal(variable: Variable, handler: (Variable, Knowns) -> R): R =
             LocalVariable(variable, rev).let { local ->
                 declareLocal(local).let {
-                    knowns -> handler.apply(
+                    knowns -> handler(
                         local,
                         Knowns(knowns, mappings = knowns.mappings + (variable to local)))
                 }
@@ -253,35 +254,3 @@ class Knowns {
     }
 
 }
-
-/**
- * Handles the given local variable mapping.
- *
- * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
- * The updated knowns are passed to [handler].
- *
- * @param variable a variable, local to resolution rule.
- * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
- *
- * @see [Knowns.mapping]
- */
-fun <R : Any> Knowns.mapping(variable: Variable, handler: (PlainTerm, Knowns) -> R): R? =
-        mapping(
-                variable,
-                BiFunction { mapping, knowns -> handler(mapping, knowns) })
-
-/**
- * Handles the given local variable mapping.
- *
- * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
- * The updated knowns are passed to [handler].
- *
- * @param variable a variable, local to resolution rule.
- * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
- *
- * @see [Knowns.mapping]
- */
-fun <R> Knowns.declareLocal(variable: Variable, handler: (Variable, Knowns) -> R): R =
-        declareLocal(
-                variable,
-                BiFunction { mapping, knowns -> handler(mapping, knowns) })

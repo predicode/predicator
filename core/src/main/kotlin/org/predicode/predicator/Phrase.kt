@@ -32,19 +32,15 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
             }
 
     /**
-     * Creates a phrase predicate that [expands][Term.expand] all of its terms, then searches for corresponding
-     * [resolution rules][Rule], and applies them.
+     * Resolves this phrase as predicate.
+     *
+     * [expands][Term.expand] all of the phrase terms, then searches for corresponding [resolution rules][Rule]
+     * and applies them.
      */
-    fun predicate() = object : Predicate {
-
-        override fun resolve(resolver: PredicateResolver): Flux<Knowns> = try {
-            expansion(resolver)?.resolve() ?: Flux.empty()
-        } catch (e: Exception) {
-            Flux.error(e)
-        }
-
-        override fun toString() = this@Phrase.toString()
-
+    fun resolve(resolver: PredicateResolver): Flux<Knowns> = try {
+        expansion(resolver)?.resolve() ?: Flux.empty()
+    } catch (e: Exception) {
+        Flux.error(e)
     }
 
     override fun print(out: TermPrinter) {
@@ -85,7 +81,7 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
 
     private class PhraseExpansion(var resolver: PredicateResolver, size: Int) {
 
-        private var predicate: Predicate = alwaysTrue()
+        private var predicate: Predicate = True
         private val terms: Array<PlainTerm?> = arrayOfNulls(size)
         private var index = 0
 
@@ -99,7 +95,7 @@ class Phrase(val terms: List<Term>) : CompoundTerm() {
                         }
                         ?: false
 
-        fun resolve() = predicate().resolve(resolver)
+        fun resolve() = predicate().invoke(resolver)
 
         fun definition(variable: Variable): Predicate =
                 resolver.knowns.declareLocal(variable) { local, knowns ->

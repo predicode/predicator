@@ -1,13 +1,20 @@
 @file:JvmName("Characters")
 package org.predicode.predicator.grammar
 
-const val BACKTICK = '`'.toInt()
-const val SINGLE_QUOTE = '\''.toInt()
-const val DOUBLE_QUOTE = '"'.toInt()
-const val BACKSLASH = '\\'.toInt()
-const val SPACE = ' '.toInt()
-const val UNDERSCORE = '_'.toInt()
-const val OPENING_BRACE = '['.toInt()
-const val CLOSING_BRACE = ']'.toInt()
-const val OPENING_PARENT = '('.toInt()
-const val CLOSING_PARENT = ')'.toInt()
+typealias CodePoint = Int
+
+typealias CodePointConsumer = (CodePoint) -> Unit
+
+const val BACKTICK: CodePoint = '`'.toInt()
+const val SINGLE_QUOTE: CodePoint = '\''.toInt()
+const val DOUBLE_QUOTE: CodePoint = '"'.toInt()
+const val BACKSLASH: CodePoint = '\\'.toInt()
+const val SPACE: CodePoint = ' '.toInt()
+const val UNDERSCORE: CodePoint = '_'.toInt()
+const val OPENING_BRACE: CodePoint = '['.toInt()
+const val CLOSING_BRACE: CodePoint = ']'.toInt()
+const val OPENING_PARENT: CodePoint = '('.toInt()
+const val CLOSING_PARENT: CodePoint = ')'.toInt()
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Char.toCodePoint(): CodePoint = toInt()

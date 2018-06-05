@@ -1,7 +1,5 @@
 package org.predicode.predicator
 
-import reactor.core.publisher.Flux
-
 /**
  * Predicate resolution rule.
  *
@@ -26,24 +24,6 @@ data class Rule(val condition: RulePattern, val predicate: Predicate) {
             }
 
     override fun toString() = "$condition :- $predicate"
-
-    /**
-     * A selector of matching predicate resolution rules.
-     */
-    @FunctionalInterface
-    interface Selector {
-
-        /**
-         * Selects matching predicate resolution rules.
-         *
-         * @param pattern rule search pattern.
-         * @param knowns known resolutions.
-         *
-         * @return a [Flux] of [rule matches][Match].
-         */
-        fun ruleMatches(pattern: RulePattern, knowns: Knowns): Flux<Match>
-
-    }
 
     /**
      * Selected rule match.

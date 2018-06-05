@@ -3,7 +3,6 @@ package org.predicode.predicator.grammar
 import java.util.*
 
 
-
 private val OPERATORS: BitSet = BitSet(128).apply {
     set('%'.toInt())
     set('&'.toInt())
@@ -32,8 +31,6 @@ private val QUOTES: BitSet = BitSet(128).apply {
     set(DOUBLE_QUOTE)
     set(UNDERSCORE)
 }
-
-typealias CodePoint = Int
 
 enum class CharClass(
         private val printer: NameCharPrinter,

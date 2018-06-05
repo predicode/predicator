@@ -194,7 +194,7 @@ abstract class Value : ResolvedTerm() {
  * Variable term.
  *
  * Variable can be either local to rule, or global, i.e. present in original query. The former should be
- * [mapped][Knowns.map] to their values prior to [predicate resolution][Predicate.resolve].
+ * [mapped][Knowns.map] to their values prior to [predicate resolution][Predicate.invoke].
  * All of the latter should be specified when [constructing knowns][Knowns] and are to be [resolved][Knowns.resolve].
  */
 abstract class Variable : MappedTerm() {

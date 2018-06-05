@@ -1,8 +1,11 @@
-@file:JvmMultifileClass
-@file:JvmName("Predicates")
 package org.predicode.predicator
 
 import reactor.core.publisher.Flux
+
+/**
+ * Predicate function.
+ */
+typealias PredicateFn = (PredicateResolver) -> Flux<Knowns>
 
 /**
  * Resolvable predicate.
@@ -10,8 +13,7 @@ import reactor.core.publisher.Flux
  * When predicate resolution rule [condition][Rule.condition] matches, the [known mappings][Knowns] are applied
  * to matching rule's [predicate][Rule.predicate] in order to resolve it.
  */
-@FunctionalInterface
-interface Predicate {
+interface Predicate : PredicateFn {
 
     /**
      * Resolves this predicate.
@@ -22,7 +24,7 @@ interface Predicate {
      *
      * @return a [flux][Flux] emitting resolved mappings, if any.
      */
-    fun resolve(resolver: PredicateResolver): Flux<Knowns>
+    override fun invoke(resolver: PredicateResolver): Flux<Knowns>
 
     /**
      * Constructs predicates conjunction.
@@ -54,9 +56,9 @@ interface Predicate {
 
     private data class And(val first: Predicate, val second: Predicate) : Predicate {
 
-        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                first.resolve(resolver)
-                        .flatMap { resolved -> second.resolve(resolver.withKnowns(resolved)) }
+        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+                first(resolver)
+                        .flatMap { resolved -> second(resolver.withKnowns(resolved)) }
 
         override fun toString() = "$first, $second"
 
@@ -64,8 +66,8 @@ interface Predicate {
 
     private data class Or(val first: Predicate, val second: Predicate) : Predicate {
 
-        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                Flux.merge(first.resolve(resolver), second.resolve(resolver))
+        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+                Flux.merge(first(resolver), second(resolver))
 
         override fun toString() = "$first; $second"
 
@@ -73,8 +75,8 @@ interface Predicate {
 
     private data class Not(val negated: Predicate) : Predicate {
 
-        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                negated.resolve(resolver)
+        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+                negated(resolver)
                         .next()
                         .map { true }
                         .defaultIfEmpty(false)
@@ -86,4 +88,11 @@ interface Predicate {
 
     }
 
+}
+
+/**
+ * Converts this predicate function to predicate.
+ */
+fun PredicateFn.asPredicate() = object : Predicate {
+    override fun invoke(resolver: PredicateResolver): Flux<Knowns> = this@asPredicate(resolver)
 }

@@ -2,7 +2,6 @@ package org.predicode.predicator
 
 import org.predicode.predicator.grammar.printTerms
 import reactor.core.publisher.Flux
-import java.util.function.Function
 
 /**
  * Resolution rule match pattern.
@@ -53,16 +52,16 @@ class RulePattern(val terms: List<PlainTerm>) {
     fun rule(predicate: Predicate) = Rule(this, predicate)
 
     /**
-     * Creates a fact with this pattern as its [condition][Rule.condition].
+     * Creates a resolution rule with this pattern as its [condition][Rule.condition].
+     *
+     * @param predicate predicate the constructed rule resolves to if this pattern matches.
      */
-    fun fact() = rule(alwaysTrue())
+    fun rule(predicate: PredicateFn) = Rule(this, predicate.asPredicate())
 
     /**
-     * Creates a rule resolved by the given predicate resolution function.
-     *
-     * @param resolve predicate resolution function.
+     * Creates a fact with this pattern as its [condition][Rule.condition].
      */
-    fun resolveBy(resolve: Function<PredicateResolver, Flux<Knowns>>) = rule(resolvingPredicate(resolve))
+    fun fact() = rule(True)
 
     /**
      * Creates a rule resolved by [rule application][applyRules].
@@ -72,21 +71,21 @@ class RulePattern(val terms: List<PlainTerm>) {
     fun resolveBy(vararg terms: PlainTerm) = rule(RulePattern(*terms).applyRules())
 
     /**
-     * Creates a rule resolved by [phrase predicate][Phrase.predicate] consisting of the given terms.
+     * Creates a rule [resolved by phrase predicate][Phrase.resolve] consisting of the given terms.
      *
      * @param terms terms the phrase consists of.
      */
-    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms).predicate())
+    fun resolveBy(vararg terms: Term) = rule(Phrase(*terms)::resolve)
 
     /**
      * Creates predicate that searches for the rules matching this pattern and applies them.
      */
     fun applyRules() = object : Predicate {
 
-        override fun resolve(resolver: PredicateResolver): Flux<Knowns> =
-                resolver.ruleSelector.ruleMatches(this@RulePattern, resolver.knowns)
+        override fun invoke(resolver: PredicateResolver): Flux<Knowns> =
+                resolver.matchingRules(this@RulePattern, resolver.knowns)
                         .flatMap { (rule, knowns) ->
-                            rule.predicate.resolve(resolver.withKnowns(knowns))
+                            rule.predicate(resolver.withKnowns(knowns))
                         }
 
         override fun toString() = this@RulePattern.toString()
