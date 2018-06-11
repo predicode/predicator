@@ -8,7 +8,7 @@ internal class NamePrinter(
 
     var lastNonSeparating: CharClass = CharClass.START_CHAR_CLASS
 
-    fun print() {
+    fun print(): Boolean {
         name.codePoints().mapToObj { it }.reduce(
                 CharClass.START_CHAR_CLASS,
                 { cclass, c ->
@@ -17,11 +17,17 @@ internal class NamePrinter(
                     }
                 },
                 { _, s -> s })
-        // Close quote if the name does not end with allowed symbol
-        if (quoting.closeQuote || !lastNonSeparating.nameEnd) out(quote)
+
+        if (quoting.closeQuote || !lastNonSeparating.nameEnd) {
+            // Close quote if the name does not end with allowed symbol
+            out(quote)
+            return true
+        }
+
+        return false
     }
 
-    fun out(codePoint: Int) = print(codePoint)
+    fun out(codePoint: CodePoint) = print(codePoint)
 
 }
 

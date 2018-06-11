@@ -54,6 +54,26 @@ internal class TermPrinterTest {
     }
 
     @Test
+    fun `separates keywords from quoted terms`() {
+        assert(printTerms(namedKeyword("keyword"), namedAtom("atom")))
+                .toBe("keyword 'atom")
+        assert(printTerms(namedAtom("atom"), namedKeyword("keyword")))
+                .toBe("'atom' keyword")
+        assert(printTerms(namedKeyword("keyword"), namedVariable("variable")))
+                .toBe("keyword _variable")
+        assert(printTerms(namedVariable("variable"), namedKeyword("keyword")))
+                .toBe("_variable_ keyword")
+    }
+
+    @Test
+    fun `does not double-quote terms`() {
+        assert(printTerms(namedAtom("atom+"), namedKeyword("keyword")))
+                .toBe("'atom+' keyword")
+        assert(printTerms(namedVariable("variable+"), namedKeyword("keyword")))
+                .toBe("_variable+_ keyword")
+    }
+
+    @Test
     fun `separates values from quoted terms`() {
         assert(printTerms(rawValue("value"), namedAtom("atom")))
                 .toBe("[value] 'atom")

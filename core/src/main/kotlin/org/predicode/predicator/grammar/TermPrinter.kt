@@ -19,16 +19,22 @@ class TermPrinter internal constructor(private val print: CodePointConsumer) {
     }
 
     fun atom(name: CharSequence) {
-        this.partPrinter = this.partPrinter.separate(this).apply {
-            printName(name, quote = SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE, print = print)
-        }.quoted(SINGLE_QUOTE)
+        this.partPrinter = quotedName(name, quote = SINGLE_QUOTE)
     }
 
     fun variable(name: CharSequence) {
-        this.partPrinter = this.partPrinter.separate(this).apply {
-            printName(name, quote = UNDERSCORE, quoting = QuotingStyle.OPEN_QUOTE, print = print)
-        }.quoted(UNDERSCORE)
+        this.partPrinter = quotedName(name, quote = UNDERSCORE)
     }
+
+    private fun quotedName(name: CharSequence, quote: CodePoint): PartPrinter =
+            this.partPrinter.separate(this).let {
+
+                val quoteClosed = printName(name, quote = quote, quoting = QuotingStyle.OPEN_QUOTE, print = print)
+
+                if (quoteClosed) return UnquotedTermPrinter
+
+                return it.quoted(quote)
+            }
 
     fun value(value: CharSequence) {
         this.partPrinter = this.partPrinter.separate(this).apply {
@@ -79,7 +85,7 @@ class TermPrinter internal constructor(private val print: CodePointConsumer) {
 
     }
 
-    private class QuotedTermPrinter(val quote: Int) : PartPrinter {
+    private class QuotedTermPrinter(val quote: CodePoint) : PartPrinter {
 
         override fun separate(printer: TermPrinter) = endQuoted(printer).apply { printer.out(SPACE) }
 
