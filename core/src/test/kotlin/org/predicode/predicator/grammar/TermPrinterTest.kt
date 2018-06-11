@@ -115,7 +115,7 @@ internal class TermPrinterTest {
                 printTerms(
                         Phrase(namedKeyword("phrase 1")),
                         Phrase(namedKeyword("phrase 2"))))
-                .toBe("(phrase1) (phrase2)")
+                .toBe("(phrase 1) (phrase 2)")
     }
 
 }

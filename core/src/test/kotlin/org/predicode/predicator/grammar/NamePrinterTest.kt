@@ -59,14 +59,24 @@ internal class NamePrinterTest {
 
     @Test
     fun `glues symbols of different classes`() {
-        assert(print("name 2"))
-                .toBe("name2")
         assert(print("name - 3 x 3"))
-                .toBe("name-3x3")
+                .toBe("name-3 x 3")
         assert(print("d & g"))
                 .toBe("d&g")
         assert(print("prefix: suffix"))
                 .toBe("prefix\\:suffix")
+    }
+
+    @Test
+    fun `does not glue numbers and letters`() {
+        assert(print("name 1"))
+                .toBe("name 1")
+        assert(print("name2"))
+                .toBe("name2")
+        assert(print("name 3 d"))
+                .toBe("name 3 d")
+        assert(print("name 3d"))
+                .toBe("name 3d")
     }
 
     @Test

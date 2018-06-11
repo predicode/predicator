@@ -40,8 +40,14 @@ enum class CharClass(
     START_CHAR_CLASS(NameStartPrinter, nameStart = true, nameEnd = true) {
         override fun nameGluesWith(next: CharClass) = true
     },
-    LETTER_CHAR_CLASS(NameBodyPrinter, nameStart = true, nameEnd = true),
-    NUMERIC_CHAR_CLASS(NameBodyPrinter, nameEnd = true),
+    LETTER_CHAR_CLASS(NameBodyPrinter, nameStart = true, nameEnd = true) {
+        override fun nameGluesWith(next: CharClass) =
+                super.nameGluesWith(next) && next != NUMERIC_CHAR_CLASS
+    },
+    NUMERIC_CHAR_CLASS(NameBodyPrinter, nameEnd = true) {
+        override fun nameGluesWith(next: CharClass) =
+                super.nameGluesWith(next) && next != LETTER_CHAR_CLASS
+    },
     OPERATOR_CHAR_CLASS(NameBodyPrinter),
     CONNECTOR_CHAR_CLASS(NameBodyPrinter),
     SEPARATOR_CHAR_CLASS(NameSeparatorPrinter, nameStart = true, nameEnd = true) {
