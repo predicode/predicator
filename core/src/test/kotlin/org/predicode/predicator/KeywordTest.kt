@@ -1,11 +1,10 @@
 package org.predicode.predicator
 
-import ch.tutteli.atrium.api.cc.en_UK.isNotNull
-import ch.tutteli.atrium.api.cc.en_UK.isNull
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 
 class KeywordTest {
@@ -27,7 +26,7 @@ class KeywordTest {
 
     @Test
     fun `matches keyword with the same name`() {
-        assert(namedKeyword("name1").match(namedKeyword("name1"), knowns)).isNotNull {
+        assert(namedKeyword("name1").match(namedKeyword("name1"), knowns).get()) {
             toBe(knowns)
         }
     }
@@ -35,7 +34,7 @@ class KeywordTest {
     @Test
     fun `does not match keyword with another name`() {
         assert(namedKeyword("name1").match(namedKeyword("name2"), knowns))
-                .isNull()
+                .toBe(Optional.empty())
     }
 
     @Test
@@ -44,11 +43,11 @@ class KeywordTest {
         val keyword = namedKeyword("name")
 
         assert(keyword.match(namedAtom("name"), knowns))
-                .isNull()
+                .toBe(Optional.empty())
         assert(keyword.match(rawValue(123), knowns))
-                .isNull()
+                .toBe(Optional.empty())
         assert(keyword.match(namedVariable("name"), knowns))
-                .isNull()
+                .toBe(Optional.empty())
     }
 
     @Test
@@ -56,7 +55,7 @@ class KeywordTest {
 
         val keyword = namedKeyword("name")
 
-        assert(keyword.expand(resolver))
+        assert(keyword.expand(resolver).get())
                 .toBe(Term.Expansion(keyword, knowns))
     }
 

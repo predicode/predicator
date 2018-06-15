@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.toFlux
 import reactor.core.publisher.toMono
 import reactor.test.StepVerifier
+import java.util.*
 import java.util.function.UnaryOperator
 
 class PhraseTest {
@@ -29,13 +30,13 @@ class PhraseTest {
 
             val knowns = Knowns()
             val resolver = object : PredicateResolver {
-                override val knowns = knowns
+                override fun getKnowns() = knowns
                 override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> =
                         selectOneOf()(pattern, knowns)
             }
             val term = mockk<PlainTerm>()
 
-            every { term.expand(refEq(resolver)) }.returns(Term.Expansion(term, knowns))
+            every { term.expand(refEq(resolver)) }.returns(Optional.of(Term.Expansion(term, knowns)))
 
             StepVerifier.create(Phrase(term).resolve(resolver))
                     .verifyComplete()
@@ -48,7 +49,7 @@ class PhraseTest {
 
             val knowns = Knowns()
             val resolver = object : PredicateResolver {
-                override val knowns = knowns
+                override fun getKnowns() = knowns
                 override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> =
                         selectOneOf()(pattern, knowns)
             }
@@ -57,7 +58,7 @@ class PhraseTest {
             val and = mockk<Predicate>("AND")
             val updatePredicate = mockk<UnaryOperator<Predicate>>()
 
-            every { term.expand(any()) }.returns(Term.Expansion(term, knowns, updatePredicate))
+            every { term.expand(any()) }.returns(Optional.of(Term.Expansion(term, knowns, updatePredicate)))
             every { updatePredicate.apply(any()) }.returns(predicate)
             every { predicate.and(any()) }.returns(and)
             every { and(any()) }.returns(knowns.toMono().toFlux())

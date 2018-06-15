@@ -1,11 +1,10 @@
 package org.predicode.predicator
 
-import ch.tutteli.atrium.api.cc.en_UK.isNotNull
-import ch.tutteli.atrium.api.cc.en_UK.isNull
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 
 class AtomTest {
@@ -27,15 +26,14 @@ class AtomTest {
 
     @Test
     fun `matches atom with the same name`() {
-        assert(namedAtom("name1").match(namedAtom("name1"), knowns)).isNotNull {
-            toBe(knowns)
-        }
+        assert(namedAtom("name1").match(namedAtom("name1"), knowns))
+                .toBe(Optional.of(knowns))
     }
 
     @Test
     fun `does not match atom with another name`() {
         assert(namedAtom("name1").match(namedAtom("name2"), knowns))
-                .isNull()
+                .toBe(Optional.empty())
     }
 
     @Test
@@ -46,9 +44,9 @@ class AtomTest {
 
         knowns = Knowns(variable)
 
-        assert(atom.match(variable, knowns)).isNotNull {
-            assert(subject.resolution(variable))
-                    .toBe(Knowns.Resolution.Resolved(atom))
+        assert(atom.match(variable, knowns).get()) {
+            assert(subject.resolution(variable).value().get())
+                    .toBe(atom)
         }
     }
 
@@ -58,9 +56,9 @@ class AtomTest {
         val atom = namedAtom("name")
 
         assert(atom.match(namedKeyword("name"), knowns))
-                .isNull()
+                .toBe(Optional.empty())
         assert(atom.match(rawValue(123), knowns))
-                .isNull()
+                .toBe(Optional.empty())
 
     }
 
@@ -69,7 +67,7 @@ class AtomTest {
 
         val atom = namedAtom("name")
 
-        assert(atom.expand(resolver))
+        assert(atom.expand(resolver).get())
                 .toBe(Term.Expansion(atom, knowns))
     }
 
