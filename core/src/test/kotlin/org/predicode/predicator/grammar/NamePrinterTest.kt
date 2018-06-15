@@ -3,6 +3,8 @@ package org.predicode.predicator.grammar
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.grammar.CodePoints.BACKTICK
+import org.predicode.predicator.grammar.CodePoints.SINGLE_QUOTE
 
 
 internal class NamePrinterTest {

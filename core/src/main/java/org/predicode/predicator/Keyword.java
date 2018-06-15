@@ -1,14 +1,13 @@
 package org.predicode.predicator;
 
 import org.jetbrains.annotations.NotNull;
-import org.predicode.predicator.grammar.NamePrinterKt;
-import org.predicode.predicator.grammar.QuotingStyle;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.predicode.predicator.grammar.Characters.BACKTICK;
+import static org.predicode.predicator.grammar.CodePoints.BACKTICK;
+import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 
 
 /**
@@ -95,7 +94,7 @@ public abstract class Keyword extends PlainTerm {
 
     @Override
     public String toString() {
-        return NamePrinterKt.printName(getName(), BACKTICK, QuotingStyle.ALWAYS_QUOTE);
+        return ALWAYS_QUOTE.printName(getName(), BACKTICK);
     }
 
     private static final class NamedKeyword extends Keyword {

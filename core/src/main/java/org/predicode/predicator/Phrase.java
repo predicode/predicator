@@ -2,7 +2,6 @@ package org.predicode.predicator;
 
 import org.jetbrains.annotations.NotNull;
 import org.predicode.predicator.grammar.TermPrinter;
-import org.predicode.predicator.grammar.TermPrinterKt;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.predicode.predicator.Variable.tempVariable;
+import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 
 
 /**
@@ -110,7 +110,7 @@ public class Phrase extends CompoundTerm implements Predicate {
 
     @Override
     public String toString() {
-        return TermPrinterKt.printTerms(getTerms());
+        return printTerms(getTerms());
     }
 
     @Nonnull

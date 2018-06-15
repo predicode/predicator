@@ -1,13 +1,12 @@
 package org.predicode.predicator;
 
 import org.jetbrains.annotations.NotNull;
-import org.predicode.predicator.grammar.NamePrinterKt;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.predicode.predicator.grammar.Characters.SINGLE_QUOTE;
+import static org.predicode.predicator.grammar.CodePoints.SINGLE_QUOTE;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 
 
@@ -104,7 +103,7 @@ public abstract class Atom extends ResolvedTerm {
 
     @Override
     public String toString() {
-        return NamePrinterKt.printName(getName(), SINGLE_QUOTE, ALWAYS_QUOTE);
+        return ALWAYS_QUOTE.printName(getName(), SINGLE_QUOTE);
     }
 
     private static final class NamedAtom extends Atom {

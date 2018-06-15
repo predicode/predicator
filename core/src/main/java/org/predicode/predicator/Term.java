@@ -1,7 +1,6 @@
 package org.predicode.predicator;
 
 import org.predicode.predicator.grammar.TermPrinter;
-import org.predicode.predicator.grammar.TermPrinterKt;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -54,7 +53,7 @@ public abstract class Term {
 
     @Override
     public String toString() {
-        return TermPrinterKt.printTerms(this);
+        return TermPrinter.printTerms(this);
     }
 
     public static final class Expansion {

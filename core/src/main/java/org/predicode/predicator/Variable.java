@@ -1,7 +1,6 @@
 package org.predicode.predicator;
 
 import org.jetbrains.annotations.NotNull;
-import org.predicode.predicator.grammar.NamePrinterKt;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -11,7 +10,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static org.predicode.predicator.Keyword.DEFINITION_KEYWORD;
-import static org.predicode.predicator.grammar.Characters.UNDERSCORE;
+import static org.predicode.predicator.grammar.CodePoints.UNDERSCORE;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 
 
@@ -145,7 +144,7 @@ public abstract class Variable extends MappedTerm {
 
     @Override
     public String toString() {
-        return NamePrinterKt.printName(getName(), UNDERSCORE, ALWAYS_QUOTE);
+        return ALWAYS_QUOTE.printName(getName(), UNDERSCORE);
     }
 
     private static final class NamedVariable extends Variable {

@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.predicode.predicator.grammar.TermPrinterKt;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -8,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 
 
 /**
@@ -148,7 +149,7 @@ public final class RulePattern implements Predicate {
 
     @Override
     public String toString() {
-        return TermPrinterKt.printTerms(getTerms());
+        return printTerms(getTerms());
     }
 
 }
