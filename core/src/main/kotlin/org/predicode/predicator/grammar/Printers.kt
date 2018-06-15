@@ -2,7 +2,7 @@ package org.predicode.predicator.grammar
 
 import org.predicode.predicator.Term
 
-typealias CodePoint = Int;
+typealias CodePoint = Int
 
 fun printTerms(terms: Iterable<Term>, print: (CodePoint) -> Unit) =
         TermPrinter.printTerms(terms, print)
