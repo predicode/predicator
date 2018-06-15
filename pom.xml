@@ -48,13 +48,13 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <kotlin.version>1.2.41</kotlin.version>
+    <kotlin.version>1.2.50</kotlin.version>
     <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
 
-    <reactor.version>3.1.7.RELEASE</reactor.version>
+    <reactor.version>3.1.8.RELEASE</reactor.version>
     <junit-jupiter.version>5.2.0</junit-jupiter.version>
     <atrium.version>0.6.0</atrium.version>
-    <mockk.version>1.8</mockk.version>
+    <mockk.version>1.8.3</mockk.version>
   </properties>
 
   <repositories>
@@ -148,7 +148,7 @@
           <configuration>
             <args>
               <arg>-Xjsr305=strict</arg> <!-- Enable strict mode for JSR-305 annotations -->
-              <arg>-Xenable-jvm-default</arg> <!-- Enable @JvmDefault annotation support -->
+              <arg>-Xjvm-default=enable</arg> <!-- Enable @JvmDefault annotation support -->
             </args>
           </configuration>
           <executions>
