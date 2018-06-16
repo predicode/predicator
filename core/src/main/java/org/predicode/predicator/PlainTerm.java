@@ -13,8 +13,9 @@ import java.util.Optional;
  * <ul>
  * <li>{@link Keyword keyword},</li>
  * <li>{@link Atom atom},</li>
- * <li>{@link Value arbitrary value}, or</li>
- * <li>{@link Variable variable}.</li>
+ * <li>{@link Value arbitrary value},</li>
+ * <li>{@link Variable variable}, or</li>
+ * <li>{@link Placeholder placeholder}.</li>
  * </ul>
  * </p>
  */
@@ -26,20 +27,27 @@ public abstract class PlainTerm extends Term {
     /**
      * Attempts to match against another term.
      *
-     * This method is called for the terms of the [rule condition][Rule.condition] with corresponding query term
-     * as argument.
+     * <p>This method is called for the terms of the {@link Rule#getCondition() rule condition} with corresponding
+     * query term as argument.</p>
      *
      * @param term a term to match against.
      * @param knowns known resolutions to update.
      *
      * @return updated knowns if the term matches, or empty optional otherwise.
      */
+    @Nonnull
     public abstract Optional<Knowns> match(@Nonnull PlainTerm term, @Nonnull Knowns knowns);
 
     @Nonnull
     public abstract <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p);
 
-    interface Visitor<P, R> {
+    @Nonnull
+    @Override
+    public final <P, R> R accept(@Nonnull Term.Visitor<P, R> visitor, @Nonnull P p) {
+        return accept((Visitor<P, R>) visitor, p);
+    }
+
+    public interface Visitor<P, R> extends MappedTerm.Visitor<P, R> {
 
         @Nonnull
         default R visitKeyword(@Nonnull Keyword keyword, @Nonnull P p) {
@@ -47,28 +55,14 @@ public abstract class PlainTerm extends Term {
         }
 
         @Nonnull
-        default R visitAtom(@Nonnull Atom atom, @Nonnull P p) {
-            return visitResolved(atom, p);
+        default R visitPlaceholder(@Nonnull Placeholder placeholder, @Nonnull P p) {
+            return visitPlain(placeholder, p);
         }
 
-        @Nonnull
-        default R visitVariable(@Nonnull Variable variable, @Nonnull P p) {
-            return visitMapped(variable, p);
-        }
-
-        @Nonnull
-        default R visitValue(@Nonnull Value value, @Nonnull P p) {
-            return visitResolved(value, p);
-        }
-
+        @Override
         @Nonnull
         default R visitMapped(@Nonnull MappedTerm term, @Nonnull P p) {
             return visitPlain(term, p);
-        }
-
-        @Nonnull
-        default R visitResolved(@Nonnull ResolvedTerm term, @Nonnull P p) {
-            return visitMapped(term, p);
         }
 
         @Nonnull

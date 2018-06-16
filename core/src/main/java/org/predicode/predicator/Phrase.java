@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.jetbrains.annotations.NotNull;
 import org.predicode.predicator.grammar.TermPrinter;
 import reactor.core.publisher.Flux;
 
@@ -71,7 +70,7 @@ public class Phrase extends CompoundTerm implements Predicate {
      * <p>{@link Term#expand(PredicateResolver) Expands} all of the phrase terms, then searches for corresponding
      * {@link Rule resolution rules} and applies them.</p>
      */
-    @NotNull
+    @Nonnull
     public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
         try {
             return expansion(resolver)

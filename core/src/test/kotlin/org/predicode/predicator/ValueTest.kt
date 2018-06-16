@@ -39,7 +39,7 @@ class ValueTest {
     @Test
     fun `resolves variable`() {
 
-        val value = rawValue("name")
+        val value = rawValue("value")
         val variable = namedVariable("var")
 
         knowns = Knowns(variable)
@@ -48,6 +48,12 @@ class ValueTest {
             assert(subject.resolution(variable).value().get())
                     .toBe(value)
         }
+    }
+
+    @Test
+    fun `matches placeholder`() {
+        assert(rawValue("value").match(Placeholder.placeholder(), knowns))
+                .toBe(Optional.of(knowns))
     }
 
     @Test

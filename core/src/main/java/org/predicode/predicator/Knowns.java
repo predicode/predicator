@@ -1,7 +1,5 @@
 package org.predicode.predicator;
 
-import org.jetbrains.annotations.NotNull;
-
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +48,7 @@ public class Knowns {
      * When {@link Variable variable} is used as local variable value, it is the one from {@link #resolutions original
      * query}.</p>
      */
-    private final Map<Variable, PlainTerm> mappings;
+    private final Map<Variable, MappedTerm> mappings;
 
     private int rev;
 
@@ -68,7 +66,7 @@ public class Knowns {
     private Knowns(
             @Nonnull Knowns proto,
             @Nonnull Map<Variable, Resolution> resolutions,
-            @Nonnull Map<Variable, PlainTerm> mappings) {
+            @Nonnull Map<Variable, MappedTerm> mappings) {
         this.resolutions = resolutions;
         this.mappings = mappings;
         this.rev = proto.rev;
@@ -133,7 +131,7 @@ public class Knowns {
         resolutions.putAll(this.resolutions);
         resolutions.put(local, UNRESOLVED);
 
-        final HashMap<Variable, PlainTerm> mappings = new HashMap<>(this.mappings.size() + 1);
+        final HashMap<Variable, MappedTerm> mappings = new HashMap<>(this.mappings.size() + 1);
 
         mappings.putAll(this.mappings);
         mappings.put(local.variable, local);
@@ -156,13 +154,13 @@ public class Knowns {
     @Nonnull
     public Optional<Knowns> map(@Nonnull Variable variable, @Nonnull MappedTerm value) {
 
-        final PlainTerm prev = this.mappings.get(variable);
+        final MappedTerm prev = this.mappings.get(variable);
 
         if (prev == null) {
             // New mapping
             value.accept(ENSURE_QUERY_VARIABLE_EXISTS, this);
 
-            final HashMap<Variable, PlainTerm> mappings = new HashMap<>(this.mappings.size() + 1);
+            final HashMap<Variable, MappedTerm> mappings = new HashMap<>(this.mappings.size() + 1);
 
             mappings.putAll(this.mappings);
             mappings.put(variable, value);
@@ -176,13 +174,14 @@ public class Knowns {
             // Mapping didn't change
             return Optional.of(this);
         }
+
         return updateMapping(value, prev);
     }
 
     @Nonnull
-    private Optional<Knowns> updateMapping(@Nonnull MappedTerm value, @Nonnull PlainTerm prev) {
+    private Optional<Knowns> updateMapping(@Nonnull MappedTerm value, @Nonnull MappedTerm prev) {
         return prev.accept(
-                new PlainTerm.Visitor<MappedTerm, Optional<Knowns>>() {
+                new MappedTerm.Visitor<MappedTerm, Optional<Knowns>>() {
 
                     @Nonnull
                     @Override
@@ -192,7 +191,7 @@ public class Knowns {
 
                     @Nonnull
                     @Override
-                    public Optional<Knowns> visitPlain(@Nonnull PlainTerm term, @Nonnull MappedTerm value) {
+                    public Optional<Knowns> visitMapped(@Nonnull MappedTerm term, @Nonnull MappedTerm value) {
                         return Optional.empty();
                     }
 
@@ -215,7 +214,7 @@ public class Knowns {
                         .orElseGet(() -> addResolution(variable, value)));
     }
 
-    @NotNull
+    @Nonnull
     private Optional<Knowns> addResolution(@Nonnull Variable var, @Nonnull MappedTerm value) {
         return value.accept(
                 new PlainTerm.Visitor<Knowns, Optional<Knowns>>() {

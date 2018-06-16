@@ -58,6 +58,12 @@ class VariableTest {
     }
 
     @Test
+    fun `matches placeholder`() {
+        assert(namedVariable("variable").match(Placeholder.placeholder(), knowns))
+                .toBe(Optional.of(knowns))
+    }
+
+    @Test
     fun `does not remap the same term`() {
 
         val variable = namedVariable("variable")

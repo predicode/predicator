@@ -31,6 +31,12 @@ class AtomTest {
     }
 
     @Test
+    fun `matches placeholder`() {
+        assert(namedAtom("name1").match(Placeholder.placeholder(), knowns))
+                .toBe(Optional.of(knowns))
+    }
+
+    @Test
     fun `does not match atom with another name`() {
         assert(namedAtom("name1").match(namedAtom("name2"), knowns))
                 .toBe(Optional.empty())

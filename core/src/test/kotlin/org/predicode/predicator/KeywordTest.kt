@@ -38,6 +38,12 @@ class KeywordTest {
     }
 
     @Test
+    fun `does not match placeholder`() {
+        assert(namedKeyword("name").match(Placeholder.placeholder(), knowns))
+                .toBe(Optional.empty())
+    }
+
+    @Test
     fun `does not match other terms`() {
 
         val keyword = namedKeyword("name")

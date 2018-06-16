@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.jetbrains.annotations.NotNull;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -26,6 +25,7 @@ public abstract class Value extends ResolvedTerm {
         return new RawValue<>(value);
     }
 
+    @Nonnull
     @Override
     public Optional<Knowns> match(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
 
@@ -34,19 +34,25 @@ public abstract class Value extends ResolvedTerm {
         return term.accept(
                 new PlainTerm.Visitor<Knowns, Optional<Knowns>>() {
 
-                    @NotNull
+                    @Nonnull
                     @Override
                     public Optional<Knowns> visitValue(@Nonnull Value value, @Nonnull Knowns knowns) {
                         return value.valueMatch(self, knowns);
                     }
 
-                    @NotNull
+                    @Nonnull
                     @Override
                     public Optional<Knowns> visitVariable(@Nonnull Variable variable, @Nonnull Knowns knowns) {
                         return knowns.resolve(variable, self);
                     }
 
-                    @NotNull
+                    @Nonnull
+                    @Override
+                    public Optional<Knowns> visitPlaceholder(@Nonnull Placeholder placeholder, @Nonnull Knowns knowns) {
+                        return Optional.of(knowns);
+                    }
+
+                    @Nonnull
                     @Override
                     public Optional<Knowns> visitPlain(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
                         return Optional.empty();
@@ -56,15 +62,9 @@ public abstract class Value extends ResolvedTerm {
                 knowns);
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public final <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p) {
-        return visitor.visitValue(this, p);
-    }
-
-    @NotNull
-    @Override
-    public final <P, R> R accept(@Nonnull Term.Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitValue(this, p);
     }
 

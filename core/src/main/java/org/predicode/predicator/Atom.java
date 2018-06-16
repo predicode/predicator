@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.jetbrains.annotations.NotNull;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -54,18 +53,13 @@ public abstract class Atom extends ResolvedTerm {
         return this.name;
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public final <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitAtom(this, p);
     }
 
-    @NotNull
-    @Override
-    public final <P, R> R accept(@Nonnull Term.Visitor<P, R> visitor, @Nonnull P p) {
-        return visitor.visitAtom(this, p);
-    }
-
+    @Nonnull
     @Override
     public final Optional<Knowns> match(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
 
@@ -74,21 +68,27 @@ public abstract class Atom extends ResolvedTerm {
         return term.accept(
                 new PlainTerm.Visitor<Knowns, Optional<Knowns>>() {
 
-                    @NotNull
+                    @Nonnull
                     @Override
-                    public Optional<Knowns> visitAtom(@Nonnull Atom atom, @NotNull Knowns knowns) {
+                    public Optional<Knowns> visitAtom(@Nonnull Atom atom, @Nonnull Knowns knowns) {
                         return self.equals(atom) ? Optional.of(knowns) : Optional.empty();
                     }
 
-                    @NotNull
+                    @Nonnull
                     @Override
-                    public Optional<Knowns> visitVariable(@Nonnull Variable variable, @NotNull Knowns knowns) {
+                    public Optional<Knowns> visitVariable(@Nonnull Variable variable, @Nonnull Knowns knowns) {
                         return knowns.resolve(variable, self);
                     }
 
-                    @NotNull
+                    @Nonnull
                     @Override
-                    public Optional<Knowns> visitPlain(@Nonnull PlainTerm term, @NotNull Knowns knowns) {
+                    public Optional<Knowns> visitPlaceholder(@Nonnull Placeholder placeholder, @Nonnull Knowns knowns) {
+                        return Optional.of(knowns);
+                    }
+
+                    @Nonnull
+                    @Override
+                    public Optional<Knowns> visitPlain(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
                         return Optional.empty();
                     }
 

@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.jetbrains.annotations.NotNull;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -64,6 +63,7 @@ public abstract class Keyword extends PlainTerm {
         return this.name;
     }
 
+    @Nonnull
     @Override
     public final Optional<Knowns> match(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
         return equals(term) ? Optional.of(knowns) : Optional.empty();
@@ -75,15 +75,9 @@ public abstract class Keyword extends PlainTerm {
         return Optional.of(new Expansion(this, resolver.getKnowns()));
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public final <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p) {
-        return visitor.visitKeyword(this, p);
-    }
-
-    @NotNull
-    @Override
-    public final <P, R> R accept(@Nonnull Term.Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitKeyword(this, p);
     }
 

@@ -13,11 +13,8 @@ import java.util.function.UnaryOperator;
  *
  * <p>Can be one of:
  * <ul>
- * <li>{@link Keyword keyword},</li>
- * <li>{@link Atom atom},</li>
- * <li>{@link Value arbitrary value},</li>
- * <li>{@link Variable variable}, or</li>
- * <li>any {@link CompoundTerm compound term}, such as {@link Phrase phrase}</li>
+ * <li>{@link PlainTerm plain term}, or</li>
+ * <li>{@link CompoundTerm compound term}, such as {@link Phrase phrase}</li>
  * </ul>
  * </p>
  */
@@ -142,7 +139,7 @@ public abstract class Term {
 
     }
 
-    interface Visitor<P, R> extends PlainTerm.Visitor<P, R> {
+    public interface Visitor<P, R> extends PlainTerm.Visitor<P, R> {
 
         @Nonnull
         R visitCompound(@Nonnull CompoundTerm term, @Nonnull P p);

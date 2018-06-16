@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.jetbrains.annotations.NotNull;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -76,6 +75,7 @@ public abstract class Variable extends MappedTerm {
         return this.name;
     }
 
+    @Nonnull
     @Override
     public Optional<Knowns> match(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
 
@@ -88,6 +88,12 @@ public abstract class Variable extends MappedTerm {
                     @Override
                     public Optional<Knowns> visitMapped(@Nonnull MappedTerm term, @Nonnull Knowns knowns) {
                         return knowns.map(self, term);
+                    }
+
+                    @Nonnull
+                    @Override
+                    public Optional<Knowns> visitPlaceholder(@Nonnull Placeholder placeholder, @Nonnull Knowns knowns) {
+                        return Optional.of(knowns);
                     }
 
                     @Nonnull
@@ -106,15 +112,9 @@ public abstract class Variable extends MappedTerm {
         return resolver.getKnowns().mapping(this, Expansion::new);
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public final <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p) {
-        return visitor.visitVariable(this, p);
-    }
-
-    @NotNull
-    @Override
-    public final <P, R> R accept(@Nonnull Term.Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitVariable(this, p);
     }
 
