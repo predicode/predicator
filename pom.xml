@@ -53,7 +53,7 @@
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
 
     <jsr305.version>3.0.2</jsr305.version>
-    <reactor.version>3.1.8.RELEASE</reactor.version>
+    <reactor-bom.version>Bismuth-SR10</reactor-bom.version>
     <junit-jupiter.version>5.2.0</junit-jupiter.version>
     <atrium.version>0.6.0</atrium.version>
     <mockk.version>1.8.3</mockk.version>
@@ -103,8 +103,10 @@
       <!-- Reactive -->
       <dependency>
         <groupId>io.projectreactor</groupId>
-        <artifactId>reactor-core</artifactId>
-        <version>${reactor.version}</version>
+        <artifactId>reactor-bom</artifactId>
+        <version>${reactor-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <!-- Testing -->
@@ -136,12 +138,6 @@
         <groupId>io.mockk</groupId>
         <artifactId>mockk</artifactId>
         <version>${mockk.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.projectreactor</groupId>
-        <artifactId>reactor-test</artifactId>
-        <version>${reactor.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
