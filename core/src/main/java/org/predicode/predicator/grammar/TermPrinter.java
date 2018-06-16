@@ -5,8 +5,7 @@ import org.predicode.predicator.Term;
 import javax.annotation.Nonnull;
 
 import static org.predicode.predicator.grammar.CodePoints.*;
-import static org.predicode.predicator.grammar.PartPrinter.INITIAL_PART_PRINTER;
-import static org.predicode.predicator.grammar.PartPrinter.UNQUOTED_PART_PRINTER;
+import static org.predicode.predicator.grammar.PartPrinter.*;
 
 
 public class TermPrinter implements CodePointPrinter {
@@ -71,24 +70,24 @@ public class TermPrinter implements CodePointPrinter {
     }
 
     public void atom(@Nonnull CharSequence name) {
-        this.partPrinter = quotedName(name, SINGLE_QUOTE);
+        this.partPrinter = quotedName(name, ATOM_PART_PRINTER);
     }
 
     public void variable(@Nonnull CharSequence name) {
-        this.partPrinter = quotedName(name, UNDERSCORE);
+        this.partPrinter = quotedName(name, VARIABLE_PART_PRINTER);
     }
 
     @Nonnull
-    private PartPrinter quotedName(@Nonnull CharSequence name, int quote) {
+    private PartPrinter quotedName(@Nonnull CharSequence name, @Nonnull PartPrinter.QuotedPartPrinter quoted) {
 
         final PartPrinter it = this.partPrinter.separate(this);
-        final boolean quoteClosed = QuotingStyle.OPEN_QUOTE.printName(name, quote, this.print);
+        final boolean quoteClosed = QuotingStyle.OPEN_QUOTE.printName(name, quoted.getQuote(), this.print);
 
         if (quoteClosed) {
             return UNQUOTED_PART_PRINTER;
         }
 
-        return it.quoted(quote);
+        return quoted;
     }
 
     public void value(@Nonnull CharSequence value) {
