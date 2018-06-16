@@ -29,7 +29,7 @@ interface PartPrinter {
         @Nonnull
         @Override
         public PartPrinter separate(@Nonnull TermPrinter printer) {
-            printer.out(SPACE);
+            printer.print(SPACE);
             return this;
         }
 
@@ -52,7 +52,7 @@ interface PartPrinter {
 
         final PartPrinter out = endQuoted(printer).separate(printer);
 
-        QuotingStyle.AUTO_QUOTE.printName(name, BACKTICK, printer::out);
+        QuotingStyle.AUTO_QUOTE.printName(name, BACKTICK, printer::print);
 
         return out;
     }
@@ -76,7 +76,7 @@ interface PartPrinter {
 
             final PartPrinter result = endQuoted(printer);
 
-            printer.out(SPACE);
+            printer.print(SPACE);
 
             return result;
         }
@@ -90,7 +90,7 @@ interface PartPrinter {
         @Nonnull
         @Override
         public PartPrinter keyword(@Nonnull TermPrinter printer, @Nonnull CharSequence name) {
-            printer.out(this.quote);
+            printer.print(this.quote);
             return PartPrinter.super.keyword(printer, name).endQuoted(printer);
         }
 

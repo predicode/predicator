@@ -55,7 +55,7 @@ abstract class NameCharPrinter {
             }
             if (out.getQuoting().openQuote() || !next.nameStart()) {
                 // Open quote if the name does not start with allowed start symbol
-                out.out(out.getQuote());
+                out.print(out.getQuote());
             }
             return next;
         }
@@ -84,7 +84,7 @@ abstract class NameCharPrinter {
             }
             if (!out.getLastNonSeparating().nameGluesWith(next)) {
                 // Separate next with space, unless it glues with previous one
-                out.out(SPACE);
+                out.print(SPACE);
             }
             return next;
         }
@@ -117,7 +117,7 @@ abstract class NameCharPrinter {
                 @Nonnull NamePrinter out,
                 @Nonnull CharClass next,
                 int codePoint) {
-            out.out(codePoint);
+            out.print(codePoint);
         }
 
     };
@@ -139,8 +139,8 @@ abstract class NameCharPrinter {
                 @Nonnull NamePrinter out,
                 @Nonnull CharClass next,
                 int codePoint) {
-            out.out(BACKSLASH);
-            out.out(codePoint);
+            out.print(BACKSLASH);
+            out.print(codePoint);
         }
 
     };
@@ -162,9 +162,9 @@ abstract class NameCharPrinter {
                 @Nonnull NamePrinter out,
                 @Nonnull CharClass next,
                 int codePoint) {
-            out.out(BACKSLASH);
-            Integer.toHexString(codePoint).codePoints().forEach(out::out);
-            out.out(BACKSLASH);
+            out.print(BACKSLASH);
+            out.print(Integer.toHexString(codePoint));
+            out.print(BACKSLASH);
         }
 
     };

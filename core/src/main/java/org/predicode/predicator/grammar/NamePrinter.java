@@ -3,7 +3,7 @@ package org.predicode.predicator.grammar;
 import javax.annotation.Nonnull;
 
 
-class NamePrinter {
+class NamePrinter implements CodePointPrinter {
 
     @Nonnull
     private final CharSequence name;
@@ -30,7 +30,7 @@ class NamePrinter {
         this.print = print;
     }
 
-    int getQuote() {
+    final int getQuote() {
         return this.quote;
     }
 
@@ -42,6 +42,11 @@ class NamePrinter {
     @Nonnull
     final CharClass getLastNonSeparating() {
         return this.lastNonSeparating;
+    }
+
+    @Override
+    public void print(int codePoint) {
+        this.print.print(codePoint);
     }
 
     boolean print() {
@@ -62,15 +67,11 @@ class NamePrinter {
 
         if (this.quoting.closeQuote() || !this.lastNonSeparating.nameEnd()) {
             // Close quote if the name does not end with allowed symbol
-            out(this.quote);
+            print(this.quote);
             return true;
         }
 
         return false;
-    }
-
-    void out(int codePoint) {
-        this.print.print(codePoint);
     }
 
 }

@@ -9,7 +9,7 @@ import static org.predicode.predicator.grammar.PartPrinter.INITIAL_PART_PRINTER;
 import static org.predicode.predicator.grammar.PartPrinter.UNQUOTED_PART_PRINTER;
 
 
-public class TermPrinter {
+public class TermPrinter implements CodePointPrinter {
 
     public static void printTerms(@Nonnull Iterable<? extends Term> terms, @Nonnull CodePointPrinter print) {
         new TermPrinter(print).print(terms);
@@ -45,8 +45,13 @@ public class TermPrinter {
     @Nonnull
     private PartPrinter partPrinter = INITIAL_PART_PRINTER;
 
-    TermPrinter(@Nonnull CodePointPrinter print) {
+    private TermPrinter(@Nonnull CodePointPrinter print) {
         this.print = print;
+    }
+
+    @Override
+    public void print(int codePoint) {
+        this.print.print(codePoint);
     }
 
     public void print(@Nonnull Iterable<? extends Term> terms) {
@@ -88,24 +93,20 @@ public class TermPrinter {
 
     public void value(@Nonnull CharSequence value) {
         this.partPrinter = this.partPrinter.separate(this);
-        out(OPENING_BRACE);
-        value.codePoints().forEach(this::out);
-        out(CLOSING_BRACE);
+        print(OPENING_BRACE);
+        print(value);
+        print(CLOSING_BRACE);
     }
 
     public void startCompound() {
         this.partPrinter.endQuoted(this).separate(this);
-        out(OPENING_PARENT);
+        print(OPENING_PARENT);
         this.partPrinter = INITIAL_PART_PRINTER;
     }
 
     public void endCompound() {
         this.partPrinter = this.partPrinter.endQuoted(this);
-        out(CLOSING_PARENT);
-    }
-
-    void out(int codePoint) {
-        this.print.print(codePoint);
+        print(CLOSING_PARENT);
     }
 
 }
