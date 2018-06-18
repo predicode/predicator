@@ -3,7 +3,6 @@ package org.predicode.predicator.predicates;
 import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
-import org.predicode.predicator.RulePattern;
 import org.predicode.predicator.annotations.SamWithReceiver;
 import org.predicode.predicator.terms.PlainTerm;
 import org.predicode.predicator.terms.Term;
@@ -31,7 +30,7 @@ public interface Predicate {
     /**
      * Predicate always resolved without modifying the original resolution.
      *
-     * <p>This is used as the only predicate of the {@link RulePattern#fact() fact}.</p>
+     * <p>This is used as the only predicate of the {@link Rule.Pattern#fact() fact}.</p>
      */
     Predicate TRUE = True.INSTANCE;
 

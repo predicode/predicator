@@ -2,7 +2,6 @@ package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
-import org.predicode.predicator.RulePattern;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -11,7 +10,7 @@ import java.util.Optional;
 /**
  * A plain, non-compound term.
  *
- * <p>{@link RulePattern Rule patterns} may contain plain terms only.</p>
+ * <p>{@link Rule.Pattern Rule patterns} may contain plain terms only.</p>
  *
  * <p>Can be one of:
  * <ul>

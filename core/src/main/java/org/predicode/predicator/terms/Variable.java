@@ -1,8 +1,8 @@
 package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
+import org.predicode.predicator.Rule;
 import org.predicode.predicator.predicates.Predicate;
-import org.predicode.predicator.RulePattern;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -129,8 +129,8 @@ public abstract class Variable extends MappedTerm {
      * @return rule pattern matching expression definition.
      */
     @Nonnull
-    public final RulePattern definitionOf(@Nonnull PlainTerm ...terms) {
-        return new RulePattern(definitionTerms(terms));
+    public final Rule.Pattern definitionOf(@Nonnull PlainTerm ...terms) {
+        return Rule.pattern(definitionTerms(terms));
     }
 
     /**
