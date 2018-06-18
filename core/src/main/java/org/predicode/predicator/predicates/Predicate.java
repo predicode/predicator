@@ -1,5 +1,9 @@
-package org.predicode.predicator;
+package org.predicode.predicator.predicates;
 
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.PredicateResolver;
+import org.predicode.predicator.Rule;
+import org.predicode.predicator.RulePattern;
 import org.predicode.predicator.annotations.SamWithReceiver;
 import org.predicode.predicator.terms.Term;
 import reactor.core.publisher.Flux;

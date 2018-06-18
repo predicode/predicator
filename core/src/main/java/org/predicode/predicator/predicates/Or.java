@@ -1,11 +1,13 @@
-package org.predicode.predicator;
+package org.predicode.predicator.predicates;
 
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.PredicateResolver;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 
 
-final class And implements Predicate {
+final class Or implements Predicate {
 
     @Nonnull
     private final Predicate first;
@@ -13,7 +15,7 @@ final class And implements Predicate {
     @Nonnull
     private final Predicate second;
 
-    And(@Nonnull Predicate first, @Nonnull Predicate second) {
+    Or(@Nonnull Predicate first, @Nonnull Predicate second) {
         this.first = first;
         this.second = second;
     }
@@ -21,13 +23,12 @@ final class And implements Predicate {
     @Nonnull
     @Override
     public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
-        return this.first.resolve(resolver)
-                .flatMap(resolved -> this.second.resolve(resolver.withKnowns(resolved)));
+        return Flux.merge(this.first.resolve(resolver), this.second.resolve(resolver));
     }
 
     @Override
     public String toString() {
-        return this.first + ", " + this.second;
+        return this.first + "; " + this.second;
     }
 
 }

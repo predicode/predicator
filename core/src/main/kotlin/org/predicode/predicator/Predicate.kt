@@ -1,5 +1,6 @@
 package org.predicode.predicator
 
+import org.predicode.predicator.predicates.Predicate
 import reactor.core.publisher.Flux
 
 

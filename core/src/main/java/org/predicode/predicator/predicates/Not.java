@@ -1,5 +1,7 @@
-package org.predicode.predicator;
+package org.predicode.predicator.predicates;
 
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.PredicateResolver;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;

@@ -1,7 +1,7 @@
 package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
-import org.predicode.predicator.Predicate;
+import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.PredicateResolver;
 import org.predicode.predicator.RulePattern;
 import org.predicode.predicator.grammar.TermPrinter;

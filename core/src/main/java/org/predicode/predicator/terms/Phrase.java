@@ -2,6 +2,8 @@ package org.predicode.predicator.terms;
 
 import org.predicode.predicator.*;
 import org.predicode.predicator.grammar.TermPrinter;
+import org.predicode.predicator.predicates.Predicate;
+import org.predicode.predicator.PredicateResolver;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;

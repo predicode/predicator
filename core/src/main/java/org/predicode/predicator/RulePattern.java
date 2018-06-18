@@ -1,5 +1,6 @@
 package org.predicode.predicator;
 
+import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.terms.Phrase;
 import org.predicode.predicator.terms.PlainTerm;
 import org.predicode.predicator.terms.Term;
