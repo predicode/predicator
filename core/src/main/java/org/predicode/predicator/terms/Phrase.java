@@ -73,6 +73,7 @@ public class Phrase extends CompoundTerm implements Predicate {
      * <p>{@link Term#expand(PredicateResolver) Expands} all of the phrase terms, then searches for corresponding
      * {@link Rule resolution rules} and applies them.</p>
      */
+    @Override
     @Nonnull
     public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
         try {

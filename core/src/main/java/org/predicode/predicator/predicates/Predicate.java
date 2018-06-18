@@ -26,74 +26,12 @@ public interface Predicate {
      *
      * <p>This is used as the only predicate of the {@link RulePattern#fact() fact}.</p>
      */
-    Predicate TRUE = new Predicate() {
-
-        @Nonnull
-        @Override
-        public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
-            return Flux.just(resolver.getKnowns());
-        }
-
-        @Nonnull
-        @Override
-        public Predicate and(@Nonnull Predicate other) {
-            return other;
-        }
-
-        @Nonnull
-        @Override
-        public Predicate or(@Nonnull Predicate other) {
-            return this;
-        }
-
-        @Nonnull
-        @Override
-        public Predicate negate() {
-            return FALSE;
-        }
-
-        @Override
-        public String toString() {
-            return ".";
-        }
-
-    };
+    Predicate TRUE = True.INSTANCE;
 
     /**
      * Returns predicate that is never resolved.
      */
-    Predicate FALSE = new Predicate() {
-
-        @Nonnull
-        @Override
-        public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
-            return Flux.empty();
-        }
-
-        @Nonnull
-        @Override
-        public Predicate and(@Nonnull Predicate other) {
-            return this;
-        }
-
-        @Nonnull
-        @Override
-        public Predicate or(@Nonnull Predicate other) {
-            return other;
-        }
-
-        @Nonnull
-        @Override
-        public Predicate negate() {
-            return TRUE;
-        }
-
-        @Override
-        public String toString() {
-            return "\\+.";
-        }
-
-    };
+    Predicate FALSE = False.INSTANCE;
 
     /**
      * Resolves this predicate.
