@@ -1,7 +1,7 @@
 package org.predicode.predicator.predicates
 
 import ch.tutteli.atrium.api.cc.en_UK.*
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import ch.tutteli.atrium.expect
 import io.mockk.every
 import io.mockk.mockk
@@ -27,30 +27,30 @@ class EmptyCallTest {
 
     @Test
     fun `is empty`() {
-        assert(call.isEmpty).isTrue()
+        assertThat(call.isEmpty).isTrue()
     }
 
     @Test
     fun `is finite`() {
-        assert(call.isFinite).isTrue()
-        assert(call.toFinite()).isNotNull {
-            assert(subject).isSame(call)
-            assert(subject.allTerms()).isEmpty()
+        assertThat(call.isFinite).isTrue()
+        assertThat(call.toFinite()).isNotNull {
+            assertThat(subject).isSame(call)
+            assertThat(subject.allTerms()).isEmpty()
         }
     }
 
     @Test
     fun `has empty prefix`() {
-        assert(call.prefix(0).get()) {
-            assert(subject.terms).isEmpty()
-            assert(subject.suffix.isEmpty).isTrue()
-            assert(subject.isEmpty).isTrue()
+        assertThat(call.prefix(0).get()) {
+            assertThat(subject.terms).isEmpty()
+            assertThat(subject.suffix.isEmpty).isTrue()
+            assertThat(subject.isEmpty).isTrue()
         }
     }
 
     @Test
     fun `can not build non-empty prefix`() {
-        assert(call.prefix(1)).toBe(Optional.empty())
+        assertThat(call.prefix(1)).toBe(Optional.empty())
     }
 
     @Test
@@ -74,12 +74,12 @@ class FiniteCallTest {
 
     @Test
     fun `is empty without terms`() {
-        assert(Predicate.call(emptyList())).isSame(emptyCall())
+        assertThat(Predicate.call(emptyList())).isSame(emptyCall())
     }
 
     @Test
     fun `is empty prefix with terms`() {
-        assert(call).toBe(Predicate.prefix(terms))
+        assertThat(call).toBe(Predicate.prefix(terms))
     }
 
 }
@@ -97,15 +97,15 @@ class InfiniteCallTest {
 
     @Test
     fun `is not empty`() {
-        assert(call.isEmpty).isFalse()
-        assert(call.length()).notToBe(0)
+        assertThat(call.isEmpty).isFalse()
+        assertThat(call.length()).notToBe(0)
     }
 
     @Test
     fun `is infinite`() {
-        assert(call.isFinite).isFalse()
-        assert(call.toFinite()).isNull()
-        assert(call.length()).isLessThan(0)
+        assertThat(call.isFinite).isFalse()
+        assertThat(call.toFinite()).isNull()
+        assertThat(call.length()).isLessThan(0)
     }
 
     @Test
@@ -119,7 +119,7 @@ class InfiniteCallTest {
 
         every { buildPrefix.apply(any()) }.returns(Optional.of(prefix))
 
-        assert(call.prefix(3).get()).toBe(prefix)
+        assertThat(call.prefix(3).get()).toBe(prefix)
         verify { buildPrefix.apply(3) }
     }
 

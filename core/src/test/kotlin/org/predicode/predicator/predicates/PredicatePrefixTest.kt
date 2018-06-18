@@ -1,7 +1,7 @@
 package org.predicode.predicator.predicates
 
 import ch.tutteli.atrium.api.cc.en_UK.*
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import ch.tutteli.atrium.expect
 import io.mockk.every
 import io.mockk.mockk
@@ -29,10 +29,10 @@ class FinitePrefixTest {
 
     @Test
     fun `is finite`() {
-        assert(prefix.isFinite).isTrue()
-        assert(prefix.toFinite()).isNotNull {
-            assert(subject).isSame(prefix)
-            assert(subject.allTerms()).toBe(prefixTerms + suffixTerms)
+        assertThat(prefix.isFinite).isTrue()
+        assertThat(prefix.toFinite()).isNotNull {
+            assertThat(subject).isSame(prefix)
+            assertThat(subject.allTerms()).toBe(prefixTerms + suffixTerms)
         }
     }
 
@@ -41,9 +41,9 @@ class FinitePrefixTest {
 
         val prefix = Predicate.prefix(prefixTerms)
 
-        assert(prefix.suffix.isEmpty).isTrue()
-        assert(prefix.toFinite()).isNotNull {
-            assert(subject.allTerms()).toBe(prefixTerms)
+        assertThat(prefix.suffix.isEmpty).isTrue()
+        assertThat(prefix.toFinite()).isNotNull {
+            assertThat(subject.allTerms()).toBe(prefixTerms)
         }
     }
 
@@ -52,20 +52,20 @@ class FinitePrefixTest {
 
         val prefix = Predicate.prefix(emptyList(), Predicate.call(suffixTerms))
 
-        assert(prefix.terms).isEmpty()
-        assert(prefix.toFinite()).isNotNull {
-            assert(subject.allTerms()).toBe(suffixTerms)
+        assertThat(prefix.terms).isEmpty()
+        assertThat(prefix.toFinite()).isNotNull {
+            assertThat(subject.allTerms()).toBe(suffixTerms)
         }
     }
 
     @Test
     fun `has length including prefix and suffix terms`() {
-        assert(prefix.length()).toBe(prefixTerms.size + suffixTerms.size)
+        assertThat(prefix.length()).toBe(prefixTerms.size + suffixTerms.size)
     }
 
     @Test
     fun `return itself when prefix with the same length requested`() {
-        assert(prefix.prefix(prefixTerms.size).get()).isSame(prefix)
+        assertThat(prefix.prefix(prefixTerms.size).get()).isSame(prefix)
     }
 
     @Test
@@ -76,37 +76,37 @@ class FinitePrefixTest {
 
     @Test
     fun `can not build too long prefix`() {
-        assert(prefix.prefix(prefix.length() + 1)).toBe(Optional.empty())
+        assertThat(prefix.prefix(prefix.length() + 1)).toBe(Optional.empty())
     }
 
     @Test
     fun `builds full prefix`() {
-        assert(prefix.prefix(prefix.length()).get()) {
-            assert(subject.terms).toBe(prefixTerms + suffixTerms)
-            assert(subject.suffix.isEmpty).isTrue()
+        assertThat(prefix.prefix(prefix.length()).get()) {
+            assertThat(subject.terms).toBe(prefixTerms + suffixTerms)
+            assertThat(subject.suffix.isEmpty).isTrue()
         }
     }
 
     @Test
     fun `builds shorter prefix`() {
-        assert(prefix.prefix(1).get()) {
-            assert(subject.terms).toBe(prefixTerms.slice(0..0))
-            assert(subject.suffix.length()).toBe(prefix.length() - 1)
-            assert(subject.suffix.prefix(prefix.length() - 1).get()) {
-                assert(subject.terms).toBe(prefixTerms.slice(1..(prefixTerms.size - 1)) + suffixTerms)
-                assert(subject.suffix.isEmpty).isTrue()
+        assertThat(prefix.prefix(1).get()) {
+            assertThat(subject.terms).toBe(prefixTerms.slice(0..0))
+            assertThat(subject.suffix.length()).toBe(prefix.length() - 1)
+            assertThat(subject.suffix.prefix(prefix.length() - 1).get()) {
+                assertThat(subject.terms).toBe(prefixTerms.slice(1..(prefixTerms.size - 1)) + suffixTerms)
+                assertThat(subject.suffix.isEmpty).isTrue()
             }
         }
     }
 
     @Test
     fun `builds longer prefix`() {
-        assert(prefix.prefix(prefixTerms.size + 1).get()) {
-            assert(subject.terms).toBe(prefixTerms + suffixTerms.slice(0..0))
-            assert(subject.suffix.length()).toBe(suffix.length() - 1)
-            assert(subject.suffix.prefix(suffix.length() - 1).get()) {
-                assert(subject.terms).toBe(suffixTerms.slice(1..(suffixTerms.size - 1)))
-                assert(subject.suffix.isEmpty).isTrue()
+        assertThat(prefix.prefix(prefixTerms.size + 1).get()) {
+            assertThat(subject.terms).toBe(prefixTerms + suffixTerms.slice(0..0))
+            assertThat(subject.suffix.length()).toBe(suffix.length() - 1)
+            assertThat(subject.suffix.prefix(suffix.length() - 1).get()) {
+                assertThat(subject.terms).toBe(suffixTerms.slice(1..(suffixTerms.size - 1)))
+                assertThat(subject.suffix.isEmpty).isTrue()
             }
         }
     }
@@ -130,14 +130,14 @@ class InfinitePrefixTest {
 
     @Test
     fun `is infinite`() {
-        assert(prefix.isFinite).isFalse()
-        assert(prefix.length()).isLessThan(0)
-        assert(prefix.toFinite()).isNull()
+        assertThat(prefix.isFinite).isFalse()
+        assertThat(prefix.length()).isLessThan(0)
+        assertThat(prefix.toFinite()).isNull()
     }
 
     @Test
     fun `return itself when prefix with the same length requested`() {
-        assert(prefix.prefix(prefixTerms.size).get()).isSame(prefix)
+        assertThat(prefix.prefix(prefixTerms.size).get()).isSame(prefix)
     }
 
     @Test
@@ -148,10 +148,10 @@ class InfinitePrefixTest {
 
     @Test
     fun `builds shorter prefix`() {
-        assert(prefix.prefix(1).get()) {
-            assert(subject.terms).toBe(prefixTerms.slice(0..0))
-            assert(subject.suffix.isFinite).isFalse()
-            assert(subject.suffix.prefix(prefixTerms.size - 1).get())
+        assertThat(prefix.prefix(1).get()) {
+            assertThat(subject.terms).toBe(prefixTerms.slice(0..0))
+            assertThat(subject.suffix.isFinite).isFalse()
+            assertThat(subject.suffix.prefix(prefixTerms.size - 1).get())
                     .toBe(Predicate.prefix(prefixTerms.slice(1..(prefixTerms.size - 1)), suffix))
         }
     }
@@ -164,9 +164,9 @@ class InfinitePrefixTest {
 
         every { suffixPrefix.apply(1) }.returns(Optional.of(Predicate.prefix(suffixTerms, suffixSuffix)))
 
-        assert(prefix.prefix(prefixTerms.size + 1).get()) {
-            assert(subject.terms).toBe(prefixTerms + suffixTerms)
-            assert(subject.suffix.isFinite).isFalse()
+        assertThat(prefix.prefix(prefixTerms.size + 1).get()) {
+            assertThat(subject.terms).toBe(prefixTerms + suffixTerms)
+            assertThat(subject.suffix.isFinite).isFalse()
         }
     }
 
@@ -179,12 +179,12 @@ class InfinitePrefixTest {
                 suffixTerms.slice(0..0),
                 Predicate.call(suffixTerms.slice(1..(suffixTerms.size - 1))))))
 
-        assert(prefix.prefix(prefixTerms.size + 1).get()) {
-            assert(subject.terms).toBe(prefixTerms + suffixTerms.slice(0..0))
-            assert(subject.suffix.length()).toBe(suffixTerms.size - 1)
-            assert(subject.suffix.prefix(suffixTerms.size - 1).get()) {
-                assert(subject.terms).toBe(suffixTerms.slice(1..(suffixTerms.size - 1)))
-                assert(subject.suffix.isEmpty).isTrue()
+        assertThat(prefix.prefix(prefixTerms.size + 1).get()) {
+            assertThat(subject.terms).toBe(prefixTerms + suffixTerms.slice(0..0))
+            assertThat(subject.suffix.length()).toBe(suffixTerms.size - 1)
+            assertThat(subject.suffix.prefix(suffixTerms.size - 1).get()) {
+                assertThat(subject.terms).toBe(suffixTerms.slice(1..(suffixTerms.size - 1)))
+                assertThat(subject.suffix.isEmpty).isTrue()
             }
         }
     }

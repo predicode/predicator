@@ -1,7 +1,7 @@
 package org.predicode.predicator.terms
 
 import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,7 +20,7 @@ class PhraseTest {
 
     @Test
     fun `string representation`() {
-        assert(Phrase(
+        assertThat(Phrase(
                 namedKeyword("keyword"),
                 namedVariable("variable")).toString())
                 .toBe("keyword _variable")

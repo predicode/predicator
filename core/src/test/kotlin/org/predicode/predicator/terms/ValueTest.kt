@@ -1,7 +1,7 @@
 package org.predicode.predicator.terms
 
 import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.Knowns
@@ -23,19 +23,19 @@ class ValueTest {
 
     @Test
     fun `string representation`() {
-        assert(namedVariable("variable").toString())
+        assertThat(namedVariable("variable").toString())
                 .toBe("_variable_")
     }
 
     @Test
     fun `matches the same value`() {
-        assert(rawValue("value1").match(rawValue("value1"), knowns).get())
+        assertThat(rawValue("value1").match(rawValue("value1"), knowns).get())
                 .toBe(knowns)
     }
 
     @Test
     fun `does not match another value`() {
-        assert(rawValue("value1").match(rawValue(123), knowns))
+        assertThat(rawValue("value1").match(rawValue(123), knowns))
                 .toBe(Optional.empty())
     }
 
@@ -47,15 +47,15 @@ class ValueTest {
 
         knowns = Knowns(variable)
 
-        assert(value.match(variable, knowns).get()) {
-            assert(subject.resolution(variable).value().get())
+        assertThat(value.match(variable, knowns).get()) {
+            assertThat(subject.resolution(variable).value().get())
                     .toBe(value)
         }
     }
 
     @Test
     fun `matches placeholder`() {
-        assert(rawValue("value").match(Placeholder.placeholder(), knowns))
+        assertThat(rawValue("value").match(Placeholder.placeholder(), knowns))
                 .toBe(Optional.of(knowns))
     }
 
@@ -64,9 +64,9 @@ class ValueTest {
 
         val value = rawValue("name")
 
-        assert(value.match(namedKeyword("name"), knowns))
+        assertThat(value.match(namedKeyword("name"), knowns))
                 .toBe(Optional.empty())
-        assert(value.match(namedAtom("name"), knowns))
+        assertThat(value.match(namedAtom("name"), knowns))
                 .toBe(Optional.empty())
     }
 
@@ -75,7 +75,7 @@ class ValueTest {
 
         val value = rawValue("name")
 
-        assert(value.expand(resolver).get())
+        assertThat(value.expand(resolver).get())
                 .toBe(Term.Expansion(value, knowns))
     }
 

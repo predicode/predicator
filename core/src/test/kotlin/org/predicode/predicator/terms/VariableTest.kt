@@ -4,7 +4,7 @@ import ch.tutteli.atrium.api.cc.en_UK.notToBe
 import ch.tutteli.atrium.api.cc.en_UK.startsWith
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.api.cc.en_UK.toThrow
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import ch.tutteli.atrium.expect
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -29,7 +29,7 @@ class VariableTest {
 
     @Test
     fun `does not match keyword`() {
-        assert(
+        assertThat(
                 namedVariable("variable").match(
                         namedKeyword(
                                 "keyword"), knowns))
@@ -42,9 +42,9 @@ class VariableTest {
         val variable = namedVariable("variable")
         val atom = namedAtom("atom")
 
-        assert(variable.match(atom, knowns).get()) {
+        assertThat(variable.match(atom, knowns).get()) {
             subject.mapping(variable) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(atom)
             }
         }
@@ -56,9 +56,9 @@ class VariableTest {
         val variable = namedVariable("variable")
         val value = rawValue("value")
 
-        assert(variable.match(value, knowns).get()) {
+        assertThat(variable.match(value, knowns).get()) {
             subject.mapping(variable) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(value)
             }
         }
@@ -66,7 +66,7 @@ class VariableTest {
 
     @Test
     fun `matches placeholder`() {
-        assert(namedVariable("variable").match(Placeholder.placeholder(), knowns))
+        assertThat(namedVariable("variable").match(Placeholder.placeholder(), knowns))
                 .toBe(Optional.of(knowns))
     }
 
@@ -78,9 +78,9 @@ class VariableTest {
 
         knowns = knowns.map(variable, value).get()
 
-        assert(variable.match(value, knowns).get()) {
+        assertThat(variable.match(value, knowns).get()) {
             subject.mapping(variable) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(value)
             }
         }
@@ -93,7 +93,7 @@ class VariableTest {
 
         knowns = knowns.map(variable, rawValue(12345)).get()
 
-        assert(variable.match(namedAtom("atom"), knowns))
+        assertThat(variable.match(namedAtom("atom"), knowns))
                 .toBe(Optional.empty())
     }
 
@@ -115,9 +115,9 @@ class VariableTest {
 
         knowns = Knowns(queryVar)
 
-        assert(localVar.match(queryVar, knowns).get()) {
+        assertThat(localVar.match(queryVar, knowns).get()) {
             subject.mapping(localVar) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(queryVar)
             }
         }
@@ -135,11 +135,11 @@ class VariableTest {
 
         val resolution = namedAtom("resolution")
 
-        assert(localVar.match(resolution, knowns).get()) {
-            assert(subject.resolution(queryVar).value().get())
+        assertThat(localVar.match(resolution, knowns).get()) {
+            assertThat(subject.resolution(queryVar).value().get())
                     .toBe(resolution)
             subject.mapping(localVar) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(queryVar)
             }
         }
@@ -156,11 +156,11 @@ class VariableTest {
                 .resolve(queryVar, resolution).get()
                 .map(localVar, queryVar).get()
 
-        assert(localVar.match(resolution, knowns).get()) {
-            assert(subject.resolution(queryVar).value().get())
+        assertThat(localVar.match(resolution, knowns).get()) {
+            assertThat(subject.resolution(queryVar).value().get())
                     .toBe(resolution)
             subject.mapping(localVar) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(queryVar)
             }
         }
@@ -176,7 +176,7 @@ class VariableTest {
                 .resolve(queryVar, namedAtom("resolution")).get()
                 .map(localVar, queryVar).get()
 
-        assert(localVar.match(namedAtom("other resolution"), knowns))
+        assertThat(localVar.match(namedAtom("other resolution"), knowns))
                 .toBe(Optional.empty())
     }
 
@@ -190,11 +190,11 @@ class VariableTest {
         knowns = Knowns(queryVar1, queryVar2)
                 .map(localVar, queryVar1).get()
 
-        assert(localVar.match(queryVar2, knowns).get()) {
-            assert(subject.resolution(queryVar1).aliased())
+        assertThat(localVar.match(queryVar2, knowns).get()) {
+            assertThat(subject.resolution(queryVar1).aliased())
                     .toBe(Optional.of(queryVar2))
             subject.mapping(localVar) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(queryVar1)
             }
         }
@@ -212,13 +212,13 @@ class VariableTest {
                 .map(localVar, queryVar1).get()
         knowns = localVar.match(queryVar2, knowns).get()
 
-        assert(localVar.match(queryVar3, knowns).get()) {
-            assert(subject.resolution(queryVar1).aliased())
+        assertThat(localVar.match(queryVar3, knowns).get()) {
+            assertThat(subject.resolution(queryVar1).aliased())
                     .toBe(Optional.of(queryVar2))
-            assert(subject.resolution(queryVar2).aliased())
+            assertThat(subject.resolution(queryVar2).aliased())
                     .toBe(Optional.of(queryVar3))
             subject.mapping(localVar) { mapping, _ ->
-                assert(mapping)
+                assertThat(mapping)
                         .toBe(queryVar1)
             }
         }
@@ -233,7 +233,7 @@ class VariableTest {
         knowns = knowns.map(variable, value).get()
         resolver = resolver.withKnowns(knowns)
 
-        assert(variable.expand(resolver).get())
+        assertThat(variable.expand(resolver).get())
                 .toBe(Term.Expansion(value, knowns))
     }
 
@@ -246,8 +246,8 @@ class VariableTest {
 
             val variable = tempVariable("t")
 
-            assert(variable).toBe(variable)
-            assert(variable).notToBe(tempVariable("t"))
+            assertThat(variable).toBe(variable)
+            assertThat(variable).notToBe(tempVariable("t"))
         }
 
         @Test
@@ -256,7 +256,7 @@ class VariableTest {
             val prefix = "temp variable prefix"
             val variable = tempVariable(prefix)
 
-            assert(variable.name)
+            assertThat(variable.name)
                     .startsWith("$prefix ")
         }
 

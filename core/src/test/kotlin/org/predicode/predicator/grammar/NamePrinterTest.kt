@@ -1,7 +1,7 @@
 package org.predicode.predicator.grammar
 
 import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.grammar.CodePoints.BACKTICK
 import org.predicode.predicator.grammar.CodePoints.SINGLE_QUOTE
@@ -11,95 +11,95 @@ internal class NamePrinterTest {
 
     @Test
     fun `prints name`() {
-        assert(print("name"))
+        assertThat(print("name"))
                 .toBe("name")
     }
 
     @Test
     fun `removes leading whitespaces`() {
-        assert(print(" \t name"))
+        assertThat(print(" \t name"))
                 .toBe("name")
     }
 
     @Test
     fun `removes trailing whitespaces`() {
-        assert(print("name \t "))
+        assertThat(print("name \t "))
                 .toBe("name")
     }
 
     @Test
     fun `removes extra whitespaces`() {
-        assert(print("keyword \r name"))
+        assertThat(print("keyword \r name"))
                 .toBe("keyword name")
     }
 
     @Test
     fun `escapes symbols`() {
-        assert(print("keyword.name"))
+        assertThat(print("keyword.name"))
                 .toBe("keyword\\.name")
-        assert(print("keyword:name"))
+        assertThat(print("keyword:name"))
                 .toBe("keyword\\:name")
-        assert(print("keyword#name"))
+        assertThat(print("keyword#name"))
                 .toBe("keyword\\#name")
-        assert(print("keyword\$name"))
+        assertThat(print("keyword\$name"))
                 .toBe("keyword\\\$name")
-        assert(print("keyword_name"))
+        assertThat(print("keyword_name"))
                 .toBe("keyword\\_name")
-        assert(print("keyword`name"))
+        assertThat(print("keyword`name"))
                 .toBe("keyword\\`name")
-        assert(print("keyword'name"))
+        assertThat(print("keyword'name"))
                 .toBe("keyword\\'name")
-        assert(print("keyword\"name"))
+        assertThat(print("keyword\"name"))
                 .toBe("keyword\\\"name")
     }
 
     @Test
     fun `encodes symbols`() {
-        assert(print("keyword\u0008name"))
+        assertThat(print("keyword\u0008name"))
                 .toBe("keyword\\8\\name")
     }
 
     @Test
     fun `glues symbols of different classes`() {
-        assert(print("name - 3 x 3"))
+        assertThat(print("name - 3 x 3"))
                 .toBe("name-3 x 3")
-        assert(print("d & g"))
+        assertThat(print("d & g"))
                 .toBe("d&g")
-        assert(print("prefix: suffix"))
+        assertThat(print("prefix: suffix"))
                 .toBe("prefix\\:suffix")
     }
 
     @Test
     fun `does not glue numbers and letters`() {
-        assert(print("name 1"))
+        assertThat(print("name 1"))
                 .toBe("name 1")
-        assert(print("name2"))
+        assertThat(print("name2"))
                 .toBe("name2")
-        assert(print("name 3 d"))
+        assertThat(print("name 3 d"))
                 .toBe("name 3 d")
-        assert(print("name 3d"))
+        assertThat(print("name 3d"))
                 .toBe("name 3d")
     }
 
     @Test
     fun `opens quote`() {
-        assert(print("3d"))
+        assertThat(print("3d"))
                 .toBe("`3d")
-        assert(print("-data"))
+        assertThat(print("-data"))
                 .toBe("`-data")
     }
 
     @Test
     fun `quotes unconditionally`() {
-        assert(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE))
+        assertThat(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE))
                 .toBe("\'atom")
-        assert(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.ALWAYS_QUOTE))
+        assertThat(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.ALWAYS_QUOTE))
                 .toBe("\'atom\'")
     }
 
     @Test
     fun `closes quote`() {
-        assert(print("name+"))
+        assertThat(print("name+"))
                 .toBe("name+`")
     }
 

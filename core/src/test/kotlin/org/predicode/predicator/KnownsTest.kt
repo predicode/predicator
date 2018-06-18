@@ -3,7 +3,7 @@ package org.predicode.predicator
 import ch.tutteli.atrium.api.cc.en_UK.isSame
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.api.cc.en_UK.toThrow
-import ch.tutteli.atrium.assert
+import ch.tutteli.atrium.assertThat
 import ch.tutteli.atrium.expect
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -35,8 +35,8 @@ class KnownsTest {
             val knowns = Knowns(variable)
             val resolution = namedAtom("resolution")
 
-            assert(knowns.resolve(variable, resolution).get()) {
-                assert(subject.resolution(variable).value().get())
+            assertThat(knowns.resolve(variable, resolution).get()) {
+                assertThat(subject.resolution(variable).value().get())
                         .toBe(resolution)
             }
         }
@@ -48,10 +48,10 @@ class KnownsTest {
             val resolution = namedAtom("resolution")
             val knowns = Knowns(variable).resolve(variable, resolution).get()
 
-            assert(knowns.resolve(variable, resolution).get()) {
-                assert(subject.resolution(variable).value().get())
+            assertThat(knowns.resolve(variable, resolution).get()) {
+                assertThat(subject.resolution(variable).value().get())
                         .toBe(resolution)
-                assert(subject).isSame(knowns)
+                assertThat(subject).isSame(knowns)
             }
         }
 
@@ -62,7 +62,7 @@ class KnownsTest {
             val resolution = namedAtom("resolution")
             val knowns = Knowns(variable).resolve(variable, resolution).get()
 
-            assert(knowns.resolve(variable, namedAtom("other")))
+            assertThat(knowns.resolve(variable, namedAtom("other")))
                     .toBe(Optional.empty())
         }
 
@@ -79,13 +79,13 @@ class KnownsTest {
 
             knowns = localVar.match(queryVar2, knowns).get() // Alias queryVar1 -> queryVar2
 
-            assert(knowns.resolve(queryVar1, resolution).get()) {
-                assert(subject.resolution(queryVar1).aliased())
+            assertThat(knowns.resolve(queryVar1, resolution).get()) {
+                assertThat(subject.resolution(queryVar1).aliased())
                         .toBe(Optional.of(queryVar2))
-                assert(subject.resolution(queryVar2).value().get())
+                assertThat(subject.resolution(queryVar2).value().get())
                         .toBe(resolution)
                 subject.mapping(localVar) { mapping, _ ->
-                    assert(mapping)
+                    assertThat(mapping)
                             .toBe(queryVar1)
                 }
             }
