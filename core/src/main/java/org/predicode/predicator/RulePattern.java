@@ -105,7 +105,7 @@ public final class RulePattern implements Predicate {
     }
 
     /**
-     * Creates a rule resolved by {@link #resolve(PredicateResolver) rules application}.
+     * Creates a rule resolved by {@link #resolve(Resolver) rules application}.
      *
      * @param terms terms the rule search pattern consists of.
      */
@@ -115,7 +115,7 @@ public final class RulePattern implements Predicate {
     }
 
     /**
-     * Creates a rule resolved by {@link Phrase#resolve(PredicateResolver) phrase predicate} consisting of the given
+     * Creates a rule resolved by {@link Phrase#resolve(Resolver) phrase predicate} consisting of the given
      * terms.
      *
      * @param terms terms the phrase consists of.
@@ -127,7 +127,7 @@ public final class RulePattern implements Predicate {
 
     @Nonnull
     @Override
-    public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
+    public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
         return resolver.matchingRules(this, resolver.getKnowns())
                 .flatMap(match -> match.getRule().getPredicate().resolve(resolver.withKnowns(match.getKnowns())));
     }

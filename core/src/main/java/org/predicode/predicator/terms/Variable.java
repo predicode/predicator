@@ -2,7 +2,6 @@ package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.predicates.Predicate;
-import org.predicode.predicator.PredicateResolver;
 import org.predicode.predicator.RulePattern;
 import org.predicode.predicator.grammar.TermPrinter;
 
@@ -21,7 +20,7 @@ import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
  * Variable term.
  *
  * <p>Variable can be either local to rule, or global, i.e. present in original query. The former should be
- * {@link Knowns#map(Variable, MappedTerm) mapped} to their values prior to {@link Predicate#resolve(PredicateResolver)
+ * {@link Knowns#map(Variable, MappedTerm) mapped} to their values prior to {@link Predicate#resolve(Predicate.Resolver)
  * predicate resolution}. All of the latter should be specified when {@link Knowns#Knowns(Variable...)
  * constructing knowns} and are to be {@link Knowns#resolve(Variable, ResolvedTerm)}.</p>
  */
@@ -30,7 +29,7 @@ public abstract class Variable extends MappedTerm {
     private static Random tempNameRandom = new Random();
 
     /**
-     * Creates a named [variable][Variable].
+     * Creates a named {@link Variable variable}.
      *
      * <p>This variable matches another one only if the latter is constructed with this function with the same
      * {@code name}.</p>
@@ -43,7 +42,7 @@ public abstract class Variable extends MappedTerm {
     }
 
     /**
-     * Create temporary [variable][Variable].
+     * Create temporary {@link Variable variable}.
      *
      * <p>Temporary variables are compared by their identity. In contrast to {@link #namedVariable(String)
      * named variables} the name of temporary one is used only for its representation.</p>
@@ -112,7 +111,7 @@ public abstract class Variable extends MappedTerm {
 
     @Nonnull
     @Override
-    public Optional<Expansion> expand(@Nonnull PredicateResolver resolver) {
+    public Optional<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
         return resolver.getKnowns().mapping(this, Expansion::new);
     }
 

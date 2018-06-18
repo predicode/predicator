@@ -1,7 +1,7 @@
 package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
-import org.predicode.predicator.PredicateResolver;
+import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -73,7 +73,7 @@ public abstract class Keyword extends PlainTerm {
 
     @Nonnull
     @Override
-    public final Optional<Expansion> expand(@Nonnull PredicateResolver resolver) {
+    public final Optional<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
         return Optional.of(new Expansion(this, resolver.getKnowns()));
     }
 

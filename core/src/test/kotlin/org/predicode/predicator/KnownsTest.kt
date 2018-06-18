@@ -7,6 +7,8 @@ import ch.tutteli.atrium.assert
 import ch.tutteli.atrium.expect
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.terms.namedAtom
+import org.predicode.predicator.terms.namedVariable
 import java.util.*
 
 
@@ -20,7 +22,9 @@ class KnownsTest {
 
             val knowns = Knowns()
 
-            expect { knowns.resolve(namedVariable("unknown"), namedAtom("resolution")) }
+            expect { knowns.resolve(
+                    namedVariable("unknown"),
+                    namedAtom("resolution")) }
                     .toThrow<UnknownVariableException>()
         }
 

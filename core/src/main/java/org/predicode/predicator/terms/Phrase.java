@@ -3,7 +3,6 @@ package org.predicode.predicator.terms;
 import org.predicode.predicator.*;
 import org.predicode.predicator.grammar.TermPrinter;
 import org.predicode.predicator.predicates.Predicate;
-import org.predicode.predicator.PredicateResolver;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -54,7 +53,7 @@ public class Phrase extends CompoundTerm implements Predicate {
 
     @Nonnull
     @Override
-    public Optional<Expansion> expand(@Nonnull PredicateResolver resolver) {
+    public Optional<Expansion> expand(@Nonnull Resolver resolver) {
         return expansion(resolver)
                 .map(expansion -> {
 
@@ -70,12 +69,12 @@ public class Phrase extends CompoundTerm implements Predicate {
     /**
      * Resolves this phrase as predicate.
      *
-     * <p>{@link Term#expand(PredicateResolver) Expands} all of the phrase terms, then searches for corresponding
+     * <p>{@link Term#expand(Resolver) Expands} all of the phrase terms, then searches for corresponding
      * {@link Rule resolution rules} and applies them.</p>
      */
     @Override
     @Nonnull
-    public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
+    public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
         try {
             return expansion(resolver)
                     .map(PhraseExpansion::resolve)
@@ -117,7 +116,7 @@ public class Phrase extends CompoundTerm implements Predicate {
     }
 
     @Nonnull
-    private Optional<PhraseExpansion> expansion(@Nonnull PredicateResolver resolver) {
+    private Optional<PhraseExpansion> expansion(@Nonnull Resolver resolver) {
 
         final PhraseExpansion expansion = new PhraseExpansion(resolver, getTerms().size());
 
@@ -133,7 +132,7 @@ public class Phrase extends CompoundTerm implements Predicate {
     private static final class PhraseExpansion {
 
         @Nonnull
-        private PredicateResolver resolver;
+        private Predicate.Resolver resolver;
 
         @Nonnull
         private Predicate predicate = Predicate.TRUE;
@@ -143,7 +142,7 @@ public class Phrase extends CompoundTerm implements Predicate {
 
         private int index = 0;
 
-        PhraseExpansion(@Nonnull PredicateResolver resolver, int size) {
+        PhraseExpansion(@Nonnull Predicate.Resolver resolver, int size) {
             this.resolver = resolver;
             this.terms = new PlainTerm[size];
         }

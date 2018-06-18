@@ -2,7 +2,6 @@ package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.predicates.Predicate;
-import org.predicode.predicator.PredicateResolver;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -39,7 +38,7 @@ public abstract class Term {
      * @return this term expansion, or empty optional if this term can not be expanded.
      */
     @Nonnull
-    public abstract Optional<Expansion> expand(@Nonnull PredicateResolver resolver);
+    public abstract Optional<Expansion> expand(@Nonnull Predicate.Resolver resolver);
 
     /**
      * Prints this term representation with the given term printer.

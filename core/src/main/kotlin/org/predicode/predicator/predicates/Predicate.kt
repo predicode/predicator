@@ -1,6 +1,5 @@
-package org.predicode.predicator
+package org.predicode.predicator.predicates
 
-import org.predicode.predicator.predicates.Predicate
 import reactor.core.publisher.Flux
 
 
@@ -16,11 +15,12 @@ inline operator fun Predicate.not() = negate()
 /**
  * Resolves this predicate.
  *
- * Resolution may involve term [expansion][Term.expand] and applying other resolution rules.
+ * Resolution may involve term [expansion][org.predicode.predicator.terms.Term.expand] and applying other resolution
+ * rules.
  *
  * @param resolver predicate resolver to resolve against.
  *
  * @return a [flux][Flux] emitting resolved mappings, if any.
  */
 @Suppress("NOTHING_TO_INLINE")
-inline operator fun Predicate.invoke(resolver: PredicateResolver) = resolve(resolver)
+inline operator fun Predicate.invoke(resolver: Predicate.Resolver) = resolve(resolver)

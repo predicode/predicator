@@ -4,14 +4,16 @@ import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.predicode.predicator.*
+import org.predicode.predicator.Knowns
+import org.predicode.predicator.predicates.Predicate
+import org.predicode.predicator.predicates.TestPredicateResolver
 import java.util.*
 
 
 class KeywordTest {
 
     lateinit var knowns: Knowns
-    lateinit var resolver: PredicateResolver
+    lateinit var resolver: Predicate.Resolver
 
     @BeforeEach
     fun `create knowns`() {

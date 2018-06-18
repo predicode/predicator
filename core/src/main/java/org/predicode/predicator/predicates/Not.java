@@ -1,7 +1,6 @@
 package org.predicode.predicator.predicates;
 
 import org.predicode.predicator.Knowns;
-import org.predicode.predicator.PredicateResolver;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -18,7 +17,7 @@ final class Not implements Predicate {
 
     @Nonnull
     @Override
-    public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
+    public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
         return this.negated.resolve(resolver)
                 .next()
                 .map(knowns -> true)

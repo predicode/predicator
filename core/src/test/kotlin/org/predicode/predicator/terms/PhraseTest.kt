@@ -33,7 +33,7 @@ class PhraseTest {
         fun `expands terms`() {
 
             val knowns = Knowns()
-            val resolver = object : PredicateResolver {
+            val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
                 override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> =
                         selectOneOf()(pattern, knowns)
@@ -52,7 +52,7 @@ class PhraseTest {
         fun `updates predicate`() {
 
             val knowns = Knowns()
-            val resolver = object : PredicateResolver {
+            val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
                 override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> =
                         selectOneOf()(pattern, knowns)
@@ -65,7 +65,7 @@ class PhraseTest {
             every { term.expand(any()) }.returns(Optional.of(Term.Expansion(term, knowns, updatePredicate)))
             every { updatePredicate.apply(any()) }.returns(predicate)
             every { predicate.and(any()) }.returns(and)
-            every { and(any()) }.returns(knowns.toMono().toFlux())
+            every { and.resolve(any()) }.returns(knowns.toMono().toFlux())
 
             StepVerifier.create(Phrase(term).resolve(resolver))
                     .consumeNextWith {}
@@ -74,7 +74,7 @@ class PhraseTest {
             verify {
                 updatePredicate.apply(any())
                 predicate.and(any())
-                and(any())
+                and.resolve(any())
             }
         }
 

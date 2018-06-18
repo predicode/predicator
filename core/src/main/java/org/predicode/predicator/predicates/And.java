@@ -1,7 +1,6 @@
 package org.predicode.predicator.predicates;
 
 import org.predicode.predicator.Knowns;
-import org.predicode.predicator.PredicateResolver;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -22,7 +21,7 @@ final class And implements Predicate {
 
     @Nonnull
     @Override
-    public Flux<Knowns> resolve(@Nonnull PredicateResolver resolver) {
+    public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
         return this.first.resolve(resolver)
                 .flatMap(resolved -> this.second.resolve(resolver.withKnowns(resolved)));
     }

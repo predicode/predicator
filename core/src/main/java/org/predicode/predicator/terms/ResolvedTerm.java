@@ -1,6 +1,6 @@
 package org.predicode.predicator.terms;
 
-import org.predicode.predicator.PredicateResolver;
+import org.predicode.predicator.predicates.Predicate;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -25,7 +25,7 @@ public abstract class ResolvedTerm extends MappedTerm {
 
     @Nonnull
     @Override
-    public final Optional<Expansion> expand(@Nonnull PredicateResolver resolver) {
+    public final Optional<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
         return Optional.of(new Expansion(this, resolver.getKnowns()));
     }
 

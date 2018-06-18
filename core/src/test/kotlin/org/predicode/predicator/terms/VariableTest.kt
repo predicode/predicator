@@ -10,13 +10,16 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.predicode.predicator.*
+import org.predicode.predicator.Knowns
+import org.predicode.predicator.UnknownVariableException
+import org.predicode.predicator.predicates.Predicate
+import org.predicode.predicator.predicates.TestPredicateResolver
 import java.util.*
 
 class VariableTest {
 
     private lateinit var knowns: Knowns
-    private lateinit var resolver: PredicateResolver
+    private lateinit var resolver: Predicate.Resolver
 
     @BeforeEach
     fun `create knowns`() {
@@ -26,7 +29,10 @@ class VariableTest {
 
     @Test
     fun `does not match keyword`() {
-        assert(namedVariable("variable").match(namedKeyword("keyword"), knowns))
+        assert(
+                namedVariable("variable").match(
+                        namedKeyword(
+                                "keyword"), knowns))
                 .toBe(Optional.empty())
     }
 
