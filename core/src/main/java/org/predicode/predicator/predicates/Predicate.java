@@ -93,7 +93,7 @@ public interface Predicate {
         Knowns getKnowns();
 
         /**
-         * Constructs new predicate resolver based on this one with the given variable mappings an resolutions.
+         * Constructs new predicate resolver based on this one with the given variable mappings and resolutions.
          *
          * @param knowns new variable mappings an resolutions.
          */
