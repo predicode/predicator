@@ -203,7 +203,7 @@ public final class Rule {
         /**
          * Attempts to match the given predicate call against this pattern.
          *
-         * <p>This method is called for the {@link Rule#getCondition() rule condition} with target call as argument.
+         * <p>This method is called for the {@link Rule#getCondition() rule condition} with target call as argument.</p>
          *
          * @param call a predicate call to match.
          * @param knowns known resolutions.
