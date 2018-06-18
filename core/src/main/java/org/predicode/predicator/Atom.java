@@ -55,7 +55,7 @@ public abstract class Atom extends ResolvedTerm {
 
     @Nonnull
     @Override
-    public final <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p) {
+    public final <P, R> R accept(@Nonnull ResolvedTerm.Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitAtom(this, p);
     }
 

@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * Arbitrary value term.
  *
- * <p>Values match only [matching][valueMatch] values and can be mapped to variables.</p>
+ * <p>Values match only {@link #valueMatch(Value, Knowns) matching values} and can be mapped to variables.</p>
  */
 public abstract class Value extends ResolvedTerm {
 
@@ -64,7 +64,7 @@ public abstract class Value extends ResolvedTerm {
 
     @Nonnull
     @Override
-    public final <P, R> R accept(@Nonnull Visitor<P, R> visitor, @Nonnull P p) {
+    public final <P, R> R accept(@Nonnull ResolvedTerm.Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitValue(this, p);
     }
 

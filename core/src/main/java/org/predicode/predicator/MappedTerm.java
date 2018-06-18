@@ -20,30 +20,21 @@ public abstract class MappedTerm extends PlainTerm {
         return accept((Visitor<P, R>) visitor, p);
     }
 
-    public interface Visitor<P, R> {
-
-        @Nonnull
-        default R visitAtom(@Nonnull Atom atom, @Nonnull P p) {
-            return visitResolved(atom, p);
-        }
+    public interface Visitor<P, R> extends ResolvedTerm.Visitor<P, R> {
 
         @Nonnull
         default R visitVariable(@Nonnull Variable variable, @Nonnull P p) {
             return visitMapped(variable, p);
         }
 
-        @Nonnull
-        default R visitValue(@Nonnull Value value, @Nonnull P p) {
-            return visitResolved(value, p);
-        }
-
-        @Nonnull
-        R visitMapped(@Nonnull MappedTerm term, @Nonnull P p);
-
+        @Override
         @Nonnull
         default R visitResolved(@Nonnull ResolvedTerm term, @Nonnull P p) {
             return visitMapped(term, p);
         }
+
+        @Nonnull
+        R visitMapped(@Nonnull MappedTerm term, @Nonnull P p);
 
     }
 
