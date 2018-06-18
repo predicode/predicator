@@ -129,15 +129,32 @@ public abstract class Variable extends MappedTerm {
      * @return rule pattern matching expression definition.
      */
     @Nonnull
-    public RulePattern definitionOf(@Nonnull PlainTerm ...terms) {
+    public final RulePattern definitionOf(@Nonnull PlainTerm ...terms) {
+        return new RulePattern(definitionTerms(terms));
+    }
 
-        final ArrayList<PlainTerm> termList = new ArrayList<>(terms.length);
+    /**
+     * Builds pattern call corresponding to definition of some expression.
+     *
+     * @param terms expression terms.
+     *
+     * @return rule pattern matching expression definition.
+     */
+    @Nonnull
+    public final Predicate.Call definitionCall(@Nonnull PlainTerm ...terms) {
+        return Predicate.call(definitionTerms(terms));
+    }
+
+    @Nonnull
+    private ArrayList<PlainTerm> definitionTerms(@Nonnull PlainTerm[] terms) {
+
+        final ArrayList<PlainTerm> termList = new ArrayList<>(2 + terms.length);
 
         termList.add(this);
         termList.add(DEFINITION_KEYWORD);
         termList.addAll(Arrays.asList(terms));
 
-        return new RulePattern(termList);
+        return termList;
     }
 
     @Override

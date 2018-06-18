@@ -1,10 +1,7 @@
 package org.predicode.predicator;
 
 import org.predicode.predicator.predicates.Predicate;
-import org.predicode.predicator.terms.Phrase;
 import org.predicode.predicator.terms.PlainTerm;
-import org.predicode.predicator.terms.Term;
-import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -18,7 +15,7 @@ import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 /**
  * Resolution rule match pattern.
  */
-public final class RulePattern implements Predicate {
+public final class RulePattern {
 
     @Nonnull
     private final List<? extends PlainTerm> terms;
@@ -37,7 +34,7 @@ public final class RulePattern implements Predicate {
      *
      * @param terms array of terms this pattern consists of.
      */
-    public RulePattern(@Nonnull PlainTerm ...terms) {
+    public RulePattern(@Nonnull PlainTerm... terms) {
         this(Arrays.asList(terms));
     }
 
@@ -52,38 +49,45 @@ public final class RulePattern implements Predicate {
     }
 
     /**
-     * Attempts to match against another pattern.
+     * Attempts to match the given predicate call against this pattern.
      *
-     * This method is called for the {@link Rule#getCondition() rule condition} with query pattern as argument.
+     * <p>This method is called for the {@link Rule#getCondition() rule condition} with target call as argument.
      *
-     * @param pattern a pattern to match against.
+     * @param call a predicate call to match.
      * @param knowns known resolutions.
      *
-     * @return updated knowns if the pattern matches, or empty optional otherwise.
+     * @return updated knowns if the call matches this pattern, or empty optional otherwise.
      */
     @Nonnull
-    public Optional<Knowns> match(@Nonnull RulePattern pattern, @Nonnull Knowns knowns) {
-        if (pattern.getTerms().size() != getTerms().size()) {
+    public Optional<Knowns> match(@Nonnull Predicate.Call call, @Nonnull Knowns knowns) {
+        if (!call.isFinite()) {
+            // TODO implement infinite predicate call matching against open rule patterns.
             return Optional.empty();
         }
-
-        @Nonnull
-        Knowns result = knowns.startMatching();
-        int index = 0;
-
-        for (PlainTerm term : getTerms()) {
-
-            final Optional<Knowns> match = term.match(pattern.getTerms().get(index), result);
-
-            if (!match.isPresent()) {
-                return Optional.empty();
-            }
-
-            result = match.get();
-            ++index;
+        if (getTerms().size() != call.length()) {
+            return Optional.empty(); // Wrong call length
         }
 
-        return Optional.of(result);
+        return call.prefix(getTerms().size()).flatMap(prefix -> {
+
+            @Nonnull
+            Knowns result = knowns.startMatching();
+            int index = 0;
+
+            for (PlainTerm term : getTerms()) {
+
+                final Optional<Knowns> match = term.match(prefix.getTerms().get(index), result);
+
+                if (!match.isPresent()) {
+                    return Optional.empty();
+                }
+
+                result = match.get();
+                ++index;
+            }
+
+            return Optional.of(result);
+        });
     }
 
     /**
@@ -102,34 +106,6 @@ public final class RulePattern implements Predicate {
     @Nonnull
     public final Rule fact() {
         return rule(Predicate.TRUE);
-    }
-
-    /**
-     * Creates a rule resolved by {@link #resolve(Resolver) rules application}.
-     *
-     * @param terms terms the rule search pattern consists of.
-     */
-    @Nonnull
-    public final Rule resolveBy(@Nonnull PlainTerm ...terms) {
-        return rule(new RulePattern(terms));
-    }
-
-    /**
-     * Creates a rule resolved by {@link Phrase#resolve(Resolver) phrase predicate} consisting of the given
-     * terms.
-     *
-     * @param terms terms the phrase consists of.
-     */
-    @Nonnull
-    public final Rule resolveBy(@Nonnull Term...terms) {
-        return rule(new Phrase(terms));
-    }
-
-    @Nonnull
-    @Override
-    public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
-        return resolver.matchingRules(this, resolver.getKnowns())
-                .flatMap(match -> match.getRule().getPredicate().resolve(resolver.withKnowns(match.getKnowns())));
     }
 
     @Override

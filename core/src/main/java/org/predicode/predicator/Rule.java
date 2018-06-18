@@ -54,16 +54,16 @@ public final class Rule {
     }
 
     /**
-     * Attempts to match this rule {@link #getCondition() condition} against the given {@code pattern}.
+     * Attempts to match this given predicate {@code call} against this rule {@link #getCondition() condition}.
      *
-     * @param pattern rule pattern to match against.
+     * @param call predicate call to match.
      * @param knowns known resolutions.
      *
      * @return rule match, or empty optional if the rule condition does not match.
      */
-    public final Optional<Match> match(@Nonnull RulePattern pattern, @Nonnull Knowns knowns) {
+    public final Optional<Match> match(@Nonnull Predicate.Call call, @Nonnull Knowns knowns) {
         return getCondition()
-                .match(pattern, knowns)
+                .match(call, knowns)
                 .map(updatedKnowns -> new Rule.Match(this, updatedKnowns));
     }
 
@@ -80,15 +80,15 @@ public final class Rule {
     public interface Selector {
 
         /**
-         * Selects matching predicate resolution rules.
+         * Selects resolution rules given predicate call matches.
          *
-         * @param pattern rule search pattern.
+         * @param call predicate call.
          * @param knowns known resolutions.
          *
          * @return a {@link Flux} of {@link Match rule matches}.
          */
         @Nonnull
-        Flux<Match> matchingRules(@Nonnull RulePattern pattern, @Nonnull Knowns knowns);
+        Flux<Match> matchingRules(@Nonnull Predicate.Call call, @Nonnull Knowns knowns);
 
     }
 
@@ -118,7 +118,7 @@ public final class Rule {
 
         /**
          * Variable mappings and resolutions returned from {@link Rule#getCondition() rule condition}
-         * {@link RulePattern#match(RulePattern, Knowns) match}.
+         * {@link RulePattern#match(Predicate.Call, Knowns) match}.
          */
         @Nonnull
         public final Knowns getKnowns() {

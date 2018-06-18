@@ -7,8 +7,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.predicode.predicator.*
+import org.predicode.predicator.Knowns
+import org.predicode.predicator.Rule
+import org.predicode.predicator.invoke
 import org.predicode.predicator.predicates.Predicate
+import org.predicode.predicator.selectOneOf
 import reactor.core.publisher.Flux
 import reactor.core.publisher.toFlux
 import reactor.core.publisher.toMono
@@ -35,8 +38,8 @@ class PhraseTest {
             val knowns = Knowns()
             val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
-                override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> =
-                        selectOneOf()(pattern, knowns)
+                override fun matchingRules(call: Predicate.Call, knowns: Knowns): Flux<Rule.Match> =
+                        selectOneOf()(call, knowns)
             }
             val term = mockk<PlainTerm>()
 
@@ -54,8 +57,8 @@ class PhraseTest {
             val knowns = Knowns()
             val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
-                override fun matchingRules(pattern: RulePattern, knowns: Knowns): Flux<Rule.Match> =
-                        selectOneOf()(pattern, knowns)
+                override fun matchingRules(call: Predicate.Call, knowns: Knowns): Flux<Rule.Match> =
+                        selectOneOf()(call, knowns)
             }
             val term = mockk<PlainTerm>("term")
             val predicate = mockk<Predicate>("predicate")

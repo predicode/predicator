@@ -166,7 +166,7 @@ public interface Predicate {
      * prefix rules only.</p>
      */
     @Immutable
-    abstract class Call {
+    abstract class Call implements Predicate {
 
         Call() {
         }
@@ -211,6 +211,16 @@ public interface Predicate {
          */
         public final boolean isFinite() {
             return toFinite() != null;
+        }
+
+        @Nonnull
+        @Override
+        public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
+            return resolver.matchingRules(this, resolver.getKnowns())
+                    .flatMap(match -> match.getRule()
+                            .getPredicate()
+                            .resolve(
+                                    resolver.withKnowns(match.getKnowns())));
         }
 
         @Nullable
@@ -312,8 +322,8 @@ public interface Predicate {
 
                 @Nonnull
                 @Override
-                public Flux<Rule.Match> matchingRules(@Nonnull RulePattern pattern, @Nonnull Knowns knowns) {
-                    return Resolver.this.matchingRules(pattern, knowns);
+                public Flux<Rule.Match> matchingRules(@Nonnull Call call, @Nonnull Knowns knowns) {
+                    return Resolver.this.matchingRules(call, knowns);
                 }
 
             };

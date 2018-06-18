@@ -168,13 +168,13 @@ public class Phrase extends CompoundTerm implements Predicate {
         Predicate definition(@Nonnull Variable variable) {
             return this.resolver.getKnowns().declareLocal(variable, (local, knowns) -> {
                 this.resolver = this.resolver.withKnowns(knowns);
-                return this.predicate.and(local.definitionOf(this.terms));
+                return this.predicate.and(local.definitionCall(this.terms));
             });
         }
 
         @Nonnull
         private Predicate predicate() {
-            return this.predicate.and(new RulePattern(this.terms));
+            return this.predicate.and(Predicate.call(Arrays.asList(this.terms)));
         }
 
     }

@@ -1,11 +1,12 @@
 package org.predicode.predicator
 
+import org.predicode.predicator.predicates.Predicate
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toFlux
 import java.util.*
 
 @Suppress("NOTHING_TO_INLINE")
-inline operator fun Rule.Selector.invoke(pattern: RulePattern, knowns: Knowns) = matchingRules(pattern, knowns)
+inline operator fun Rule.Selector.invoke(call: Predicate.Call, knowns: Knowns) = matchingRules(call, knowns)
 
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun Rule.Match.component1(): Rule = rule
@@ -22,9 +23,9 @@ fun selectOneOf(vararg rules: Rule): Rule.Selector = MatchingRuleSelector(rules)
 
 private class MatchingRuleSelector(private val rules: Array<out Rule>) : Rule.Selector {
 
-    override fun matchingRules(pattern: RulePattern, knowns: Knowns) =
+    override fun matchingRules(call: Predicate.Call, knowns: Knowns) =
             rules.toFlux().flatMap { rule ->
-                Mono.justOrEmpty(rule.match(pattern, knowns))
+                Mono.justOrEmpty(rule.match(call, knowns))
             }
 
     override fun equals(other: Any?): Boolean {
