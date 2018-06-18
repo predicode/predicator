@@ -1,5 +1,6 @@
-package org.predicode.predicator;
+package org.predicode.predicator.terms;
 
+import org.predicode.predicator.*;
 import org.predicode.predicator.grammar.TermPrinter;
 import reactor.core.publisher.Flux;
 
@@ -9,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.predicode.predicator.Variable.tempVariable;
+import static org.predicode.predicator.terms.Variable.tempVariable;
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 
 

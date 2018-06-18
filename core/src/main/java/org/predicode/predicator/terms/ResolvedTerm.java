@@ -1,4 +1,6 @@
-package org.predicode.predicator;
+package org.predicode.predicator.terms;
+
+import org.predicode.predicator.PredicateResolver;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

@@ -1,5 +1,10 @@
 package org.predicode.predicator
 
+import org.predicode.predicator.terms.Atom
+import org.predicode.predicator.terms.Keyword
+import org.predicode.predicator.terms.Value
+import org.predicode.predicator.terms.Variable
+
 /**
  * Creates a [keyword][Keyword] with the given name.
  *

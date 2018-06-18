@@ -1,9 +1,10 @@
-package org.predicode.predicator
+package org.predicode.predicator.terms
 
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.*
 import java.util.*
 
 

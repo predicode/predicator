@@ -1,4 +1,4 @@
-package org.predicode.predicator;
+package org.predicode.predicator.terms;
 
 import javax.annotation.Nonnull;
 

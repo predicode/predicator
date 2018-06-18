@@ -1,5 +1,9 @@
-package org.predicode.predicator;
+package org.predicode.predicator.terms;
 
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.Predicate;
+import org.predicode.predicator.PredicateResolver;
+import org.predicode.predicator.RulePattern;
 import org.predicode.predicator.grammar.TermPrinter;
 
 import javax.annotation.Nonnull;
@@ -8,7 +12,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.predicode.predicator.Keyword.DEFINITION_KEYWORD;
+import static org.predicode.predicator.terms.Keyword.DEFINITION_KEYWORD;
 import static org.predicode.predicator.grammar.CodePoints.UNDERSCORE;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 

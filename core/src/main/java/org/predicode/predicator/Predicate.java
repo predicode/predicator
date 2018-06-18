@@ -1,6 +1,7 @@
 package org.predicode.predicator;
 
 import org.predicode.predicator.annotations.SamWithReceiver;
+import org.predicode.predicator.terms.Term;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;

@@ -1,6 +1,6 @@
 package org.predicode.predicator.grammar;
 
-import org.predicode.predicator.Term;
+import org.predicode.predicator.terms.Term;
 
 import javax.annotation.Nonnull;
 

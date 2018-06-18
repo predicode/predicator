@@ -1,5 +1,7 @@
 package org.predicode.predicator;
 
+import org.predicode.predicator.terms.Variable;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.NoSuchElementException;

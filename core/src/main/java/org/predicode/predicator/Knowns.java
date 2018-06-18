@@ -1,5 +1,10 @@
 package org.predicode.predicator;
 
+import org.predicode.predicator.terms.MappedTerm;
+import org.predicode.predicator.terms.PlainTerm;
+import org.predicode.predicator.terms.ResolvedTerm;
+import org.predicode.predicator.terms.Variable;
+
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +62,7 @@ public class Knowns {
      *
      * @param variables query variables.
      */
-    Knowns(@Nonnull Variable ...variables) {
+    public Knowns(@Nonnull Variable ...variables) {
         this.mappings = emptyMap();
         this.resolutions = Stream.of(variables)
                 .collect(Collectors.toMap(UnaryOperator.identity(), v -> UNRESOLVED));

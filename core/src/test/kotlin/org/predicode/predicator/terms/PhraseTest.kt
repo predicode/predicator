@@ -1,4 +1,4 @@
-package org.predicode.predicator
+package org.predicode.predicator.terms
 
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assert
@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.toFlux
 import reactor.core.publisher.toMono
@@ -18,7 +19,9 @@ class PhraseTest {
 
     @Test
     fun `string representation`() {
-        assert(Phrase(namedKeyword("keyword"), namedVariable("variable")).toString())
+        assert(Phrase(
+                namedKeyword("keyword"),
+                namedVariable("variable")).toString())
                 .toBe("keyword _variable")
     }
 

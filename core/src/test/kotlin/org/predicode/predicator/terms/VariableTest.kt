@@ -1,4 +1,4 @@
-package org.predicode.predicator
+package org.predicode.predicator.terms
 
 import ch.tutteli.atrium.api.cc.en_UK.notToBe
 import ch.tutteli.atrium.api.cc.en_UK.startsWith
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.*
 import java.util.*
 
 class VariableTest {

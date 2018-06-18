@@ -1,4 +1,8 @@
-package org.predicode.predicator;
+package org.predicode.predicator.terms;
+
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.Rule;
+import org.predicode.predicator.RulePattern;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

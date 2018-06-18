@@ -1,5 +1,8 @@
 package org.predicode.predicator;
 
+import org.predicode.predicator.terms.Phrase;
+import org.predicode.predicator.terms.PlainTerm;
+import org.predicode.predicator.terms.Term;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
@@ -117,7 +120,7 @@ public final class RulePattern implements Predicate {
      * @param terms terms the phrase consists of.
      */
     @Nonnull
-    public final Rule resolveBy(@Nonnull Term ...terms) {
+    public final Rule resolveBy(@Nonnull Term...terms) {
         return rule(new Phrase(terms));
     }
 

@@ -1,5 +1,8 @@
 package org.predicode.predicator.grammar;
 
+import org.predicode.predicator.terms.Keyword;
+import org.predicode.predicator.terms.Variable;
+
 import javax.annotation.Nonnull;
 
 
@@ -14,7 +17,7 @@ public enum QuotingStyle {
      * <p>The opening or closing quote would is added if the name starts with or ends with not allowed symbol
      * respectively.</p>
      *
-     * <p>This is used when printing {@link org.predicode.predicator.Keyword keyword} name inside a phrase.</p>
+     * <p>This is used when printing {@link Keyword keyword} name inside a phrase.</p>
      */
     AUTO_QUOTE,
 
@@ -24,7 +27,7 @@ public enum QuotingStyle {
      * <p>The closing quote would is added too if the name ends with not allowed symbol.</p>
      *
      * <p>This is used when printing {@link }org.predicode.predicator.Atom atom}
-     * or {@link org.predicode.predicator.Variable variable} name inside a phrase.</p>
+     * or {@link Variable variable} name inside a phrase.</p>
      */
     OPEN_QUOTE,
 
