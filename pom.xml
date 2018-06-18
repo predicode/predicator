@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.predicode</groupId>
+  <artifactId>predicator</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <description>Predicate calculus library</description>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/predicode/predicator</url>
+    <connection>scm:git:https://github.com/predicode/predicator.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:predicode/predicator.git</developerConnection>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/predicode/predicator</url>
+  </issueManagement>
+
+  <organization>
+    <name>predicode</name>
+    <url>http://github.com/predicode</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>surol</id>
+      <name>Ruslan Lopatin</name>
+      <email>ruslan.lopatin@gmail.com</email>
+      <url>https://github.com/surol</url>
+    </developer>
+  </developers>
+
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <kotlin.version>1.2.50</kotlin.version>
+    <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
+    <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+
+    <jsr305.version>3.0.2</jsr305.version>
+    <reactor-bom.version>Bismuth-SR10</reactor-bom.version>
+    <junit-jupiter.version>5.2.0</junit-jupiter.version>
+    <atrium.version>0.6.0</atrium.version>
+    <mockk.version>1.8.3</mockk.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>springio-plugins-release</id>
+      <name>Spring Plugins</name>
+      <url>http://repo.spring.io/plugins-release/</url>
+    </repository>
+  </repositories>
+
+  <modules>
+    <module>core</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Project modules -->
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>predicator-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- Nullability annotations -->
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${jsr305.version}</version>
+        <optional>true</optional>
+      </dependency>
+
+      <!-- Kotlin -->
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib-jdk8</artifactId>
+        <version>${kotlin.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+          </exclusion>
+        </exclusions>
+        <optional>true</optional>
+      </dependency>
+
+      <!-- Reactive -->
+      <dependency>
+        <groupId>io.projectreactor</groupId>
+        <artifactId>reactor-bom</artifactId>
+        <version>${reactor-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Testing -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit-jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit-jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>ch.tutteli</groupId>
+        <artifactId>atrium-cc-en_UK-robstoll</artifactId>
+        <version>${atrium.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-reflect</artifactId>
+        <version>${kotlin.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.mockk</groupId>
+        <artifactId>mockk</artifactId>
+        <version>${mockk.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Compile Kotlin sources -->
+        <plugin>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-maven-plugin</artifactId>
+          <version>${kotlin.version}</version>
+          <configuration>
+            <args>
+              <arg>-Xjsr305=strict</arg> <!-- Enable strict mode for JSR-305 annotations -->
+              <arg>-Xjvm-default=enable</arg> <!-- Enable @JvmDefault annotation support -->
+            </args>
+            <compilerPlugins>
+              <plugin>sam-with-receiver</plugin>
+            </compilerPlugins>
+            <pluginOptions>
+              <option>sam-with-receiver:annotation=org.predicode.predicator.annotations.SamWithReceiver</option>
+            </pluginOptions>
+          </configuration>
+          <executions>
+            <execution>
+              <id>compile</id>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <configuration>
+                <sourceDirs>
+                  <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                  <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                </sourceDirs>
+              </configuration>
+            </execution>
+            <execution>
+              <id>test-compile</id>
+              <goals>
+                <goal>test-compile</goal>
+              </goals>
+              <configuration>
+                <sourceDirs>
+                  <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                  <sourceDir>${project.basedir}/src/test/java</sourceDir>
+                </sourceDirs>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.jetbrains.kotlin</groupId>
+              <artifactId>kotlin-maven-sam-with-receiver</artifactId>
+              <version>${kotlin.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <!-- Do not compile Java sources -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <executions>
+            <!-- Replacing default-compile as it is treated specially by maven -->
+            <execution>
+              <id>default-compile</id>
+              <phase>none</phase>
+            </execution>
+            <!-- Replacing default-testCompile as it is treated specially by maven -->
+            <execution>
+              <id>default-testCompile</id>
+              <phase>none</phase>
+            </execution>
+            <execution>
+              <id>java-compile</id>
+              <phase>compile</phase>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>java-test-compile</id>
+              <phase>test-compile</phase>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Test execution -->
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.21.0</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.junit.platform</groupId>
+              <artifactId>junit-platform-surefire-provider</artifactId>
+              <version>1.2.0</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>

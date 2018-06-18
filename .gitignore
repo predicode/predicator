@@ -1,0 +1,10 @@
+# Build target directories
+/target
+/*/target
+
+# Logs
+*.log
+
+# IntelliJ IDEA files
+*.iml
+.idea
