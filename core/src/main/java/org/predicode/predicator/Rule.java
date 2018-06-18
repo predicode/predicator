@@ -50,19 +50,13 @@ public final class Rule {
     @Nonnull
     private final Predicate predicate;
 
-    /**
-     * Constructs predicate resolution rule.
-     *
-     * @param condition a condition this rule matches.
-     * @param predicate predicate this rule resolves to when matched.
-     */
-    public Rule(@Nonnull Pattern condition, @Nonnull Predicate predicate) {
+    private Rule(@Nonnull Pattern condition, @Nonnull Predicate predicate) {
         this.condition = condition;
         this.predicate = predicate;
     }
 
     /**
-     * A condition this rule matches.
+     * A condition of this rule application.
      *
      * @return {@code condition} passed to constructor.
      */
@@ -220,9 +214,11 @@ public final class Rule {
         public abstract Optional<Knowns> match(@Nonnull Predicate.Call call, @Nonnull Knowns knowns);
 
         /**
-         * Creates a resolution rule with this pattern as its {@link Rule#getCondition() condition}.
+         * Creates predicate resolution rule with this pattern as its {@link Rule#getCondition() condition}.
          *
          * @param predicate predicate the constructed rule resolves to if this pattern matches.
+         *
+         * @return new predicate resolution rule.
          */
         @Nonnull
         public final Rule rule(@Nonnull Predicate predicate) {
@@ -231,6 +227,8 @@ public final class Rule {
 
         /**
          * Creates a fact with this pattern as its {@link Rule#getCondition() condition}.
+         *
+         * @return new fact.
          */
         @Nonnull
         public final Rule fact() {
