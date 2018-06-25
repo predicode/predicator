@@ -77,4 +77,5 @@ public class Placeholder extends PlainTerm {
     public void print(@Nonnull TermPrinter out) {
         out.print(UNDERSCORE);
     }
+
 }

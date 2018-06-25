@@ -3,11 +3,20 @@ package org.predicode.predicator.grammar;
 import javax.annotation.Nonnull;
 
 import static org.predicode.predicator.grammar.CodePoints.*;
+import static org.predicode.predicator.grammar.QuotedName.ATOM_NAME;
+import static org.predicode.predicator.grammar.QuotedName.UNQUOTED_NAME;
+import static org.predicode.predicator.grammar.QuotedName.VARIABLE_NAME;
 
 
 interface PartPrinter {
 
     PartPrinter INITIAL_PART_PRINTER = new PartPrinter() {
+
+        @Nonnull
+        @Override
+        public QuotedName getQuoted() {
+            return UNQUOTED_NAME;
+        }
 
         @Nonnull
         @Override
@@ -23,25 +32,12 @@ interface PartPrinter {
 
     };
 
-    PartPrinter UNQUOTED_PART_PRINTER = new PartPrinter() {
+    PartPrinter UNQUOTED_PART_PRINTER = new UnquotedPartPrinter(UNQUOTED_NAME);
+    QuotedPartPrinter ATOM_PART_PRINTER = new QuotedPartPrinter(ATOM_NAME);
+    QuotedPartPrinter VARIABLE_PART_PRINTER = new QuotedPartPrinter(VARIABLE_NAME);
 
-        @Nonnull
-        @Override
-        public PartPrinter separate(@Nonnull TermPrinter printer) {
-            printer.print(SPACE);
-            return this;
-        }
-
-        @Nonnull
-        @Override
-        public PartPrinter endQuoted(@Nonnull TermPrinter printer) {
-            return this;
-        }
-
-    };
-
-    QuotedPartPrinter ATOM_PART_PRINTER = new QuotedPartPrinter(SINGLE_QUOTE);
-    QuotedPartPrinter VARIABLE_PART_PRINTER = new QuotedPartPrinter(UNDERSCORE);
+    @Nonnull
+    QuotedName getQuoted();
 
     @Nonnull
     PartPrinter separate(@Nonnull TermPrinter printer);
@@ -50,9 +46,16 @@ interface PartPrinter {
     PartPrinter endQuoted(@Nonnull TermPrinter printer);
 
     @Nonnull
-    default PartPrinter keyword(@Nonnull TermPrinter printer, @Nonnull CharSequence name) {
+    default PartPrinter keyword(
+            @Nonnull TermPrinter printer,
+            @Nonnull CharSequence name,
+            @Nonnull QuotedName quoted) {
 
-        final PartPrinter out = endQuoted(printer).separate(printer);
+        PartPrinter out = endQuoted(printer);
+
+        if (!getQuoted().isPrefix() && !quoted.isInfix()) {
+            out = out.separate(printer);
+        }
 
         QuotingStyle.AUTO_QUOTE.printName(name, BACKTICK, printer);
 
@@ -61,14 +64,21 @@ interface PartPrinter {
 
     final class QuotedPartPrinter implements PartPrinter {
 
-        private final int quote;
+        @Nonnull
+        private final UnquotedPartPrinter unquoted;
 
-        private QuotedPartPrinter(int quote) {
-            this.quote = quote;
+        private QuotedPartPrinter(@Nonnull QuotedName quoted) {
+            this.unquoted = new UnquotedPartPrinter(quoted);
+        }
+
+        @Override
+        @Nonnull
+        public QuotedName getQuoted() {
+            return this.unquoted.getQuoted();
         }
 
         final int getQuote() {
-            return this.quote;
+            return getQuoted().getQuote();
         }
 
         @Nonnull
@@ -85,16 +95,50 @@ interface PartPrinter {
         @Nonnull
         @Override
         public PartPrinter endQuoted(@Nonnull TermPrinter printer) {
-            return UNQUOTED_PART_PRINTER;
+            return this.unquoted;
         }
 
         @Nonnull
         @Override
-        public PartPrinter keyword(@Nonnull TermPrinter printer, @Nonnull CharSequence name) {
-            printer.print(this.quote);
-            return PartPrinter.super.keyword(printer, name).endQuoted(printer);
+        public PartPrinter keyword(
+                @Nonnull TermPrinter printer,
+                @Nonnull CharSequence name,
+                @Nonnull QuotedName quoted) {
+            printer.print(getQuote());
+            return PartPrinter.super.keyword(printer, name, quoted).endQuoted(printer);
         }
 
     }
+
+    final class UnquotedPartPrinter implements PartPrinter {
+
+        @Nonnull
+        private final QuotedName quoted;
+
+        UnquotedPartPrinter(@Nonnull QuotedName quoted) {
+            this.quoted = quoted;
+        }
+
+        @Override
+        @Nonnull
+        public QuotedName getQuoted() {
+            return this.quoted;
+        }
+
+        @Nonnull
+        @Override
+        public PartPrinter separate(@Nonnull TermPrinter printer) {
+            printer.print(SPACE);
+            return this;
+        }
+
+        @Nonnull
+        @Override
+        public PartPrinter endQuoted(@Nonnull TermPrinter printer) {
+            return this;
+        }
+
+    }
+
 
 }

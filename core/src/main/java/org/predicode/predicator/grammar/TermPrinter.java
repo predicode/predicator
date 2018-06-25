@@ -66,8 +66,8 @@ public class TermPrinter implements CodePointPrinter {
         }
     }
 
-    public void keyword(@Nonnull CharSequence name) {
-        this.partPrinter = this.partPrinter.keyword(this, name);
+    public void keyword(@Nonnull CharSequence name, @Nonnull QuotedName quoted) {
+        this.partPrinter = this.partPrinter.keyword(this, name, quoted);
     }
 
     public void atom(@Nonnull CharSequence name) {
@@ -79,12 +79,14 @@ public class TermPrinter implements CodePointPrinter {
     }
 
     private void quotedName(@Nonnull CharSequence name, @Nonnull PartPrinter.QuotedPartPrinter quoted) {
-        this.partPrinter.separate(this);
+        if (!this.partPrinter.getQuoted().isPrefix()) {
+            this.partPrinter.separate(this);
+        }
 
         final boolean quoteClosed = OPEN_QUOTE.printName(name, quoted.getQuote(), this.print);
 
         if (quoteClosed) {
-            this.partPrinter = UNQUOTED_PART_PRINTER;
+            this.partPrinter = quoted.endQuoted(this);
         } else {
             this.partPrinter = quoted;
         }

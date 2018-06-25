@@ -1,6 +1,7 @@
 package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
+import org.predicode.predicator.grammar.QuotedName;
 import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
 
@@ -8,6 +9,9 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import static org.predicode.predicator.grammar.CodePoints.BACKTICK;
+import static org.predicode.predicator.grammar.QuotedName.INFIX_OPERATOR_NAME;
+import static org.predicode.predicator.grammar.QuotedName.KEYWORD_NAME;
+import static org.predicode.predicator.grammar.QuotedName.PREFIX_OPERATOR_NAME;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 
 
@@ -34,23 +38,67 @@ public abstract class Keyword extends PlainTerm {
      *
      * <p>This keyword matches only keywords constructed with this function with the same {@code name}</p>.
      *
-     * @param name keyword name.
+     * @param name keyword name or sign.
+     *
+     * @return new {@link Kind#KEYWORD ordinal} keyword.
      */
     @Nonnull
     public static Keyword namedKeyword(@Nonnull String name) {
-        return new NamedKeyword(name);
+        return new NamedKeyword(name, Kind.KEYWORD);
+    }
+
+    /**
+     * Creates a prefix operator with the given name.
+     *
+     * <p>This keyword matches only keywords constructed with this function with the same {@code name}</p>.
+     *
+     * @param name keyword name or sign.
+     *
+     * @return new {@link Kind#PREFIX_OPERATOR prefix operator}.
+     */
+    @Nonnull
+    public static Keyword prefixOperator(@Nonnull String name) {
+        return new NamedKeyword(name, Kind.PREFIX_OPERATOR);
+    }
+
+    /**
+     * Creates an infix operator with the given name.
+     *
+     * <p>This keyword matches only keywords constructed with this function with the same {@code name}</p>.
+     *
+     * @param name keyword name or sign.
+     *
+     * @return new {@link Kind#INFIX_OPERATOR infix operator}.
+     */
+    @Nonnull
+    public static Keyword infixOperator(@Nonnull String name) {
+        return new NamedKeyword(name, Kind.INFIX_OPERATOR);
     }
 
     @Nonnull
     private final String name;
 
+    @Nonnull
+    private final Kind kind;
+
     /**
      * Constructs keyword.
      *
-     * @param name keyword name.
+     * @param name keyword name or sign.
      */
     public Keyword(@Nonnull String name) {
+        this(name, Kind.KEYWORD);
+    }
+
+    /**
+     * Constructs keyword or operator.
+     *
+     * @param name keyword name or sign.
+     * @param kind keyword kind.
+     */
+    public Keyword(@Nonnull String name, @Nonnull Kind kind) {
         this.name = name;
+        this.kind = kind;
     }
 
     /**
@@ -63,6 +111,16 @@ public abstract class Keyword extends PlainTerm {
     @Nonnull
     public final String getName() {
         return this.name;
+    }
+
+    /**
+     * A kind of this keyword.
+     *
+     * @return keyword {@code kind} passed to the constructor.
+     */
+    @Nonnull
+    public Kind getKind() {
+        return this.kind;
     }
 
     @Nonnull
@@ -85,7 +143,7 @@ public abstract class Keyword extends PlainTerm {
 
     @Override
     public void print(@Nonnull TermPrinter out) {
-        out.keyword(getName());
+        out.keyword(getName(), getKind().getQuoted());
     }
 
     @Override
@@ -93,10 +151,55 @@ public abstract class Keyword extends PlainTerm {
         return ALWAYS_QUOTE.printName(getName(), BACKTICK);
     }
 
+    /**
+     * A kind of keyword.
+     *
+     * <p>This is used to distinguish keywords from operators.</p>
+     */
+    public enum Kind {
+
+        /**
+         * Ordinary keyword.
+         *
+         * <p>Such keywords are always separated from sibling terms with spaces.</p>
+         */
+        KEYWORD(KEYWORD_NAME),
+
+        /**
+         * Prefix operator.
+         *
+         * <p>An operator which name (or sign) is not separated from the next term.</p>
+         */
+        PREFIX_OPERATOR(PREFIX_OPERATOR_NAME),
+
+        /**
+         * Infix operator.
+         *
+         * <p>An operator whish name (or sign) is not separated from previous term.</p>
+         */
+        INFIX_OPERATOR(INFIX_OPERATOR_NAME);
+
+        @Nonnull
+        private final QuotedName quoted;
+
+        Kind(@Nonnull QuotedName quoted) {
+            this.quoted = quoted;
+        }
+
+        /**
+         * A quoted name used for the keyword of this kind.
+         */
+        @Nonnull
+        public final QuotedName getQuoted() {
+            return this.quoted;
+        }
+
+    }
+
     private static final class NamedKeyword extends Keyword {
 
-        NamedKeyword(@Nonnull String name) {
-            super(name);
+        NamedKeyword(@Nonnull String name, @Nonnull Kind kind) {
+            super(name, kind);
         }
 
         @Override
@@ -108,14 +211,20 @@ public abstract class Keyword extends PlainTerm {
                 return false;
             }
 
-            final NamedKeyword that = (NamedKeyword) o;
+            final NamedKeyword operator = (NamedKeyword) o;
 
-            return getName().equals(that.getName());
+            if (!getName().equals(operator.getName())) {
+                return false;
+            }
+
+            return getKind() == operator.getKind();
         }
 
         @Override
         public int hashCode() {
-            return getName().hashCode();
+            int result = getName().hashCode();
+            result = 31 * result + getKind().hashCode();
+            return result;
         }
 
     }
