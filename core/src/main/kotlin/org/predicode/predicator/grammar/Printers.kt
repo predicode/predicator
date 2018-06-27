@@ -18,13 +18,13 @@ fun printTerms(vararg terms: Term): String =
 
 fun printName(
         name: CharSequence,
-        quote: CodePoint,
+        quoted: QuotedName,
         quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE,
         print: (CodePoint) -> Unit) =
-        quoting.printName(name, quote, print)
+        quoting.printName(name, quoted, print)
 
 fun printName(
         name: CharSequence,
-        quote: CodePoint,
+        quoted: QuotedName,
         quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE) =
-        quoting.printName(name, quote)
+        quoting.printName(name, quoted)

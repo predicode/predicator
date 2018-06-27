@@ -2,16 +2,13 @@ package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.grammar.QuotedName;
-import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
+import org.predicode.predicator.predicates.Predicate;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.predicode.predicator.grammar.CodePoints.BACKTICK;
-import static org.predicode.predicator.grammar.QuotedName.INFIX_OPERATOR_NAME;
-import static org.predicode.predicator.grammar.QuotedName.KEYWORD_NAME;
-import static org.predicode.predicator.grammar.QuotedName.PREFIX_OPERATOR_NAME;
+import static org.predicode.predicator.grammar.QuotedName.*;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 
 
@@ -143,12 +140,12 @@ public abstract class Keyword extends PlainTerm {
 
     @Override
     public void print(@Nonnull TermPrinter out) {
-        out.keyword(getName(), getKind().getQuoted());
+        out.keyword(getName(), getKind());
     }
 
     @Override
     public String toString() {
-        return ALWAYS_QUOTE.printName(getName(), BACKTICK);
+        return ALWAYS_QUOTE.printName(getName(), getKind().getQuoted());
     }
 
     /**

@@ -68,8 +68,8 @@ interface TermSep {
 
     };
 
-    QuotedSep VARIABLE_SEP = new QuotedSep(VARIABLE_NAME.getQuote());
-    QuotedSep ATOM_SEP = new QuotedSep(ATOM_NAME.getQuote());
+    QuotedSep VARIABLE_SEP = new QuotedSep(VARIABLE_NAME);
+    QuotedSep ATOM_SEP = new QuotedSep(ATOM_NAME);
 
     TermSep KEYWORD_SEP = new TermSep() {
 
@@ -174,14 +174,16 @@ interface TermSep {
 
     final class QuotedSep implements TermSep {
 
-        private final int quote;
+        @Nonnull
+        private final QuotedName quoted;
 
-        QuotedSep(int quote) {
-            this.quote = quote;
+        QuotedSep(@Nonnull QuotedName quoted) {
+            this.quoted = quoted;
         }
 
-        public int getQuote() {
-            return this.quote;
+        @Nonnull
+        public QuotedName getQuoted() {
+            return this.quoted;
         }
 
         @Override
@@ -201,14 +203,14 @@ interface TermSep {
 
         @Override
         public void keyword(@Nonnull CodePointPrinter out) {
-            out.print(this.quote);
+            out.print(this.quoted.getQuote());
             out.print(SPACE);
         }
 
         @Nonnull
         @Override
         public QuotingStyle infix(@Nonnull CodePointPrinter out) {
-            out.print(this.quote);
+            out.print(this.quoted.getQuote());
             return AUTO_QUOTE;
         }
 

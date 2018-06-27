@@ -52,17 +52,17 @@ public enum QuotingStyle {
 
     public boolean printName(
             @Nonnull CharSequence name,
-            int quote,
+            @Nonnull QuotedName quoted,
             @Nonnull CodePointPrinter print) {
-        return new NamePrinter(name, quote, this, print).print();
+        return new NamePrinter(name, quoted, this, print).print();
     }
 
     @Nonnull
-    public String printName(@Nonnull CharSequence name, int quote) {
+    public String printName(@Nonnull CharSequence name, @Nonnull QuotedName quoted) {
 
         final StringBuilder out = new StringBuilder();
 
-        printName(name, quote, out::appendCodePoint);
+        printName(name, quoted, out::appendCodePoint);
 
         return out.toString();
     }

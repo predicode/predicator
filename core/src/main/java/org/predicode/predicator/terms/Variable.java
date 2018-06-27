@@ -2,8 +2,8 @@ package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
-import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
+import org.predicode.predicator.predicates.Predicate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.predicode.predicator.terms.Keyword.DEFINITION_KEYWORD;
-import static org.predicode.predicator.grammar.CodePoints.UNDERSCORE;
+import static org.predicode.predicator.grammar.QuotedName.VARIABLE_NAME;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
+import static org.predicode.predicator.terms.Keyword.DEFINITION_KEYWORD;
 
 
 /**
@@ -164,7 +164,7 @@ public abstract class Variable extends MappedTerm {
 
     @Override
     public String toString() {
-        return ALWAYS_QUOTE.printName(getName(), UNDERSCORE);
+        return ALWAYS_QUOTE.printName(getName(), VARIABLE_NAME);
     }
 
     private static final class NamedVariable extends Variable {

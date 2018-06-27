@@ -8,7 +8,6 @@ import static org.predicode.predicator.grammar.CodePoints.*;
  */
 public enum QuotedName {
 
-    UNQUOTED_NAME(SPACE),
     ATOM_NAME(SINGLE_QUOTE),
     VARIABLE_NAME(UNDERSCORE),
     KEYWORD_NAME(BACKTICK),
@@ -21,12 +20,12 @@ public enum QuotedName {
         this.quote = quote;
     }
 
-    public final boolean isQuoted() {
-        return this != UNQUOTED_NAME;
-    }
-
     public final int getQuote() {
         return this.quote;
+    }
+
+    public final boolean isKeyword() {
+        return ordinal() >= KEYWORD_NAME.ordinal();
     }
 
     public final boolean isPrefix() {

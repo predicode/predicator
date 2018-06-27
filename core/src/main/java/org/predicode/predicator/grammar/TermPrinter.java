@@ -1,5 +1,6 @@
 package org.predicode.predicator.grammar;
 
+import org.predicode.predicator.terms.Keyword;
 import org.predicode.predicator.terms.Term;
 
 import javax.annotation.Nonnull;
@@ -62,8 +63,9 @@ public class TermPrinter {
         }
     }
 
-    public void keyword(@Nonnull CharSequence name, @Nonnull QuotedName quoted) {
+    public void keyword(@Nonnull CharSequence name, @Nonnull Keyword.Kind kind) {
 
+        final QuotedName quoted = kind.getQuoted();
         final QuotingStyle quoting;
 
         if (quoted.isInfix()) {
@@ -73,7 +75,7 @@ public class TermPrinter {
             quoting = AUTO_QUOTE;
         }
 
-        quoting.printName(name, BACKTICK, this.out);
+        quoting.printName(name, quoted, this.out);
         this.sep = quoted.isPrefix() ? PREFIX_SEP : KEYWORD_SEP;
     }
 
@@ -88,7 +90,7 @@ public class TermPrinter {
     private void quotedName(@Nonnull CharSequence name, @Nonnull TermSep.QuotedSep sep) {
         this.sep.quoted(this.out);
 
-        final boolean quoteClosed = OPEN_QUOTE.printName(name, sep.getQuote(), this.out);
+        final boolean quoteClosed = OPEN_QUOTE.printName(name, sep.getQuoted(), this.out);
 
         this.sep = quoteClosed ? SPACE_SEP : sep;
     }

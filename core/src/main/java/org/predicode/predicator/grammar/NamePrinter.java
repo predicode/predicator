@@ -8,7 +8,8 @@ class NamePrinter implements CodePointPrinter {
     @Nonnull
     private final CharSequence name;
 
-    private final int quote;
+    @Nonnull
+    private final QuotedName quoted;
 
     @Nonnull
     private final QuotingStyle quoting;
@@ -21,17 +22,18 @@ class NamePrinter implements CodePointPrinter {
 
     NamePrinter(
             @Nonnull CharSequence name,
-            int quote,
+            @Nonnull QuotedName quoted,
             @Nonnull QuotingStyle quoting,
             @Nonnull CodePointPrinter print) {
         this.name = name;
-        this.quote = quote;
+        this.quoted = quoted;
         this.quoting = quoting;
         this.print = print;
     }
 
-    final int getQuote() {
-        return this.quote;
+    @Nonnull
+    final QuotedName getQuoted() {
+        return this.quoted;
     }
 
     @Nonnull
@@ -65,9 +67,9 @@ class NamePrinter implements CodePointPrinter {
                 },
                 (f, s) -> s);
 
-        if (this.quoting.closeQuote() || !this.lastNonSeparating.nameEnd()) {
+        if (this.quoting.closeQuote() || !this.lastNonSeparating.nameEnd(this.quoted)) {
             // Close quote if the name does not end with allowed symbol
-            print(this.quote);
+            print(this.quoted.getQuote());
             return true;
         }
 
