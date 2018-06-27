@@ -6,7 +6,7 @@ import org.predicode.predicator.grammar.TermPrinter;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.predicode.predicator.grammar.CodePoints.SINGLE_QUOTE;
+import static org.predicode.predicator.grammar.QuotedName.ATOM_NAME;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 
 
@@ -104,7 +104,7 @@ public abstract class Atom extends ResolvedTerm {
 
     @Override
     public String toString() {
-        return ALWAYS_QUOTE.printName(getName(), SINGLE_QUOTE);
+        return ALWAYS_QUOTE.printName(getName(), ATOM_NAME);
     }
 
     private static final class NamedAtom extends Atom {

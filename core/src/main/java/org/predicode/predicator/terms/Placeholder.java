@@ -1,13 +1,11 @@
 package org.predicode.predicator.terms;
 
 import org.predicode.predicator.Knowns;
-import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
+import org.predicode.predicator.predicates.Predicate;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
-
-import static org.predicode.predicator.grammar.CodePoints.UNDERSCORE;
 
 
 /**
@@ -75,6 +73,7 @@ public class Placeholder extends PlainTerm {
 
     @Override
     public void print(@Nonnull TermPrinter out) {
-        out.print(UNDERSCORE);
+        out.special("_");
     }
+
 }

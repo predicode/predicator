@@ -1,15 +1,17 @@
 package org.predicode.predicator.grammar;
 
+import org.predicode.predicator.terms.Keyword;
 import org.predicode.predicator.terms.Term;
 
 import javax.annotation.Nonnull;
 
 import static org.predicode.predicator.grammar.CodePoints.*;
-import static org.predicode.predicator.grammar.PartPrinter.*;
+import static org.predicode.predicator.grammar.QuotingStyle.AUTO_QUOTE;
 import static org.predicode.predicator.grammar.QuotingStyle.OPEN_QUOTE;
+import static org.predicode.predicator.grammar.TermSep.*;
 
 
-public class TermPrinter implements CodePointPrinter {
+public class TermPrinter {
 
     public static void printTerms(@Nonnull Iterable<? extends Term> terms, @Nonnull CodePointPrinter print) {
         new TermPrinter(print).print(terms);
@@ -40,18 +42,13 @@ public class TermPrinter implements CodePointPrinter {
     }
 
     @Nonnull
-    private final CodePointPrinter print;
+    private final CodePointPrinter out;
 
     @Nonnull
-    private PartPrinter partPrinter = INITIAL_PART_PRINTER;
+    private TermSep sep = NO_SEP;
 
-    private TermPrinter(@Nonnull CodePointPrinter print) {
-        this.print = print;
-    }
-
-    @Override
-    public void print(int codePoint) {
-        this.print.print(codePoint);
+    private TermPrinter(@Nonnull CodePointPrinter out) {
+        this.out = out;
     }
 
     public void print(@Nonnull Iterable<? extends Term> terms) {
@@ -66,46 +63,61 @@ public class TermPrinter implements CodePointPrinter {
         }
     }
 
-    public void keyword(@Nonnull CharSequence name) {
-        this.partPrinter = this.partPrinter.keyword(this, name);
+    public void keyword(@Nonnull CharSequence name, @Nonnull Keyword.Kind kind) {
+
+        final QuotedName quoted = kind.getQuoted();
+        final QuotingStyle quoting;
+
+        if (quoted.isInfix()) {
+            quoting = this.sep.infix(this.out);
+        } else {
+            this.sep.keyword(this.out);
+            quoting = AUTO_QUOTE;
+        }
+
+        quoting.printName(name, quoted, this.out);
+        this.sep = quoted.isPrefix() ? PREFIX_SEP : KEYWORD_SEP;
     }
 
     public void atom(@Nonnull CharSequence name) {
-        quotedName(name, ATOM_PART_PRINTER);
+        quotedName(name, ATOM_SEP);
     }
 
     public void variable(@Nonnull CharSequence name) {
-        quotedName(name, VARIABLE_PART_PRINTER);
+        quotedName(name, VARIABLE_SEP);
     }
 
-    private void quotedName(@Nonnull CharSequence name, @Nonnull PartPrinter.QuotedPartPrinter quoted) {
-        this.partPrinter.separate(this);
+    private void quotedName(@Nonnull CharSequence name, @Nonnull TermSep.QuotedSep sep) {
+        this.sep.quoted(this.out);
 
-        final boolean quoteClosed = OPEN_QUOTE.printName(name, quoted.getQuote(), this.print);
+        final boolean quoteClosed = OPEN_QUOTE.printName(name, sep.getQuoted(), this.out);
 
-        if (quoteClosed) {
-            this.partPrinter = UNQUOTED_PART_PRINTER;
-        } else {
-            this.partPrinter = quoted;
-        }
+        this.sep = quoteClosed ? SPACE_SEP : sep;
     }
 
     public void value(@Nonnull CharSequence value) {
-        this.partPrinter = this.partPrinter.separate(this);
-        print(OPENING_BRACE);
-        print(value);
-        print(CLOSING_BRACE);
+        this.sep.value(this.out);
+        this.out.print(OPENING_BRACE);
+        this.out.print(value);
+        this.out.print(CLOSING_BRACE);
+        this.sep = SPACE_SEP;
+    }
+
+    public void special(@Nonnull CharSequence value) {
+        this.sep.special(this.out);
+        this.out.print(value);
+        this.sep = SPECIAL_SEP;
     }
 
     public void startCompound() {
-        this.partPrinter.endQuoted(this).separate(this);
-        print(OPENING_PARENT);
-        this.partPrinter = INITIAL_PART_PRINTER;
+        this.sep.value(this.out);
+        this.out.print(OPENING_PARENT);
+        this.sep = NO_SEP;
     }
 
     public void endCompound() {
-        this.partPrinter = this.partPrinter.endQuoted(this);
-        print(CLOSING_PARENT);
+        this.out.print(CLOSING_PARENT);
+        this.sep = SPACE_SEP;
     }
 
 }

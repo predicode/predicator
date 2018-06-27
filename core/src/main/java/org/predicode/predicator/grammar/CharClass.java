@@ -27,7 +27,16 @@ public enum CharClass {
             return super.nameGluesWith(next) && next != LETTER_CHAR_CLASS;
         }
     },
-    OPERATOR_CHAR_CLASS(NAME_BODY_PRINTER, false, false),
+    OPERATOR_CHAR_CLASS(NAME_BODY_PRINTER, false, false) {
+        @Override
+        public boolean nameStart(@Nonnull QuotedName quoted) {
+            return quoted.isKeyword();
+        }
+        @Override
+        public boolean nameEnd(@Nonnull QuotedName quoted) {
+            return quoted.isKeyword();
+        }
+    },
     CONNECTOR_CHAR_CLASS(NAME_BODY_PRINTER, false, false),
     SEPARATOR_CHAR_CLASS(NAME_SEPARATOR_PRINTER, true, true) {
         @Override
@@ -98,11 +107,11 @@ public enum CharClass {
         this.nameEnd = nameEnd;
     }
 
-    public final boolean nameStart() {
+    public boolean nameStart(@Nonnull QuotedName quoted) {
         return this.nameStart;
     }
 
-    public final boolean nameEnd() {
+    public boolean nameEnd(@Nonnull QuotedName quoted) {
         return this.nameEnd;
     }
 

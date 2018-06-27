@@ -53,9 +53,9 @@ abstract class NameCharPrinter {
             if (next.separating()) {
                 return current; // Skip leading separators
             }
-            if (out.getQuoting().openQuote() || !next.nameStart()) {
+            if (out.getQuoting().openQuote() || !next.nameStart(out.getQuoted())) {
                 // Open quote if the name does not start with allowed start symbol
-                out.print(out.getQuote());
+                out.print(out.getQuoted().getQuote());
             }
             return next;
         }

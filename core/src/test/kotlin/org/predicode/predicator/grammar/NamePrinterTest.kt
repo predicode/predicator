@@ -3,8 +3,8 @@ package org.predicode.predicator.grammar
 import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assertThat
 import org.junit.jupiter.api.Test
-import org.predicode.predicator.grammar.CodePoints.BACKTICK
-import org.predicode.predicator.grammar.CodePoints.SINGLE_QUOTE
+import org.predicode.predicator.grammar.QuotedName.ATOM_NAME
+import org.predicode.predicator.grammar.QuotedName.KEYWORD_NAME
 
 
 internal class NamePrinterTest {
@@ -86,27 +86,33 @@ internal class NamePrinterTest {
         assertThat(print("3d"))
                 .toBe("`3d")
         assertThat(print("-data"))
-                .toBe("`-data")
+                .toBe("-data")
+        assertThat(print("3d", quoted = ATOM_NAME))
+                .toBe("'3d")
+        assertThat(print("-data", quoted = ATOM_NAME))
+                .toBe("'-data")
     }
 
     @Test
     fun `quotes unconditionally`() {
-        assertThat(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.OPEN_QUOTE))
+        assertThat(print("atom", quoted = ATOM_NAME, quoting = QuotingStyle.OPEN_QUOTE))
                 .toBe("\'atom")
-        assertThat(print("atom", quote = SINGLE_QUOTE, quoting = QuotingStyle.ALWAYS_QUOTE))
+        assertThat(print("atom", quoted = ATOM_NAME, quoting = QuotingStyle.ALWAYS_QUOTE))
                 .toBe("\'atom\'")
     }
 
     @Test
     fun `closes quote`() {
+        assertThat(print("name+", quoted = ATOM_NAME))
+                .toBe("name+'")
         assertThat(print("name+"))
-                .toBe("name+`")
+                .toBe("name+")
     }
 
     private fun print(
             name: String,
-            quote: CodePoint = BACKTICK,
+            quoted: QuotedName = KEYWORD_NAME,
             quoting: QuotingStyle = QuotingStyle.AUTO_QUOTE): String =
-            printName(name, quote = quote, quoting = quoting)
+            printName(name, quoted = quoted, quoting = quoting)
 
 }
