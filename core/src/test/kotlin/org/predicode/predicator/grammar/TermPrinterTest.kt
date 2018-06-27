@@ -4,6 +4,8 @@ import ch.tutteli.atrium.api.cc.en_UK.toBe
 import ch.tutteli.atrium.assertThat
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.terms.*
+import org.predicode.predicator.terms.Keyword.infixOperator
+import org.predicode.predicator.terms.Keyword.prefixOperator
 
 
 internal class TermPrinterTest {
@@ -38,15 +40,28 @@ internal class TermPrinterTest {
 
     @Test
     fun `closes quotes before keywords`() {
-        ch.tutteli.atrium.assertThat(printTerms(
+        assertThat(printTerms(
                 namedAtom("atom"),
                 namedKeyword("keyword")))
                 .toBe("'atom' keyword")
-        ch.tutteli.atrium.assertThat(
+        assertThat(
                 printTerms(
                         namedVariable("variable"),
                         namedKeyword("keyword")))
                 .toBe("_variable_ keyword")
+    }
+
+    @Test
+    fun `appends infix operators`() {
+        assertThat(printTerms(
+                namedAtom("atom"),
+                infixOperator("op")))
+                .toBe("'atom'op")
+        assertThat(
+                printTerms(
+                        namedVariable("variable"),
+                        infixOperator("op")))
+                .toBe("_variable_op")
     }
 
     @Test
@@ -55,6 +70,114 @@ internal class TermPrinterTest {
                 namedKeyword("first"),
                 namedKeyword("second")))
                 .toBe("first second")
+    }
+
+    @Test
+    fun `separates keyword and operator`() {
+        assertThat(printTerms(
+                namedKeyword("first"),
+                infixOperator("second")))
+                .toBe("first`second")
+        assertThat(printTerms(
+                prefixOperator("first"),
+                namedKeyword("second")))
+                .toBe("first`second")
+        assertThat(printTerms(
+                prefixOperator("first"),
+                infixOperator("second")))
+                .toBe("first`second")
+    }
+
+    @Test
+    fun `after placeholder`() {
+        assertThat(printTerms(
+                Placeholder.placeholder(),
+                namedAtom("second")))
+                .toBe("_ 'second")
+        assertThat(printTerms(
+                Placeholder.placeholder(),
+                namedVariable("second")))
+                .toBe("_ _second")
+        assertThat(printTerms(
+                Placeholder.placeholder(),
+                rawValue("second")))
+                .toBe("_ [second]")
+        assertThat(printTerms(
+                Placeholder.placeholder(),
+                Placeholder.placeholder()))
+                .toBe("_ _")
+        assertThat(printTerms(
+                Placeholder.placeholder(),
+                Phrase(namedKeyword("second"))))
+                .toBe("_ (second)")
+    }
+
+    @Test
+    fun `before placeholder`() {
+        assertThat(printTerms(
+                namedAtom("first"),
+                Placeholder.placeholder()))
+                .toBe("'first _")
+        assertThat(printTerms(
+                namedVariable("first"),
+                Placeholder.placeholder()))
+                .toBe("_first _")
+        assertThat(printTerms(
+                rawValue("first"),
+                Placeholder.placeholder()))
+                .toBe("[first] _")
+        assertThat(printTerms(
+                Phrase(namedKeyword("first")),
+                Placeholder.placeholder()))
+                .toBe("(first) _")
+    }
+
+    @Test
+    fun `prefix operator`() {
+        assertThat(printTerms(
+                prefixOperator("first"),
+                namedAtom("second")))
+                .toBe("first'second")
+        assertThat(printTerms(
+                prefixOperator("first"),
+                namedVariable("second")))
+                .toBe("first_second")
+        assertThat(printTerms(
+                prefixOperator("first"),
+                rawValue("second")))
+                .toBe("first[second]")
+        assertThat(printTerms(
+                prefixOperator("first"),
+                Placeholder.placeholder()))
+                .toBe("first`_")
+        assertThat(printTerms(
+                prefixOperator("first"),
+                Phrase(namedKeyword("second"))))
+                .toBe("first(second)")
+    }
+
+    @Test
+    fun `infix operator`() {
+        assertThat(printTerms(
+                namedAtom("first"),
+                infixOperator("second")))
+                .toBe("'first'second")
+        assertThat(printTerms(
+                namedVariable("first"),
+                infixOperator("second")))
+                .toBe("_first_second")
+        assertThat(printTerms(
+                rawValue("first"),
+                infixOperator("second")))
+                .toBe("[first]second")
+        assertThat(printTerms(
+                Placeholder.placeholder(),
+                infixOperator("second")))
+                .toBe("_`second")
+        assertThat(printTerms(
+                Phrase(namedKeyword("first")),
+                infixOperator("second")))
+                .toBe("(first)second")
     }
 
     @Test
