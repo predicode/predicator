@@ -4,25 +4,23 @@ import org.predicode.predicator.terms.PlainTerm;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 
 
 final class QualifiedEmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
-    private final Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers;
+    private final Qualifiers qualifiers;
 
-    QualifiedEmptyCall(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+    QualifiedEmptyCall(@Nonnull Qualifiers qualifiers) {
         this.qualifiers = qualifiers;
     }
 
     @Override
     @Nonnull
-    public final Map<? extends Qualifier.Signature, ? extends Qualifier> getQualifiers() {
+    public Qualifiers getQualifiers() {
         return this.qualifiers;
     }
 
@@ -64,20 +62,7 @@ final class QualifiedEmptyCall extends Predicate.Call implements FiniteCall {
 
     @Override
     public String toString() {
-
-        final StringBuilder out = new StringBuilder();
-        int i = 0;
-
-        for (final Qualifier qualifier : this.qualifiers.values()) {
-            if (i != 0) {
-                out.append(' ');
-            }
-            out.append('@');
-            ++i;
-            printTerms(qualifier.getTerms(), out);
-        }
-
-        return out.toString();
+        return this.qualifiers.toString();
     }
 
     @Nonnull
@@ -97,8 +82,7 @@ final class QualifiedEmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
     @Override
-    public QualifiedEmptyCall updateQualifiers(
-            @Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+    public QualifiedEmptyCall updateQualifiers(@Nonnull Qualifiers qualifiers) {
         return new QualifiedEmptyCall(qualifiers);
     }
 

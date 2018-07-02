@@ -6,7 +6,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
@@ -67,7 +66,7 @@ final class InfinitePrefix extends Predicate.Prefix {
 
     @Nonnull
     @Override
-    Prefix updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+    InfinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
         return new InfinitePrefix(getTerms(), getSuffix().updateQualifiers(qualifiers));
     }
 

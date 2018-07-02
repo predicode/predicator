@@ -4,7 +4,6 @@ import org.predicode.predicator.terms.PlainTerm;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Map;
 
 
 interface FiniteCall {
@@ -16,6 +15,6 @@ interface FiniteCall {
     List<? extends PlainTerm> allTerms();
 
     @Nonnull
-    FiniteCall updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers);
+    FiniteCall updateQualifiers(@Nonnull Qualifiers qualifiers);
 
 }

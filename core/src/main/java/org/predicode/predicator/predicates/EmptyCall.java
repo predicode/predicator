@@ -4,11 +4,10 @@ import org.predicode.predicator.terms.PlainTerm;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
+import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
 
 
 final class EmptyCall extends Predicate.Call implements FiniteCall {
@@ -20,8 +19,8 @@ final class EmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
     @Override
-    public final Map<? extends Qualifier.Signature, ? extends Qualifier> getQualifiers() {
-        return emptyMap();
+    public Qualifiers getQualifiers() {
+        return noQualifiers();
     }
 
     @Override
@@ -73,7 +72,7 @@ final class EmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
     @Override
-    public FinitePrefix updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+    public FinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
         return new FinitePrefix(emptyList(), new QualifiedEmptyCall(qualifiers));
     }
 

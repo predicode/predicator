@@ -2,12 +2,10 @@ package org.predicode.predicator.predicates;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-import static java.util.Collections.emptyMap;
-import static org.predicode.predicator.grammar.TermPrinter.printTerms;
+import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
 
 
 final class InfiniteCall extends Predicate.Call {
@@ -16,22 +14,22 @@ final class InfiniteCall extends Predicate.Call {
     private final IntFunction<Optional<Predicate.Prefix>> buildPrefix;
 
     @Nonnull
-    private final Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers;
+    private final Qualifiers qualifiers;
 
     InfiniteCall(@Nonnull IntFunction<Optional<Predicate.Prefix>> buildPrefix) {
-        this(buildPrefix, emptyMap());
+        this(buildPrefix, noQualifiers());
     }
 
     InfiniteCall(
             @Nonnull IntFunction<Optional<Prefix>> buildPrefix,
-            @Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+            @Nonnull Qualifiers qualifiers) {
         this.buildPrefix = buildPrefix;
         this.qualifiers = qualifiers;
     }
 
     @Override
     @Nonnull
-    public final Map<? extends Qualifier.Signature, ? extends Qualifier> getQualifiers() {
+    public final Qualifiers getQualifiers() {
         return this.qualifiers;
     }
 
@@ -73,9 +71,9 @@ final class InfiniteCall extends Predicate.Call {
         final StringBuilder out = new StringBuilder();
 
         out.append(this.buildPrefix);
-        for (final Qualifier qualifier : this.qualifiers.values()) {
-            out.append(' ').append('@');
-            printTerms(qualifier.getTerms(), out);
+        if (!this.qualifiers.isEmpty()) {
+            out.append(' ');
+            this.qualifiers.printQualifiers(out);
         }
 
         return out.toString();
@@ -95,7 +93,7 @@ final class InfiniteCall extends Predicate.Call {
 
     @Nonnull
     @Override
-    Call updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+    InfiniteCall updateQualifiers(@Nonnull Qualifiers qualifiers) {
         return new InfiniteCall(this.buildPrefix, qualifiers);
     }
 

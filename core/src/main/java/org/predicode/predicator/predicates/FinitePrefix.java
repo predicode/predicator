@@ -5,7 +5,6 @@ import org.predicode.predicator.terms.PlainTerm;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
@@ -62,9 +61,9 @@ final class FinitePrefix extends Predicate.Prefix implements FiniteCall {
 
         printTerms(getTerms(), out);
         printTerms(suffixTerms(), out);
-        for (final Qualifier qualifier : getQualifiers().values()) {
-            out.append(' ').append('@');
-            printTerms(qualifier.getTerms(), out);
+        if (getQualifiers().isEmpty()) {
+            out.append(' ');
+            getQualifiers().printQualifiers(out);
         }
 
         return out.toString();
@@ -122,7 +121,7 @@ final class FinitePrefix extends Predicate.Prefix implements FiniteCall {
 
     @Nonnull
     @Override
-    public FinitePrefix updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers) {
+    public FinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
         return new FinitePrefix(getTerms(), this.suffix.updateQualifiers(qualifiers));
     }
 

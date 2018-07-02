@@ -67,6 +67,9 @@ public final class Qualifier {
         return '@' + printTerms(getTerms());
     }
 
+    /**
+     * Qualifier signature.
+     */
     public static final class Signature {
 
         @Nonnull
