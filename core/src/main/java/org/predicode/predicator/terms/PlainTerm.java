@@ -5,6 +5,7 @@ import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -25,6 +26,32 @@ import java.util.Optional;
  */
 @Immutable
 public abstract class PlainTerm extends Term {
+
+    @Nonnull
+    public static Optional<Knowns> matchTerms(
+            @Nonnull List<? extends PlainTerm> patternTerms,
+            @Nonnull List<? extends PlainTerm> callTerms,
+            @Nonnull Knowns knowns) {
+        if (patternTerms.size() != callTerms.size()) {
+            return Optional.empty();
+        }
+
+        int index = 0;
+
+        for (PlainTerm term : patternTerms) {
+
+            final Optional<Knowns> match = term.match(callTerms.get(index), knowns);
+
+            if (!match.isPresent()) {
+                return Optional.empty();
+            }
+
+            knowns = match.get();
+            ++index;
+        }
+
+        return Optional.of(knowns);
+    }
 
     PlainTerm() {
     }

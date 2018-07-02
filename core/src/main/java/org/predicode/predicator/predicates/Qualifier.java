@@ -1,14 +1,18 @@
 package org.predicode.predicator.predicates;
 
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.Rule;
 import org.predicode.predicator.terms.PlainTerm;
 import org.predicode.predicator.terms.SignatureTerm;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.unmodifiableList;
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
+import static org.predicode.predicator.terms.PlainTerm.matchTerms;
 
 
 /**
@@ -41,6 +45,23 @@ public final class Qualifier {
     @Nonnull
     public final Signature getSignature() {
         return this.signature;
+    }
+
+    /**
+     * Attempts to match the given predicate qualifier against this one.
+     *
+     * <p>This method is called for {@link Rule.Pattern#getQualifiers() each rule pattern qualifier} when
+     * {@link Rule.Pattern#match(Predicate.Call, Knowns) matching} against {@link Predicate.Call#getQualifiers()
+     * predicate call qualifiers}.</p>
+     *
+     * @param qualifier a predicate qualifier to match.
+     * @param knowns known resolutions.
+     *
+     * @return updated knowns if the qualifier matches this pattern, or empty optional otherwise.
+     */
+    @Nonnull
+    public final Optional<Knowns> match(@Nonnull Qualifier qualifier, @Nonnull Knowns knowns) {
+        return matchTerms(getTerms(), qualifier.getTerms(), knowns);
     }
 
     @Override

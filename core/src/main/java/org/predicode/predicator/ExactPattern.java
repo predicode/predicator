@@ -1,6 +1,7 @@
 package org.predicode.predicator;
 
 import org.predicode.predicator.predicates.Predicate;
+import org.predicode.predicator.predicates.Qualifiers;
 import org.predicode.predicator.terms.PlainTerm;
 
 import javax.annotation.Nonnull;
@@ -19,6 +20,12 @@ final class ExactPattern extends Rule.Pattern {
         super(terms);
     }
 
+    private ExactPattern(
+            @Nonnull List<? extends PlainTerm> terms,
+            @Nonnull Qualifiers qualifiers) {
+        super(terms, qualifiers);
+    }
+
     @Override
     public boolean isPrefix() {
         return false;
@@ -29,12 +36,27 @@ final class ExactPattern extends Rule.Pattern {
     public Optional<Knowns> match(@Nonnull Predicate.Call call, @Nonnull Knowns knowns) {
         return call.prefix(getTerms().size())
                 .filter(prefix -> prefix.getSuffix().isEmpty()) // Ensure the call length equals to pattern one
-                .flatMap(prefix -> matchPrefix(prefix, getTerms(), knowns));
+                .flatMap(prefix -> matchPrefix(prefix, this, knowns));
     }
 
     @Override
     public String toString() {
-        return printTerms(getTerms());
+
+        final StringBuilder out = new StringBuilder();
+
+        printTerms(getTerms());
+        if (!getQualifiers().isEmpty()) {
+            out.append(' ');
+            getQualifiers().printQualifiers(out);
+        }
+
+        return out.toString();
+    }
+
+    @Nonnull
+    @Override
+    ExactPattern updateQualifiers(@Nonnull Qualifiers qualifiers) {
+        return new ExactPattern(getTerms(), qualifiers);
     }
 
 }

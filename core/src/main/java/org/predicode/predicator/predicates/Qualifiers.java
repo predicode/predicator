@@ -1,5 +1,8 @@
 package org.predicode.predicator.predicates;
 
+import org.predicode.predicator.Knowns;
+import org.predicode.predicator.Rule;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import java.util.*;
@@ -74,6 +77,19 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
     @Nonnull
     public final Map<? extends Qualifier.Signature, ? extends Qualifier> map() {
         return this.map;
+    }
+
+    /**
+     * Returns qualifier with the given signature.
+     *
+     * @param signature target qualifier signature.
+     *
+     * @return an optional containing qualifier with the given {@code signature}, or empty optional if no such qualifier
+     * present in this collection.
+     */
+    @Nonnull
+    public final Optional<Qualifier> get(@Nonnull Qualifier.Signature signature) {
+        return Optional.ofNullable(map().get(signature));
     }
 
     /**
@@ -173,6 +189,38 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         }
 
         return new Qualifiers(unmodifiableMap(newQualifiers));
+    }
+
+    /**
+     * Attempts to match the given predicate qualifiers collection against this one.
+     *
+     * <p>This method is called for {@link Rule.Pattern#getQualifiers() rule pattern qualifiers} when
+     * {@link Rule.Pattern#match(Predicate.Call, Knowns) matching} against {@link Predicate.Call#getQualifiers()
+     * predicate call qualifiers}.</p>
+     *
+     * <p>Each qualifier in this pattern should match the corresponding one in the given qualifiers collection.</p>
+     *
+     * @param qualifiers a predicate qualifiers to match.
+     * @param knowns known resolutions.
+     *
+     * @return updated knowns if the qualifiers matches this pattern, or empty optional otherwise.
+     */
+    @Nonnull
+    public final Optional<Knowns> match(@Nonnull Qualifiers qualifiers, @Nonnull Knowns knowns) {
+        for (final Qualifier qualifier : this) {
+
+            final Knowns k = knowns;
+            final Optional<Knowns> match = qualifiers.get(qualifier.getSignature())
+                    .flatMap(found -> qualifier.match(found, k));
+
+            if (!match.isPresent()) {
+                return Optional.empty();
+            }
+
+            knowns = match.get();
+        }
+
+        return Optional.of(knowns);
     }
 
     @Override

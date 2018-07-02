@@ -1,6 +1,7 @@
 package org.predicode.predicator;
 
 import org.predicode.predicator.predicates.Predicate;
+import org.predicode.predicator.predicates.Qualifiers;
 import org.predicode.predicator.terms.PlainTerm;
 
 import javax.annotation.Nonnull;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
+import static org.predicode.predicator.terms.PlainTerm.matchTerms;
 
 
 @Immutable
@@ -17,30 +19,20 @@ final class PrefixPattern extends Rule.Pattern {
     @Nonnull
     static Optional<Knowns> matchPrefix(
             @Nonnull Predicate.Prefix prefix,
-            @Nonnull List<? extends PlainTerm> terms,
+            @Nonnull Rule.Pattern pattern,
             @Nonnull Knowns knowns) {
-
-        @Nonnull
-        Knowns result = knowns.startMatching();
-        int index = 0;
-
-        for (PlainTerm term : terms) {
-
-            final Optional<Knowns> match = term.match(prefix.getTerms().get(index), result);
-
-            if (!match.isPresent()) {
-                return Optional.empty();
-            }
-
-            result = match.get();
-            ++index;
-        }
-
-        return Optional.of(result);
+        return matchTerms(pattern.getTerms(), prefix.getTerms(), knowns.startMatching())
+                .flatMap(updated -> pattern.getQualifiers().match(prefix.getQualifiers(), updated));
     }
 
     PrefixPattern(@Nonnull List<? extends PlainTerm> terms) {
         super(terms);
+    }
+
+    private PrefixPattern(
+            @Nonnull List<? extends PlainTerm> terms,
+            @Nonnull Qualifiers qualifiers) {
+        super(terms, qualifiers);
     }
 
     @Override
@@ -52,12 +44,28 @@ final class PrefixPattern extends Rule.Pattern {
     @Override
     public Optional<Knowns> match(@Nonnull Predicate.Call call, @Nonnull Knowns knowns) {
         return call.prefix(getTerms().size())
-                .flatMap(prefix -> matchPrefix(prefix, getTerms(), knowns));
+                .flatMap(prefix -> matchPrefix(prefix, this, knowns));
     }
 
     @Override
     public String toString() {
-        return printTerms(getTerms()) + "...";
+
+        final StringBuilder out = new StringBuilder();
+
+        printTerms(getTerms());
+        out.append("...");
+        if (!getQualifiers().isEmpty()) {
+            out.append(' ');
+            getQualifiers().printQualifiers(out);
+        }
+
+        return out.toString();
+    }
+
+    @Nonnull
+    @Override
+    PrefixPattern updateQualifiers(@Nonnull Qualifiers qualifiers) {
+        return new PrefixPattern(getTerms(), qualifiers);
     }
 
 }
