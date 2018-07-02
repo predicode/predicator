@@ -1,14 +1,25 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
+
 import javax.annotation.Nonnull;
+
+import static org.predicode.predicator.terms.Placeholder.placeholder;
 
 
 /**
  * A plain term a local {@link Variable variable} may be mapped to.
  */
+@Immutable
 public abstract class MappedTerm extends PlainTerm {
 
     MappedTerm() {
+    }
+
+    @Nonnull
+    @Override
+    public final SignatureTerm getSignature() {
+        return placeholder();
     }
 
     @Nonnull

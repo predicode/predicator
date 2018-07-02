@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
 
@@ -22,10 +23,17 @@ import java.util.Optional;
  * </ul>
  * </p>
  */
+@Immutable
 public abstract class PlainTerm extends Term {
 
     PlainTerm() {
     }
+
+    /**
+     * Returns this term's signature.
+     */
+    @Nonnull
+    public abstract SignatureTerm getSignature();
 
     /**
      * Attempts to match against another term.
@@ -50,16 +58,12 @@ public abstract class PlainTerm extends Term {
         return accept((Visitor<P, R>) visitor, p);
     }
 
-    public interface Visitor<P, R> extends MappedTerm.Visitor<P, R> {
+    public interface Visitor<P, R> extends MappedTerm.Visitor<P, R>, SignatureTerm.Visitor<P, R> {
 
         @Nonnull
-        default R visitKeyword(@Nonnull Keyword keyword, @Nonnull P p) {
-            return visitPlain(keyword, p);
-        }
-
-        @Nonnull
-        default R visitPlaceholder(@Nonnull Placeholder placeholder, @Nonnull P p) {
-            return visitPlain(placeholder, p);
+        @Override
+        default R visitSignature(@Nonnull SignatureTerm term, @Nonnull P p) {
+            return visitPlain(term, p);
         }
 
         @Override

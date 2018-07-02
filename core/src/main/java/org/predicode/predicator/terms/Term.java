@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
@@ -20,6 +21,7 @@ import java.util.function.UnaryOperator;
  * </ul>
  * </p>
  */
+@Immutable
 public abstract class Term {
 
     Term() {
@@ -55,6 +57,11 @@ public abstract class Term {
         return TermPrinter.printTerms(this);
     }
 
+    /**
+     * Term expansion.
+     *
+     * <p>This is a result of term {@link #expand(Predicate.Resolver) expansion}, when expansion is possible.</p>
+     */
     public static final class Expansion {
 
         @Nonnull
