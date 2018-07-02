@@ -13,21 +13,21 @@ import static org.predicode.predicator.grammar.TermSep.*;
 
 public class TermPrinter {
 
-    public static void printTerms(@Nonnull Iterable<? extends Term> terms, @Nonnull CodePointPrinter print) {
-        new TermPrinter(print).print(terms);
-    }
-
     @Nonnull
     public static String printTerms(@Nonnull Iterable<? extends Term> terms) {
 
         final StringBuilder out = new StringBuilder();
 
-        printTerms(terms, out::appendCodePoint);
+        printTerms(terms, out);
 
         return out.toString();
     }
 
-    public static void printTerms(@Nonnull CodePointPrinter print, @Nonnull Term ...terms) {
+    public static void printTerms(@Nonnull Iterable<? extends Term> terms, @Nonnull StringBuilder out) {
+        printTerms(terms, out::appendCodePoint);
+    }
+
+    public static void printTerms(@Nonnull Iterable<? extends Term> terms, @Nonnull CodePointPrinter print) {
         new TermPrinter(print).print(terms);
     }
 
@@ -39,6 +39,14 @@ public class TermPrinter {
         printTerms(out::appendCodePoint, terms);
 
         return out.toString();
+    }
+
+    public static void printTerms(@Nonnull StringBuilder out, @Nonnull Term ...terms) {
+        printTerms(out::appendCodePoint, terms);
+    }
+
+    public static void printTerms(@Nonnull CodePointPrinter print, @Nonnull Term ...terms) {
+        new TermPrinter(print).print(terms);
     }
 
     @Nonnull

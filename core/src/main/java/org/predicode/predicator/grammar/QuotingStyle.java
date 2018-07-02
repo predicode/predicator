@@ -57,6 +57,13 @@ public enum QuotingStyle {
         return new NamePrinter(name, quoted, this, print).print();
     }
 
+    public boolean printName(
+            @Nonnull CharSequence name,
+            @Nonnull QuotedName quoted,
+            @Nonnull StringBuilder out) {
+        return printName(name, quoted, out::appendCodePoint);
+    }
+
     @Nonnull
     public String printName(@Nonnull CharSequence name, @Nonnull QuotedName quoted) {
 
