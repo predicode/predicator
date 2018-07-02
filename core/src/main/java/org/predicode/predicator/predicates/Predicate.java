@@ -1,6 +1,5 @@
 package org.predicode.predicator.predicates;
 
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
 import org.predicode.predicator.annotations.SamWithReceiver;
@@ -10,11 +9,11 @@ import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Optional;
+import javax.annotation.concurrent.Immutable;
+import java.util.*;
 import java.util.function.IntFunction;
 
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.*;
 
 
 /**
@@ -25,6 +24,7 @@ import static java.util.Collections.unmodifiableList;
  */
 @FunctionalInterface
 @SamWithReceiver
+@Immutable
 public interface Predicate {
 
     /**
@@ -171,6 +171,63 @@ public interface Predicate {
         }
 
         /**
+         * Predicate qualifiers.
+         *
+         * @return readonly map of qualifiers with their {@link Qualifier#getSignature() signatures} as keys.
+         */
+        @Nonnull
+        public abstract Map<? extends Qualifier.Signature, ? extends Qualifier> getQualifiers();
+
+        /**
+         * Qualifies this predicate call.
+         *
+         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
+         *
+         * @param qualifiers qualifiers to apply to this predicate call.
+         *
+         * @return new predicate call with the given qualifiers applied on top of this call's ones,
+         * or this instance if qualifiers didn't change.
+         */
+        @Nonnull
+        public Call qualify(@Nonnull Qualifier... qualifiers) {
+            return qualify(Arrays.asList(qualifiers), qualifiers.length);
+        }
+
+        @Nonnull
+        public Call qualify(@Nonnull Collection<? extends Qualifier> qualifiers) {
+            return qualify(qualifiers, qualifiers.size());
+        }
+
+        @Nonnull
+        public Call qualify(@Nonnull Iterable<? extends Qualifier> qualifiers) {
+            return qualify(qualifiers, 1);
+        }
+
+        @Nonnull
+        private Call qualify(@Nonnull Iterable<? extends Qualifier> qualifiers, int numQualifiers) {
+
+            HashMap<Qualifier.Signature, Qualifier> newQualifiers = null;
+
+            for (final Qualifier qualifier : qualifiers) {
+                if (qualifier.equals(getQualifiers().get(qualifier.getSignature()))) {
+                    continue;
+                }
+                if (newQualifiers == null) {
+                    newQualifiers = new HashMap<>(getQualifiers().size() + numQualifiers);
+                    newQualifiers.putAll(getQualifiers());
+                }
+
+                newQualifiers.put(qualifier.getSignature(), qualifier);
+            }
+
+            if (newQualifiers == null) {
+                return this; // Qualifiers didn't change
+            }
+
+            return updateQualifiers(unmodifiableMap(newQualifiers));
+        }
+
+        /**
          * Extracts a prefix of the given {@code length} out of this call.
          *
          * @param length the length of the prefix.
@@ -228,6 +285,9 @@ public interface Predicate {
         @Nonnull
         abstract Optional<Prefix> buildPrefix(int length);
 
+        @Nonnull
+        abstract Call updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers);
+
     }
 
     /**
@@ -263,6 +323,30 @@ public interface Predicate {
         }
 
         @Override
+        @Nonnull
+        public final Map<? extends Qualifier.Signature, ? extends Qualifier> getQualifiers() {
+            return getSuffix().getQualifiers();
+        }
+
+        @Nonnull
+        @Override
+        public final Prefix qualify(@Nonnull Qualifier... qualifiers) {
+            return (Prefix) super.qualify(qualifiers);
+        }
+
+        @Nonnull
+        @Override
+        public final Prefix qualify(@Nonnull Collection<? extends Qualifier> qualifiers) {
+            return (Prefix) super.qualify(qualifiers);
+        }
+
+        @Nonnull
+        @Override
+        public final Prefix qualify(@Nonnull Iterable<? extends Qualifier> qualifiers) {
+            return (Prefix) super.qualify(qualifiers);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -283,12 +367,17 @@ public interface Predicate {
         @Override
         public int hashCode() {
 
-            int result = this.terms.hashCode();
+            int result = super.hashCode();
 
+            result = 31 * result + this.terms.hashCode();
             result = 31 * result + this.suffix.hashCode();
 
             return result;
         }
+
+        @Override
+        @Nonnull
+        abstract Prefix updateQualifiers(@Nonnull Map<? extends Qualifier.Signature, ? extends Qualifier> qualifiers);
 
     }
 
