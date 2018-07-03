@@ -383,7 +383,7 @@ public interface Predicate {
      *
      * <p>Instances of this class expected to be immutable.</p>
      */
-    interface Resolver extends Rule.Selector {
+    interface Resolver {
 
         /**
          * Known variable mappings and resolutions.
@@ -392,27 +392,31 @@ public interface Predicate {
         Knowns getKnowns();
 
         /**
+         * Selects resolution rules the given predicate call matches.
+         *
+         * @param call predicate call.
+         *
+         * @return a {@link Flux} of {@link Rule.Match rule matches}.
+         */
+        @Nonnull
+        Flux<Rule.Match> matchingRules(@Nonnull Predicate.Call call);
+
+        /**
          * Constructs new predicate resolver based on this one with the given variable mappings and resolutions.
          *
          * @param knowns new variable mappings an resolutions.
          */
         default Resolver withKnowns(@Nonnull final Knowns knowns) {
-            return new Resolver() {
+            return new CustomResolver(knowns, (call, kns) -> matchingRules(call));
+        }
 
-                @Nonnull
-                @Override
-                public Knowns getKnowns() {
-                    return knowns;
-                }
-
-                @Nonnull
-                @Override
-                public Flux<Rule.Match> matchingRules(@Nonnull Call call, @Nonnull Knowns knowns) {
-                    return Resolver.this.matchingRules(call, knowns);
-                }
-
-            };
-
+        /**
+         * Constructs new predicate resolver based on this one with the given predicate resolution rule selector.
+         *
+         * @param selector new predicate resolution rule selector.
+         */
+        default Resolver withSelector(@Nonnull Rule.Selector selector) {
+            return new CustomResolver(getKnowns(), selector);
         }
 
     }

@@ -106,7 +106,7 @@ public final class Rule {
     public interface Selector {
 
         /**
-         * Selects resolution rules given predicate call matches.
+         * Selects resolution rules the given predicate call matches.
          *
          * @param call predicate call.
          * @param knowns known resolutions.

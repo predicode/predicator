@@ -38,7 +38,7 @@ class PhraseTest {
             val knowns = Knowns()
             val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
-                override fun matchingRules(call: Predicate.Call, knowns: Knowns): Flux<Rule.Match> =
+                override fun matchingRules(call: Predicate.Call): Flux<Rule.Match> =
                         selectOneOf()(call, knowns)
             }
             val term = mockk<PlainTerm>()
@@ -57,7 +57,7 @@ class PhraseTest {
             val knowns = Knowns()
             val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
-                override fun matchingRules(call: Predicate.Call, knowns: Knowns): Flux<Rule.Match> =
+                override fun matchingRules(call: Predicate.Call): Flux<Rule.Match> =
                         selectOneOf()(call, knowns)
             }
             val term = mockk<PlainTerm>("term")
