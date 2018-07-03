@@ -39,7 +39,7 @@ public abstract class ResolvedTerm extends MappedTerm {
         }
 
         @Nonnull
-        default R visitValue(@Nonnull Value value, @Nonnull P p) {
+        default R visitValue(@Nonnull Value<?> value, @Nonnull P p) {
             return visitResolved(value, p);
         }
 

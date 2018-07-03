@@ -12,7 +12,7 @@ import java.util.Optional;
  *
  * <p>Values match only {@link #valueMatch(Value, Knowns) matching values} and can be mapped to variables.</p>
  */
-public abstract class Value extends ResolvedTerm {
+public abstract class Value<T> extends ResolvedTerm {
 
     /**
      * Creates a raw value.
@@ -22,7 +22,7 @@ public abstract class Value extends ResolvedTerm {
      * @param value target value.
      */
     @Nonnull
-    public static Value rawValue(@Nonnull Object value) {
+    public static <T> Value<T> rawValue(@Nonnull T value) {
         return new RawValue<>(value);
     }
 
@@ -30,14 +30,14 @@ public abstract class Value extends ResolvedTerm {
     @Override
     public Optional<Knowns> match(@Nonnull PlainTerm term, @Nonnull Knowns knowns) {
 
-        final Value self = this;
+        final Value<?> self = this;
 
         return term.accept(
                 new PlainTerm.Visitor<Knowns, Optional<Knowns>>() {
 
                     @Nonnull
                     @Override
-                    public Optional<Knowns> visitValue(@Nonnull Value value, @Nonnull Knowns knowns) {
+                    public Optional<Knowns> visitValue(@Nonnull Value<?> value, @Nonnull Knowns knowns) {
                         return value.valueMatch(self, knowns);
                     }
 
@@ -64,6 +64,9 @@ public abstract class Value extends ResolvedTerm {
     }
 
     @Nonnull
+    public abstract T get();
+
+    @Nonnull
     @Override
     public final <P, R> R accept(@Nonnull ResolvedTerm.Visitor<P, R> visitor, @Nonnull P p) {
         return visitor.visitValue(this, p);
@@ -85,9 +88,9 @@ public abstract class Value extends ResolvedTerm {
      * @return updated knowns if the term matches, or empty optional otherwise.
      */
     @Nonnull
-    protected abstract Optional<Knowns> valueMatch(@Nonnull Value other, @Nonnull Knowns knowns);
+    protected abstract Optional<Knowns> valueMatch(@Nonnull Value<?> other, @Nonnull Knowns knowns);
 
-    private static final class RawValue<T> extends Value {
+    private static final class RawValue<T> extends Value<T> {
 
         @Nonnull
         private final T value;
@@ -96,9 +99,20 @@ public abstract class Value extends ResolvedTerm {
             this.value = value;
         }
 
+        /**
+         * Returns the value contents.
+         *
+         * @return the contents of this value.
+         */
         @Nonnull
         @Override
-        protected Optional<Knowns> valueMatch(@Nonnull Value other, @Nonnull Knowns knowns) {
+        public T get() {
+            return this.value;
+        }
+
+        @Nonnull
+        @Override
+        protected Optional<Knowns> valueMatch(@Nonnull Value<?> other, @Nonnull Knowns knowns) {
             return equals(other) ? Optional.of(knowns) : Optional.empty();
         }
 

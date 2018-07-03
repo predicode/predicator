@@ -1,10 +1,5 @@
 package org.predicode.predicator.terms
 
-import org.predicode.predicator.terms.Atom
-import org.predicode.predicator.terms.Keyword
-import org.predicode.predicator.terms.Value
-import org.predicode.predicator.terms.Variable
-
 /**
  * Creates a [keyword][Keyword] with the given name.
  *
@@ -12,8 +7,7 @@ import org.predicode.predicator.terms.Variable
  *
  * @see Keyword.namedKeyword
  */
-@Suppress("NOTHING_TO_INLINE")
-inline fun namedKeyword(name: String) = Keyword.namedKeyword(name)
+fun namedKeyword(name: String) = Keyword.namedKeyword(name)
 
 /**
  * Creates an [atom][Atom] with the given name.
@@ -22,8 +16,7 @@ inline fun namedKeyword(name: String) = Keyword.namedKeyword(name)
  *
  * @see Atom.namedAtom
  */
-@Suppress("NOTHING_TO_INLINE")
-inline fun namedAtom(name: String) = Atom.namedAtom(name)
+fun namedAtom(name: String) = Atom.namedAtom(name)
 
 /**
  * Creates a raw [value][Value].
@@ -32,8 +25,7 @@ inline fun namedAtom(name: String) = Atom.namedAtom(name)
  *
  * @see Value.rawValue
  */
-@Suppress("NOTHING_TO_INLINE")
-inline fun rawValue(value: Any) = Value.rawValue(value)
+fun <T> rawValue(value: T) = Value.rawValue(value)
 
 /**
  * Creates a named [variable][Variable].
@@ -42,8 +34,7 @@ inline fun rawValue(value: Any) = Value.rawValue(value)
  *
  * @see Variable.namedVariable
  */
-@Suppress("NOTHING_TO_INLINE")
-inline fun namedVariable(name: String) = Variable.namedVariable(name)
+fun namedVariable(name: String) = Variable.namedVariable(name)
 
 /**
  * Creates temporary [variable][Variable].
@@ -52,5 +43,4 @@ inline fun namedVariable(name: String) = Variable.namedVariable(name)
  *
  * @see Variable.tempVariable
  */
-@Suppress("NOTHING_TO_INLINE")
-inline fun tempVariable(prefix: String) = Variable.tempVariable(prefix)
+fun tempVariable(prefix: String) = Variable.tempVariable(prefix)
