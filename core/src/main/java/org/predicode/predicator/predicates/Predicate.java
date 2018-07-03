@@ -188,6 +188,8 @@ public interface Predicate {
          *
          * @return new predicate call with the given qualifiers applied on top of this call's ones,
          * or this instance if qualifiers didn't change.
+         *
+         * @see Qualifiers#set(Qualifier...)
          */
         @Nonnull
         public Call qualify(@Nonnull Qualifier... qualifiers) {
@@ -210,11 +212,38 @@ public interface Predicate {
          *
          * @return new predicate call with the given qualifiers applied on top of this call's ones,
          * or this instance if qualifiers didn't change.
+         *
+         * @see Qualifiers#setAll(Qualifiers)
          */
         @Nonnull
         public Call qualify(@Nonnull Qualifiers qualifiers) {
 
             final Qualifiers updated = getQualifiers().setAll(qualifiers);
+
+            if (updated == getQualifiers()) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
+        }
+
+        /**
+         * Fulfill qualifiers of this predicate call.
+         *
+         * <p>Sets each of the given qualifiers, unless the qualifier with the same signature already present in this
+         * collection.</p>
+         *
+         * @param qualifiers qualifiers to set.
+         *
+         * @return new qualifiers collection with the given qualifiers set on top of this ones,
+         * or this instance if qualifiers didn't change.
+         *
+         * @see Qualifiers#fulfill(Qualifiers)
+         */
+        @Nonnull
+        public final Call fulfillQualifiers(@Nonnull Qualifiers qualifiers) {
+
+            final Qualifiers updated = getQualifiers().fulfill(qualifiers);
 
             if (updated == getQualifiers()) {
                 return this;
@@ -267,12 +296,16 @@ public interface Predicate {
 
         @Nonnull
         @Override
-        public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
-            return resolver.matchingRules(this, resolver.getKnowns())
+        public final Flux<Knowns> resolve(@Nonnull Resolver resolver) {
+            return resolver.matchingRules(this)
                     .flatMap(match -> match.getRule()
                             .getPredicate()
-                            .resolve(
-                                    resolver.withKnowns(match.getKnowns())));
+                            .resolve(new CustomResolver(
+                                    match.getKnowns(),
+                                    (call, knowns) -> resolver.matchingRules(
+                                            knowns.attr(Qualifiers.class)
+                                                    .map(call::fulfillQualifiers)
+                                                    .orElse(call)))));
         }
 
         @Nullable
