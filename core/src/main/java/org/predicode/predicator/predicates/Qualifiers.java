@@ -2,6 +2,11 @@ package org.predicode.predicator.predicates;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
+import org.predicode.predicator.terms.Keyword;
+import org.predicode.predicator.terms.Placeholder;
+import org.predicode.predicator.terms.PlainTerm;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -15,6 +20,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Collections.*;
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
+import static org.predicode.predicator.terms.Variable.tempVariable;
 
 
 /**
@@ -30,6 +36,8 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
             QUALIFIERS_COLLECTOR = Collectors.collectingAndThen(
                     Collectors.toMap(Qualifier::getSignature, UnaryOperator.identity()),
                     map -> new Qualifiers(unmodifiableMap(map)));
+    private static final ExtraQualifierBuilder EXTRA_QUALIFIER_TERM_REPLACER =
+            new ExtraQualifierBuilder();
 
     @Nonnull
     public static Qualifiers noQualifiers() {
@@ -219,7 +227,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         return qualifiers.update(
                 stream().filter(qualifier -> !qualifiers.map().containsKey(qualifier.getSignature())),
                 () -> new HashMap<>(size() - qualifiers.size()),
-                this);
+                noQualifiers());
     }
 
     @Nonnull
@@ -268,7 +276,47 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
             knowns = match.get();
         }
 
-        return Optional.of(knowns.attr(Qualifiers.class, exclude(qualifiers)));
+        return Optional.of(qualifiers.exclude(this).addAsExtraQualifiersTo(knowns));
+    }
+
+    @Nonnull
+    private Knowns addAsExtraQualifiersTo(@Nonnull Knowns knowns) {
+        if (isEmpty()) {
+            return knowns;
+        }
+
+        final ArrayList<Qualifier> qualifiers = new ArrayList<>(size());
+
+        for (final Qualifier qualifier : this) {
+            knowns = addExtraQualifierTo(qualifier, knowns, qualifiers);
+        }
+
+        return knowns.attr(Qualifiers.class, qualifiers(qualifiers));
+    }
+
+    @Nonnull
+    private static Knowns addExtraQualifierTo(
+            @Nonnull Qualifier qualifier,
+            @Nonnull Knowns knowns,
+            @Nonnull ArrayList<Qualifier> qualifiers) {
+
+        final ArrayList<PlainTerm> terms = new ArrayList<>(qualifier.getTerms().size());
+
+        for (final PlainTerm term : qualifier.getTerms()) {
+
+            final Tuple2<PlainTerm, Knowns> tuple = term.accept(EXTRA_QUALIFIER_TERM_REPLACER, knowns);
+            final PlainTerm replacement = tuple.getT1();
+
+            terms.add(replacement);
+            knowns = replacement.match(term, tuple.getT2()).orElseGet(() -> {
+                throw new IllegalStateException(
+                        "Can not find a replacement for extra qualifier term (" + term + ") of " + qualifier);
+            });
+        }
+
+        qualifiers.add(new Qualifier(terms));
+
+        return knowns;
     }
 
     @Override
@@ -370,4 +418,30 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         }
     }
 
+    private static class ExtraQualifierBuilder implements PlainTerm.Visitor<Knowns, Tuple2<PlainTerm, Knowns>> {
+
+        @Nonnull
+        @Override
+        public Tuple2<PlainTerm, Knowns> visitKeyword(
+                @Nonnull Keyword keyword,
+                @Nonnull Knowns knowns) {
+            return Tuples.of(keyword, knowns);
+        }
+
+        @Nonnull
+        @Override
+        public Tuple2<PlainTerm, Knowns> visitPlaceholder(
+                @Nonnull Placeholder placeholder,
+                @Nonnull Knowns knowns) {
+            return Tuples.of(placeholder, knowns);
+        }
+
+        @Nonnull
+        @Override
+        public Tuple2<PlainTerm, Knowns> visitPlain(
+                @Nonnull PlainTerm term,
+                @Nonnull Knowns knowns) {
+            return knowns.declareLocal(tempVariable("extra qualifier"), Tuples::of);
+        }
+    }
 }

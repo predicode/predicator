@@ -132,7 +132,7 @@ public class Knowns {
     /**
      * Handles the given local variable mapping.
      *
-     * </p>If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+     * <p>If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
      * The updated knowns are passed to {@code handler}.</p>
      *
      * @param variable a variable, local to resolution rule.
