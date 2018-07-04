@@ -1,13 +1,15 @@
 package org.predicode.predicator.terms
 
-import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.assertThat
+import ch.tutteli.atrium.api.cc.en_GB.toBe
+import ch.tutteli.atrium.verbs.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.Knowns
 import org.predicode.predicator.predicates.Predicate
 import org.predicode.predicator.predicates.TestPredicateResolver
-import java.util.*
+import org.predicode.predicator.testutils.isEmpty
+import org.predicode.predicator.testutils.notToBeEmpty
+import org.predicode.predicator.testutils.toContain
 
 
 class AtomTest {
@@ -30,19 +32,18 @@ class AtomTest {
     @Test
     fun `matches atom with the same name`() {
         assertThat(namedAtom("name1").match(namedAtom("name1"), knowns))
-                .toBe(Optional.of(knowns))
+                .toContain(knowns)
     }
 
     @Test
     fun `matches placeholder`() {
         assertThat(namedAtom("name1").match(Placeholder.placeholder(), knowns))
-                .toBe(Optional.of(knowns))
+                .toContain(knowns)
     }
 
     @Test
     fun `does not match atom with another name`() {
-        assertThat(namedAtom("name1").match(namedAtom("name2"), knowns))
-                .toBe(Optional.empty())
+        assertThat(namedAtom("name1").match(namedAtom("name2"), knowns)).isEmpty()
     }
 
     @Test
@@ -53,9 +54,9 @@ class AtomTest {
 
         knowns = Knowns(variable)
 
-        assertThat(atom.match(variable, knowns).get()) {
-            assertThat(subject.resolution(variable).value().get())
-                    .toBe(atom)
+        assertThat(atom.match(variable, knowns)).notToBeEmpty {
+            assertThat(subject.resolution(variable).value())
+                    .toContain(atom)
         }
     }
 
@@ -64,10 +65,8 @@ class AtomTest {
 
         val atom = namedAtom("name")
 
-        assertThat(atom.match(namedKeyword("name"), knowns))
-                .toBe(Optional.empty())
-        assertThat(atom.match(rawValue(123), knowns))
-                .toBe(Optional.empty())
+        assertThat(atom.match(namedKeyword("name"), knowns)).isEmpty()
+        assertThat(atom.match(rawValue(123), knowns)).isEmpty()
 
     }
 
@@ -76,8 +75,8 @@ class AtomTest {
 
         val atom = namedAtom("name")
 
-        assertThat(atom.expand(resolver).get())
-                .toBe(Term.Expansion(atom, knowns))
+        assertThat(atom.expand(resolver))
+                .toContain(Term.Expansion(atom, knowns))
     }
 
 }

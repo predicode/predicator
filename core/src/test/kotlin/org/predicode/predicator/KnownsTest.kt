@@ -1,15 +1,17 @@
 package org.predicode.predicator
 
-import ch.tutteli.atrium.api.cc.en_UK.isSame
-import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.api.cc.en_UK.toThrow
-import ch.tutteli.atrium.assertThat
-import ch.tutteli.atrium.expect
+import ch.tutteli.atrium.api.cc.en_GB.isSameAs
+import ch.tutteli.atrium.api.cc.en_GB.toBe
+import ch.tutteli.atrium.api.cc.en_GB.toThrow
+import ch.tutteli.atrium.verbs.assertThat
+import ch.tutteli.atrium.verbs.expect
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.terms.namedAtom
 import org.predicode.predicator.terms.namedVariable
-import java.util.*
+import org.predicode.predicator.testutils.isEmpty
+import org.predicode.predicator.testutils.notToBeEmpty
+import org.predicode.predicator.testutils.toContain
 
 
 class KnownsTest {
@@ -25,7 +27,7 @@ class KnownsTest {
             expect { knowns.resolve(
                     namedVariable("unknown"),
                     namedAtom("resolution")) }
-                    .toThrow<UnknownVariableException>()
+                    .toThrow<UnknownVariableException> {}
         }
 
         @Test
@@ -35,9 +37,9 @@ class KnownsTest {
             val knowns = Knowns(variable)
             val resolution = namedAtom("resolution")
 
-            assertThat(knowns.resolve(variable, resolution).get()) {
-                assertThat(subject.resolution(variable).value().get())
-                        .toBe(resolution)
+            assertThat(knowns.resolve(variable, resolution)).notToBeEmpty {
+                assertThat(subject.resolution(variable).value())
+                        .toContain(resolution)
             }
         }
 
@@ -48,10 +50,10 @@ class KnownsTest {
             val resolution = namedAtom("resolution")
             val knowns = Knowns(variable).resolve(variable, resolution).get()
 
-            assertThat(knowns.resolve(variable, resolution).get()) {
-                assertThat(subject.resolution(variable).value().get())
-                        .toBe(resolution)
-                assertThat(subject).isSame(knowns)
+            assertThat(knowns.resolve(variable, resolution)).notToBeEmpty {
+                assertThat(subject.resolution(variable).value())
+                        .toContain(resolution)
+                assertThat(subject).isSameAs(knowns)
             }
         }
 
@@ -62,8 +64,7 @@ class KnownsTest {
             val resolution = namedAtom("resolution")
             val knowns = Knowns(variable).resolve(variable, resolution).get()
 
-            assertThat(knowns.resolve(variable, namedAtom("other")))
-                    .toBe(Optional.empty())
+            assertThat(knowns.resolve(variable, namedAtom("other"))).isEmpty()
         }
 
         @Test
@@ -79,11 +80,11 @@ class KnownsTest {
 
             knowns = localVar.match(queryVar2, knowns).get() // Alias queryVar1 -> queryVar2
 
-            assertThat(knowns.resolve(queryVar1, resolution).get()) {
+            assertThat(knowns.resolve(queryVar1, resolution)).notToBeEmpty {
                 assertThat(subject.resolution(queryVar1).aliased())
-                        .toBe(Optional.of(queryVar2))
-                assertThat(subject.resolution(queryVar2).value().get())
-                        .toBe(resolution)
+                        .toContain(queryVar2)
+                assertThat(subject.resolution(queryVar2).value())
+                        .toContain(resolution)
                 subject.mapping(localVar) { mapping, _ ->
                     assertThat(mapping)
                             .toBe(queryVar1)

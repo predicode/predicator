@@ -1,8 +1,8 @@
 package org.predicode.predicator.predicates
 
-import ch.tutteli.atrium.api.cc.en_UK.*
-import ch.tutteli.atrium.assertThat
-import ch.tutteli.atrium.expect
+import ch.tutteli.atrium.api.cc.en_GB.*
+import ch.tutteli.atrium.verbs.assertThat
+import ch.tutteli.atrium.verbs.expect
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -13,6 +13,7 @@ import org.predicode.predicator.terms.PlainTerm
 import org.predicode.predicator.terms.namedAtom
 import org.predicode.predicator.terms.namedKeyword
 import org.predicode.predicator.terms.rawValue
+import org.predicode.predicator.testutils.isEmpty
 import java.util.*
 import java.util.function.IntFunction
 
@@ -27,14 +28,14 @@ class EmptyCallTest {
 
     @Test
     fun `is empty`() {
-        assertThat(call.isEmpty).isTrue()
+        assertThat(call.isEmpty).toBe(true)
     }
 
     @Test
     fun `is finite`() {
-        assertThat(call.isFinite).isTrue()
-        assertThat(call.toFinite()).isNotNull {
-            assertThat(subject).isSame(call)
+        assertThat(call.isFinite).toBe(true)
+        assertThat(call.toFinite()).notToBeNull {
+            isSameAs(call)
             assertThat(subject.allTerms()).isEmpty()
         }
     }
@@ -43,27 +44,27 @@ class EmptyCallTest {
     fun `has empty prefix`() {
         assertThat(call.prefix(0).get()) {
             assertThat(subject.terms).isEmpty()
-            assertThat(subject.suffix.isEmpty).isTrue()
-            assertThat(subject.isEmpty).isTrue()
+            assertThat(subject.suffix.isEmpty).toBe(true)
+            assertThat(subject.isEmpty).toBe(true)
         }
     }
 
     @Test
     fun `can not build non-empty prefix`() {
-        assertThat(call.prefix(1)).toBe(Optional.empty())
+        assertThat(call.prefix(1)).isEmpty()
     }
 
     @Test
     fun `fails on invalid prefix request`() {
         expect { call.prefix(-1) }
-                .toThrow<IllegalArgumentException>()
+                .toThrow<IllegalArgumentException> {}
     }
 
 }
 
 class FiniteCallTest {
 
-    lateinit var terms: List<PlainTerm>;
+    lateinit var terms: List<PlainTerm>
     lateinit var call: Predicate.Call
 
     @BeforeEach
@@ -74,7 +75,7 @@ class FiniteCallTest {
 
     @Test
     fun `is empty without terms`() {
-        assertThat(Predicate.call(emptyList())).isSame(emptyCall())
+        assertThat(Predicate.call(emptyList())).isSameAs(emptyCall())
     }
 
     @Test
@@ -97,14 +98,14 @@ class InfiniteCallTest {
 
     @Test
     fun `is not empty`() {
-        assertThat(call.isEmpty).isFalse()
+        assertThat(call.isEmpty).toBe(false)
         assertThat(call.length()).notToBe(0)
     }
 
     @Test
     fun `is infinite`() {
-        assertThat(call.isFinite).isFalse()
-        assertThat(call.toFinite()).isNull()
+        assertThat(call.isFinite).toBe(false)
+        assertThat(call.toFinite()).toBe(null)
         assertThat(call.length()).isLessThan(0)
     }
 

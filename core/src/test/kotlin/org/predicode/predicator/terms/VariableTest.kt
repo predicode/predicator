@@ -1,11 +1,11 @@
 package org.predicode.predicator.terms
 
-import ch.tutteli.atrium.api.cc.en_UK.notToBe
-import ch.tutteli.atrium.api.cc.en_UK.startsWith
-import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.api.cc.en_UK.toThrow
-import ch.tutteli.atrium.assertThat
-import ch.tutteli.atrium.expect
+import ch.tutteli.atrium.api.cc.en_GB.notToBe
+import ch.tutteli.atrium.api.cc.en_GB.startsWith
+import ch.tutteli.atrium.api.cc.en_GB.toBe
+import ch.tutteli.atrium.api.cc.en_GB.toThrow
+import ch.tutteli.atrium.verbs.assertThat
+import ch.tutteli.atrium.verbs.expect
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -14,7 +14,9 @@ import org.predicode.predicator.Knowns
 import org.predicode.predicator.UnknownVariableException
 import org.predicode.predicator.predicates.Predicate
 import org.predicode.predicator.predicates.TestPredicateResolver
-import java.util.*
+import org.predicode.predicator.testutils.isEmpty
+import org.predicode.predicator.testutils.notToBeEmpty
+import org.predicode.predicator.testutils.toContain
 
 class VariableTest {
 
@@ -33,7 +35,7 @@ class VariableTest {
                 namedVariable("variable").match(
                         namedKeyword(
                                 "keyword"), knowns))
-                .toBe(Optional.empty())
+                .isEmpty()
     }
 
     @Test
@@ -42,7 +44,7 @@ class VariableTest {
         val variable = namedVariable("variable")
         val atom = namedAtom("atom")
 
-        assertThat(variable.match(atom, knowns).get()) {
+        assertThat(variable.match(atom, knowns)).notToBeEmpty {
             subject.mapping(variable) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(atom)
@@ -56,7 +58,7 @@ class VariableTest {
         val variable = namedVariable("variable")
         val value = rawValue("value")
 
-        assertThat(variable.match(value, knowns).get()) {
+        assertThat(variable.match(value, knowns)).notToBeEmpty {
             subject.mapping(variable) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(value)
@@ -67,7 +69,7 @@ class VariableTest {
     @Test
     fun `matches placeholder`() {
         assertThat(namedVariable("variable").match(Placeholder.placeholder(), knowns))
-                .toBe(Optional.of(knowns))
+                .toContain(knowns)
     }
 
     @Test
@@ -78,7 +80,7 @@ class VariableTest {
 
         knowns = knowns.map(variable, value).get()
 
-        assertThat(variable.match(value, knowns).get()) {
+        assertThat(variable.match(value, knowns)).notToBeEmpty {
             subject.mapping(variable) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(value)
@@ -93,8 +95,7 @@ class VariableTest {
 
         knowns = knowns.map(variable, rawValue(12345)).get()
 
-        assertThat(variable.match(namedAtom("atom"), knowns))
-                .toBe(Optional.empty())
+        assertThat(variable.match(namedAtom("atom"), knowns)).isEmpty()
     }
 
     @Test
@@ -104,7 +105,7 @@ class VariableTest {
         val queryVar = namedVariable("queryVar")
 
         expect { localVar.match(queryVar, knowns) }
-                .toThrow<UnknownVariableException>()
+                .toThrow<UnknownVariableException> {}
     }
 
     @Test
@@ -115,7 +116,7 @@ class VariableTest {
 
         knowns = Knowns(queryVar)
 
-        assertThat(localVar.match(queryVar, knowns).get()) {
+        assertThat(localVar.match(queryVar, knowns)).notToBeEmpty {
             subject.mapping(localVar) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(queryVar)
@@ -135,9 +136,9 @@ class VariableTest {
 
         val resolution = namedAtom("resolution")
 
-        assertThat(localVar.match(resolution, knowns).get()) {
-            assertThat(subject.resolution(queryVar).value().get())
-                    .toBe(resolution)
+        assertThat(localVar.match(resolution, knowns)).notToBeEmpty {
+            assertThat(subject.resolution(queryVar).value())
+                    .toContain(resolution)
             subject.mapping(localVar) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(queryVar)
@@ -156,9 +157,9 @@ class VariableTest {
                 .resolve(queryVar, resolution).get()
                 .map(localVar, queryVar).get()
 
-        assertThat(localVar.match(resolution, knowns).get()) {
-            assertThat(subject.resolution(queryVar).value().get())
-                    .toBe(resolution)
+        assertThat(localVar.match(resolution, knowns)).notToBeEmpty {
+            assertThat(subject.resolution(queryVar).value())
+                    .toContain(resolution)
             subject.mapping(localVar) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(queryVar)
@@ -176,8 +177,7 @@ class VariableTest {
                 .resolve(queryVar, namedAtom("resolution")).get()
                 .map(localVar, queryVar).get()
 
-        assertThat(localVar.match(namedAtom("other resolution"), knowns))
-                .toBe(Optional.empty())
+        assertThat(localVar.match(namedAtom("other resolution"), knowns)).isEmpty()
     }
 
     @Test
@@ -190,9 +190,9 @@ class VariableTest {
         knowns = Knowns(queryVar1, queryVar2)
                 .map(localVar, queryVar1).get()
 
-        assertThat(localVar.match(queryVar2, knowns).get()) {
+        assertThat(localVar.match(queryVar2, knowns)).notToBeEmpty {
             assertThat(subject.resolution(queryVar1).aliased())
-                    .toBe(Optional.of(queryVar2))
+                    .toContain(queryVar2)
             subject.mapping(localVar) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(queryVar1)
@@ -212,11 +212,11 @@ class VariableTest {
                 .map(localVar, queryVar1).get()
         knowns = localVar.match(queryVar2, knowns).get()
 
-        assertThat(localVar.match(queryVar3, knowns).get()) {
+        assertThat(localVar.match(queryVar3, knowns)).notToBeEmpty {
             assertThat(subject.resolution(queryVar1).aliased())
-                    .toBe(Optional.of(queryVar2))
+                    .toContain(queryVar2)
             assertThat(subject.resolution(queryVar2).aliased())
-                    .toBe(Optional.of(queryVar3))
+                    .toContain(queryVar3)
             subject.mapping(localVar) { mapping, _ ->
                 assertThat(mapping)
                         .toBe(queryVar1)
@@ -233,8 +233,8 @@ class VariableTest {
         knowns = knowns.map(variable, value).get()
         resolver = resolver.withKnowns(knowns)
 
-        assertThat(variable.expand(resolver).get())
-                .toBe(Term.Expansion(value, knowns))
+        assertThat(variable.expand(resolver))
+                .toContain(Term.Expansion(value, knowns))
     }
 
     @Nested

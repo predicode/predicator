@@ -34,24 +34,8 @@
 
     <!-- Testing -->
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ch.tutteli</groupId>
-      <artifactId>atrium-cc-en_UK-robstoll</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.mockk</groupId>
-      <artifactId>mockk</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.projectreactor</groupId>
-      <artifactId>reactor-test</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>predicator-test-utils</artifactId>
     </dependency>
   </dependencies>
 
@@ -63,6 +47,5 @@
       </plugin>
     </plugins>
   </build>
-
 
 </project>
