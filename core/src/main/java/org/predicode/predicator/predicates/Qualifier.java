@@ -6,6 +6,7 @@ import org.predicode.predicator.terms.PlainTerm;
 import org.predicode.predicator.terms.SignatureTerm;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +24,54 @@ import static org.predicode.predicator.terms.PlainTerm.matchTerms;
  */
 public final class Qualifier {
 
+    /**
+     * Creates new qualifier.
+     *
+     * @param terms qualifier terms.
+     *
+     * @return new qualifier instance.
+     */
+    @Nonnull
+    public static Qualifier qualifier(@Nonnull PlainTerm... terms) {
+        return qualifier(Arrays.asList(terms));
+    }
+
+    /**
+     * Creates new qualifier out of a list of terms.
+     *
+     * @param terms a list of qualifier terms.
+     *
+     * @return new qualifier instance.
+     */
+    @Nonnull
+    public static Qualifier qualifier(@Nonnull List<? extends PlainTerm> terms) {
+        return new Qualifier(terms);
+    }
+
+    /**
+     * Creates new qualifier signature.
+     *
+     * @param terms signature terms.
+     *
+     * @return new qualifier signature instance.
+     */
+    @Nonnull
+    public static Signature signature(@Nonnull SignatureTerm... terms) {
+        return signature(Arrays.asList(terms));
+    }
+
+    /**
+     * Creates new qualifier signature out of a list of terms.
+     *
+     * @param terms a list of signature terms.
+     *
+     * @return new qualifier signature instance.
+     */
+    @Nonnull
+    public static Signature signature(@Nonnull List<? extends SignatureTerm> terms) {
+        return new Signature(terms);
+    }
+
     @Nonnull
     private final List<? extends PlainTerm> terms;
 
@@ -31,7 +80,7 @@ public final class Qualifier {
 
     Qualifier(@Nonnull List<? extends PlainTerm> terms) {
         this.terms = unmodifiableList(terms);
-        this.signature = new Signature(
+        this.signature = signature(
                 terms.stream()
                         .map(PlainTerm::getSignature)
                         .collect(Collectors.toList()));

@@ -11,8 +11,7 @@ import reactor.util.function.Tuples;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,21 +32,44 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
 
     private static final Qualifiers NO_QUALIFIERS = new Qualifiers(emptyMap());
     private static final Collector<Qualifier, ?, Qualifiers>
-            QUALIFIERS_COLLECTOR = Collectors.collectingAndThen(
-                    Collectors.toMap(Qualifier::getSignature, UnaryOperator.identity()),
-                    map -> new Qualifiers(unmodifiableMap(map)));
+            TO_QUALIFIERS = Collectors.collectingAndThen(
+                    Collectors.toMap(
+                            Qualifier::getSignature,
+                            UnaryOperator.identity(),
+                            (q1, q2) -> q2),
+                    map -> map.isEmpty() ? noQualifiers() : new Qualifiers(unmodifiableMap(map)));
     private static final ExtraQualifierBuilder EXTRA_QUALIFIER_TERM_REPLACER =
             new ExtraQualifierBuilder();
 
+    /**
+     * Empty qualifiers collection.
+     *
+     * @return a collection not containing any qualifiers.
+     */
     @Nonnull
     public static Qualifiers noQualifiers() {
         return NO_QUALIFIERS;
     }
 
+    /**
+     * Creates a collection consisting of one qualifier.
+     *
+     * @param qualifier a qualifier to build a collection of.
+     *
+     * @return new qualifiers collection.
+     */
+    @Nonnull
     public static Qualifiers oneQualifier(@Nonnull Qualifier qualifier) {
         return new Qualifiers(singletonMap(qualifier.getSignature(), qualifier));
     }
 
+    /**
+     * Creates qualifiers collection.
+     *
+     * @param qualifiers qualifiers of the target collection.
+     *
+     * @return new qualifiers collection.
+     */
     @Nonnull
     public static Qualifiers qualifiers(@Nonnull Qualifier... qualifiers) {
         if (qualifiers.length == 1) {
@@ -56,11 +78,25 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         return Stream.of(qualifiers).collect(toQualifiers());
     }
 
+    /**
+     * Creates qualifiers collection out of collection of qualifiers.
+     *
+     * @param qualifiers a collection of qualifiers.
+     *
+     * @return new qualifiers collection.
+     */
     @Nonnull
     public static Qualifiers qualifiers(@Nonnull Collection<? extends Qualifier> qualifiers) {
         return qualifiers.stream().collect(toQualifiers());
     }
 
+    /**
+     * Creates qualifiers collection out of iterable.
+     *
+     * @param qualifiers an iterable of qualifiers.
+     *
+     * @return new qualifiers collection.
+     */
     @Nonnull
     public static Qualifiers qualifiers(@Nonnull Iterable<? extends Qualifier> qualifiers) {
         return StreamSupport.stream(qualifiers.spliterator(), false).collect(toQualifiers());
@@ -68,13 +104,13 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
 
     @Nonnull
     public static Collector<Qualifier, ?, Qualifiers> toQualifiers() {
-        return QUALIFIERS_COLLECTOR;
+        return TO_QUALIFIERS;
     }
 
     @Nonnull
     private final Map<Qualifier.Signature, Qualifier> map;
 
-    private Qualifiers(@Nonnull Map<Qualifier.Signature, Qualifier> map) {
+    Qualifiers(@Nonnull Map<Qualifier.Signature, Qualifier> map) {
         this.map = map;
     }
 
@@ -224,10 +260,13 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         if (isEmpty() || qualifiers.isEmpty()) {
             return this;
         }
-        return qualifiers.update(
+
+        final Qualifiers result = qualifiers.update(
                 stream().filter(qualifier -> !qualifiers.map().containsKey(qualifier.getSignature())),
                 () -> new HashMap<>(size() - qualifiers.size()),
                 noQualifiers());
+
+        return result.size() == size() ? this : result;
     }
 
     @Nonnull
@@ -235,16 +274,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
             @Nonnull Stream<? extends Qualifier> qualifiers,
             @Nonnull Supplier<HashMap<Qualifier.Signature, Qualifier>> createMap,
             @Nonnull Qualifiers defaultResult) {
-        return qualifiers.collect(
-                Collectors.collectingAndThen(
-                        Collectors.toMap(
-                                Qualifier::getSignature,
-                                UnaryOperator.identity(),
-                                (q1, q2) -> {
-                                    throw new IllegalStateException("Duplicate qualifiers: " + q1 + ", " + q2);
-                                },
-                                createMap),
-                        map -> map.isEmpty() ? defaultResult : new Qualifiers(unmodifiableMap(map))));
+        return qualifiers.collect(new QualifiersCollector(createMap, defaultResult));
     }
 
     /**
@@ -443,5 +473,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
                 @Nonnull Knowns knowns) {
             return knowns.declareLocal(tempVariable("extra qualifier"), Tuples::of);
         }
+
     }
+
 }
