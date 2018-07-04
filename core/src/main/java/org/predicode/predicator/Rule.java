@@ -2,6 +2,8 @@ package org.predicode.predicator;
 
 import org.predicode.predicator.annotations.SamWithReceiver;
 import org.predicode.predicator.predicates.Predicate;
+import org.predicode.predicator.predicates.Qualifier;
+import org.predicode.predicator.predicates.Qualifiers;
 import org.predicode.predicator.terms.PlainTerm;
 import reactor.core.publisher.Flux;
 
@@ -10,6 +12,8 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
 
 
 /**
@@ -102,7 +106,7 @@ public final class Rule {
     public interface Selector {
 
         /**
-         * Selects resolution rules given predicate call matches.
+         * Selects resolution rules the given predicate call matches.
          *
          * @param call predicate call.
          * @param knowns known resolutions.
@@ -174,13 +178,25 @@ public final class Rule {
         @Nonnull
         private final List<? extends PlainTerm> terms;
 
+        @Nonnull
+        private final Qualifiers qualifiers;
+
+        Pattern(@Nonnull List<? extends PlainTerm> terms) {
+            this.terms = terms;
+            this.qualifiers = noQualifiers();
+        }
+
         /**
          * Constructs rule pattern.
          *
          * @param terms a list of terms this pattern consists of.
+         * @param qualifiers a readonly map of qualifiers with their signatures as keys
          */
-        Pattern(@Nonnull List<? extends PlainTerm> terms) {
+        Pattern(
+                @Nonnull List<? extends PlainTerm> terms,
+                @Nonnull Qualifiers qualifiers) {
             this.terms = Collections.unmodifiableList(terms);
+            this.qualifiers = qualifiers;
         }
 
         /**
@@ -191,6 +207,60 @@ public final class Rule {
         @Nonnull
         public final List<? extends PlainTerm> getTerms() {
             return this.terms;
+        }
+
+        /**
+         * Pattern qualifiers.
+         *
+         * @return collection of qualifiers.
+         */
+        @Nonnull
+        public final Qualifiers getQualifiers() {
+            return this.qualifiers;
+        }
+
+        /**
+         * Qualifies this pattern.
+         *
+         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
+         *
+         * @param qualifiers qualifiers to apply to this pattern.
+         *
+         * @return new pattern with the given qualifiers applied on top of this pattern's ones,
+         * or this instance if qualifiers didn't change.
+         */
+        @Nonnull
+        public Pattern qualify(@Nonnull Qualifier... qualifiers) {
+
+            final Qualifiers updated = getQualifiers().set(qualifiers);
+
+            if (updated == getQualifiers()) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
+        }
+
+        /**
+         * Qualifies this pattern.
+         *
+         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
+         *
+         * @param qualifiers qualifiers to apply to this pattern.
+         *
+         * @return new pattern with the given qualifiers applied on top of this pattern's ones,
+         * or this instance if qualifiers didn't change.
+         */
+        @Nonnull
+        public Pattern qualify(@Nonnull Qualifiers qualifiers) {
+
+            final Qualifiers updated = getQualifiers().setAll(qualifiers);
+
+            if (updated == getQualifiers()) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
         }
 
         /**
@@ -244,15 +314,27 @@ public final class Rule {
                 return false;
             }
 
-            final Pattern that = (Pattern) o;
+            final Pattern pattern = (Pattern) o;
 
-            return this.terms.equals(that.terms);
+            if (!this.terms.equals(pattern.terms)) {
+                return false;
+            }
+
+            return this.qualifiers.equals(pattern.qualifiers);
         }
 
         @Override
         public int hashCode() {
-            return this.terms.hashCode();
+
+            int result = this.terms.hashCode();
+
+            result = 31 * result + this.qualifiers.hashCode();
+
+            return result;
         }
+
+        @Nonnull
+        abstract Pattern updateQualifiers(@Nonnull Qualifiers qualifiers);
 
     }
 

@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.grammar.TermPrinter;
 import org.predicode.predicator.predicates.Predicate;
@@ -14,7 +15,8 @@ import java.util.Optional;
  * <p>It can be used everywhere the {@link Variable variable} can be used. But in contrast to variable, it is always
  * ignored.</p>
  */
-public class Placeholder extends PlainTerm {
+@Immutable
+public class Placeholder extends SignatureTerm {
 
     private static final Placeholder PLACEHOLDER = new Placeholder();
 

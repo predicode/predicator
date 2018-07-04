@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.grammar.QuotedName;
 import org.predicode.predicator.grammar.TermPrinter;
@@ -17,7 +18,8 @@ import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
  *
  * <p>Keywords match only themselves. They can not be mapped to variables.</p>
  */
-public abstract class Keyword extends PlainTerm {
+@Immutable
+public abstract class Keyword extends SignatureTerm {
 
     /**
      * A keyword designating definition of expression.
@@ -153,6 +155,7 @@ public abstract class Keyword extends PlainTerm {
      *
      * <p>This is used to distinguish keywords from operators.</p>
      */
+    @Immutable
     public enum Kind {
 
         /**
@@ -193,6 +196,7 @@ public abstract class Keyword extends PlainTerm {
 
     }
 
+    @Immutable
     private static final class NamedKeyword extends Keyword {
 
         NamedKeyword(@Nonnull String name, @Nonnull Kind kind) {

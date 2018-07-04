@@ -1,6 +1,5 @@
 package org.predicode.predicator.predicates;
 
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
 import org.predicode.predicator.annotations.SamWithReceiver;
@@ -10,6 +9,7 @@ import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
@@ -25,6 +25,7 @@ import static java.util.Collections.unmodifiableList;
  */
 @FunctionalInterface
 @SamWithReceiver
+@Immutable
 public interface Predicate {
 
     /**
@@ -171,6 +172,87 @@ public interface Predicate {
         }
 
         /**
+         * Predicate qualifiers.
+         *
+         * @return collection of qualifiers.
+         */
+        @Nonnull
+        public abstract Qualifiers getQualifiers();
+
+        /**
+         * Qualifies this predicate call.
+         *
+         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
+         *
+         * @param qualifiers qualifiers to apply to this predicate call.
+         *
+         * @return new predicate call with the given qualifiers applied on top of this call's ones,
+         * or this instance if qualifiers didn't change.
+         *
+         * @see Qualifiers#set(Qualifier...)
+         */
+        @Nonnull
+        public Call qualify(@Nonnull Qualifier... qualifiers) {
+
+            final Qualifiers updated = getQualifiers().set(qualifiers);
+
+            if (updated == getQualifiers()) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
+        }
+
+        /**
+         * Qualifies this predicate call.
+         *
+         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
+         *
+         * @param qualifiers qualifiers to apply to this predicate call.
+         *
+         * @return new predicate call with the given qualifiers applied on top of this call's ones,
+         * or this instance if qualifiers didn't change.
+         *
+         * @see Qualifiers#setAll(Qualifiers)
+         */
+        @Nonnull
+        public Call qualify(@Nonnull Qualifiers qualifiers) {
+
+            final Qualifiers updated = getQualifiers().setAll(qualifiers);
+
+            if (updated == getQualifiers()) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
+        }
+
+        /**
+         * Fulfill qualifiers of this predicate call.
+         *
+         * <p>Sets each of the given qualifiers, unless the qualifier with the same signature already present in this
+         * collection.</p>
+         *
+         * @param qualifiers qualifiers to set.
+         *
+         * @return new qualifiers collection with the given qualifiers set on top of this ones,
+         * or this instance if qualifiers didn't change.
+         *
+         * @see Qualifiers#fulfill(Qualifiers)
+         */
+        @Nonnull
+        public final Call fulfillQualifiers(@Nonnull Qualifiers qualifiers) {
+
+            final Qualifiers updated = getQualifiers().fulfill(qualifiers);
+
+            if (updated == getQualifiers()) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
+        }
+
+        /**
          * Extracts a prefix of the given {@code length} out of this call.
          *
          * @param length the length of the prefix.
@@ -214,12 +296,16 @@ public interface Predicate {
 
         @Nonnull
         @Override
-        public Flux<Knowns> resolve(@Nonnull Resolver resolver) {
-            return resolver.matchingRules(this, resolver.getKnowns())
+        public final Flux<Knowns> resolve(@Nonnull Resolver resolver) {
+            return resolver.matchingRules(this)
                     .flatMap(match -> match.getRule()
                             .getPredicate()
-                            .resolve(
-                                    resolver.withKnowns(match.getKnowns())));
+                            .resolve(new CustomResolver(
+                                    match.getKnowns(),
+                                    (call, knowns) -> resolver.matchingRules(
+                                            knowns.attr(Qualifiers.class)
+                                                    .map(call::fulfillQualifiers)
+                                                    .orElse(call)))));
         }
 
         @Nullable
@@ -227,6 +313,16 @@ public interface Predicate {
 
         @Nonnull
         abstract Optional<Prefix> buildPrefix(int length);
+
+        /**
+         * Replaces qualifiers of this predicate call.
+         *
+         * @param qualifiers new qualifiers.
+         *
+         * @return new predicate call with the given qualifiers collection.
+         */
+        @Nonnull
+        abstract Call updateQualifiers(@Nonnull Qualifiers qualifiers);
 
     }
 
@@ -263,6 +359,24 @@ public interface Predicate {
         }
 
         @Override
+        @Nonnull
+        public final Qualifiers getQualifiers() {
+            return getSuffix().getQualifiers();
+        }
+
+        @Nonnull
+        @Override
+        public final Prefix qualify(@Nonnull Qualifier... qualifiers) {
+            return (Prefix) super.qualify(qualifiers);
+        }
+
+        @Nonnull
+        @Override
+        public final Prefix qualify(@Nonnull Qualifiers qualifiers) {
+            return (Prefix) super.qualify(qualifiers);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -283,12 +397,17 @@ public interface Predicate {
         @Override
         public int hashCode() {
 
-            int result = this.terms.hashCode();
+            int result = super.hashCode();
 
+            result = 31 * result + this.terms.hashCode();
             result = 31 * result + this.suffix.hashCode();
 
             return result;
         }
+
+        @Nonnull
+        @Override
+        abstract Prefix updateQualifiers(@Nonnull Qualifiers qualifiers);
 
     }
 
@@ -297,7 +416,7 @@ public interface Predicate {
      *
      * <p>Instances of this class expected to be immutable.</p>
      */
-    interface Resolver extends Rule.Selector {
+    interface Resolver {
 
         /**
          * Known variable mappings and resolutions.
@@ -306,27 +425,31 @@ public interface Predicate {
         Knowns getKnowns();
 
         /**
+         * Selects resolution rules the given predicate call matches.
+         *
+         * @param call predicate call.
+         *
+         * @return a {@link Flux} of {@link Rule.Match rule matches}.
+         */
+        @Nonnull
+        Flux<Rule.Match> matchingRules(@Nonnull Predicate.Call call);
+
+        /**
          * Constructs new predicate resolver based on this one with the given variable mappings and resolutions.
          *
          * @param knowns new variable mappings an resolutions.
          */
         default Resolver withKnowns(@Nonnull final Knowns knowns) {
-            return new Resolver() {
+            return new CustomResolver(knowns, (call, kns) -> matchingRules(call));
+        }
 
-                @Nonnull
-                @Override
-                public Knowns getKnowns() {
-                    return knowns;
-                }
-
-                @Nonnull
-                @Override
-                public Flux<Rule.Match> matchingRules(@Nonnull Call call, @Nonnull Knowns knowns) {
-                    return Resolver.this.matchingRules(call, knowns);
-                }
-
-            };
-
+        /**
+         * Constructs new predicate resolver based on this one with the given predicate resolution rule selector.
+         *
+         * @param selector new predicate resolution rule selector.
+         */
+        default Resolver withSelector(@Nonnull Rule.Selector selector) {
+            return new CustomResolver(getKnowns(), selector);
         }
 
     }

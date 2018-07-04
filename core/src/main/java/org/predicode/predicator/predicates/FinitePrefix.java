@@ -59,8 +59,12 @@ final class FinitePrefix extends Predicate.Prefix implements FiniteCall {
 
         final StringBuilder out = new StringBuilder();
 
-        printTerms(getTerms(), out::appendCodePoint);
-        printTerms(suffixTerms(), out::appendCodePoint);
+        printTerms(getTerms(), out);
+        printTerms(suffixTerms(), out);
+        if (getQualifiers().isEmpty()) {
+            out.append(' ');
+            getQualifiers().printQualifiers(out);
+        }
 
         return out.toString();
     }
@@ -113,6 +117,12 @@ final class FinitePrefix extends Predicate.Prefix implements FiniteCall {
     @Nonnull
     private List<? extends PlainTerm> suffixTerms() {
         return this.suffix.allTerms();
+    }
+
+    @Nonnull
+    @Override
+    public FinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
+        return new FinitePrefix(getTerms(), this.suffix.updateQualifiers(qualifiers));
     }
 
 }

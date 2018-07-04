@@ -14,4 +14,7 @@ interface FiniteCall {
     @Nonnull
     List<? extends PlainTerm> allTerms();
 
+    @Nonnull
+    FiniteCall updateQualifiers(@Nonnull Qualifiers qualifiers);
+
 }

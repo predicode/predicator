@@ -1,9 +1,11 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -22,10 +24,43 @@ import java.util.Optional;
  * </ul>
  * </p>
  */
+@Immutable
 public abstract class PlainTerm extends Term {
+
+    @Nonnull
+    public static Optional<Knowns> matchTerms(
+            @Nonnull List<? extends PlainTerm> patternTerms,
+            @Nonnull List<? extends PlainTerm> callTerms,
+            @Nonnull Knowns knowns) {
+        if (patternTerms.size() != callTerms.size()) {
+            return Optional.empty();
+        }
+
+        int index = 0;
+
+        for (PlainTerm term : patternTerms) {
+
+            final Optional<Knowns> match = term.match(callTerms.get(index), knowns);
+
+            if (!match.isPresent()) {
+                return Optional.empty();
+            }
+
+            knowns = match.get();
+            ++index;
+        }
+
+        return Optional.of(knowns);
+    }
 
     PlainTerm() {
     }
+
+    /**
+     * Returns this term's signature.
+     */
+    @Nonnull
+    public abstract SignatureTerm getSignature();
 
     /**
      * Attempts to match against another term.
@@ -50,16 +85,12 @@ public abstract class PlainTerm extends Term {
         return accept((Visitor<P, R>) visitor, p);
     }
 
-    public interface Visitor<P, R> extends MappedTerm.Visitor<P, R> {
+    public interface Visitor<P, R> extends MappedTerm.Visitor<P, R>, SignatureTerm.Visitor<P, R> {
 
         @Nonnull
-        default R visitKeyword(@Nonnull Keyword keyword, @Nonnull P p) {
-            return visitPlain(keyword, p);
-        }
-
-        @Nonnull
-        default R visitPlaceholder(@Nonnull Placeholder placeholder, @Nonnull P p) {
-            return visitPlain(placeholder, p);
+        @Override
+        default R visitSignature(@Nonnull SignatureTerm term, @Nonnull P p) {
+            return visitPlain(term, p);
         }
 
         @Override

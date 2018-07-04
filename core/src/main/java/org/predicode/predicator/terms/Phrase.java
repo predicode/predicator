@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.*;
 import org.predicode.predicator.grammar.TermPrinter;
 import org.predicode.predicator.predicates.Predicate;
@@ -18,6 +19,7 @@ import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 /**
  * A phrase consisting of other terms.
  */
+@Immutable
 public class Phrase extends CompoundTerm implements Predicate {
 
     @Nonnull

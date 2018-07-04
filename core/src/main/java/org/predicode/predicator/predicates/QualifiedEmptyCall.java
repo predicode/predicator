@@ -7,30 +7,26 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
 
 
-final class EmptyCall extends Predicate.Call implements FiniteCall {
-
-    static final EmptyCall INSTANCE = new EmptyCall();
-
-    private EmptyCall() {
-    }
+final class QualifiedEmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
+    private final Qualifiers qualifiers;
+
+    QualifiedEmptyCall(@Nonnull Qualifiers qualifiers) {
+        this.qualifiers = qualifiers;
+    }
+
     @Override
+    @Nonnull
     public Qualifiers getQualifiers() {
-        return noQualifiers();
-    }
-
-    @Override
-    public final int length() {
-        return 0;
+        return this.qualifiers;
     }
 
     @Nonnull
     @Override
-    public final Predicate.Call call() {
+    public Call call() {
         return this;
     }
 
@@ -41,18 +37,32 @@ final class EmptyCall extends Predicate.Call implements FiniteCall {
     }
 
     @Override
+    public int length() {
+        return 0;
+    }
+
+    @Override
     public boolean equals(Object o) {
-        return this == o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final QualifiedEmptyCall that = (QualifiedEmptyCall) o;
+
+        return this.qualifiers.equals(that.qualifiers);
     }
 
     @Override
     public int hashCode() {
-        return System.identityHashCode(this);
+        return this.qualifiers.hashCode();
     }
 
     @Override
     public String toString() {
-        return "()";
+        return this.qualifiers.toString();
     }
 
     @Nonnull
@@ -63,7 +73,7 @@ final class EmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
     @Override
-    Optional<Predicate.Prefix> buildPrefix(int length) {
+    Optional<Prefix> buildPrefix(int length) {
         if (length == 0) {
             return Optional.of(Predicate.prefix(emptyList(), this));
         }
@@ -72,8 +82,8 @@ final class EmptyCall extends Predicate.Call implements FiniteCall {
 
     @Nonnull
     @Override
-    public FinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
-        return new FinitePrefix(emptyList(), new QualifiedEmptyCall(qualifiers));
+    public QualifiedEmptyCall updateQualifiers(@Nonnull Qualifiers qualifiers) {
+        return new QualifiedEmptyCall(qualifiers);
     }
 
 }

@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.grammar.TermPrinter;
 
@@ -15,6 +16,7 @@ import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
  *
  * <p>Atoms match only themselves and can be mapped to variables.</p>
  */
+@Immutable
 public abstract class Atom extends ResolvedTerm {
 
     /**
@@ -107,6 +109,7 @@ public abstract class Atom extends ResolvedTerm {
         return ALWAYS_QUOTE.printName(getName(), ATOM_NAME);
     }
 
+    @Immutable
     private static final class NamedAtom extends Atom {
 
         NamedAtom(@Nonnull String name) {

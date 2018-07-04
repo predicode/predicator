@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Rule;
 import org.predicode.predicator.predicates.Predicate;
 
@@ -13,6 +14,7 @@ import javax.annotation.Nonnull;
  * {@link Term#expand(Predicate.Resolver) expanded} and replaced with {@link PlainTerm plain term}
  * (with {@link Variable#tempVariable(String) temporary variable} typically) prior to being matched.</p>
  */
+@Immutable
 public abstract class CompoundTerm extends Term {
 
     @Nonnull

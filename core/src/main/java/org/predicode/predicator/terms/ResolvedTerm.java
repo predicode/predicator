@@ -1,5 +1,6 @@
 package org.predicode.predicator.terms;
 
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.predicates.Predicate;
 
 import javax.annotation.Nonnull;
@@ -9,6 +10,7 @@ import java.util.Optional;
 /**
  * A plain term a query {@link Variable variable} may resolve to.
  */
+@Immutable
 public abstract class ResolvedTerm extends MappedTerm {
 
     ResolvedTerm() {
@@ -37,7 +39,7 @@ public abstract class ResolvedTerm extends MappedTerm {
         }
 
         @Nonnull
-        default R visitValue(@Nonnull Value value, @Nonnull P p) {
+        default R visitValue(@Nonnull Value<?> value, @Nonnull P p) {
             return visitResolved(value, p);
         }
 

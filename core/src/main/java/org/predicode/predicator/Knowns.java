@@ -1,5 +1,6 @@
 package org.predicode.predicator;
 
+import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.terms.MappedTerm;
 import org.predicode.predicator.terms.PlainTerm;
 import org.predicode.predicator.terms.ResolvedTerm;
@@ -44,6 +45,7 @@ public class Knowns {
      * <p>Query variable names are set only once via constructor. The list of query variables can not change after that.
      * </p>
      */
+    @Nonnull
     private final Map<Variable, Resolution> resolutions;
 
     /**
@@ -53,7 +55,16 @@ public class Knowns {
      * When {@link Variable variable} is used as local variable value, it is the one from {@link #resolutions original
      * query}.</p>
      */
+    @Nonnull
     private final Map<Variable, MappedTerm> mappings;
+
+    /**
+     * Resolution attributes.
+     *
+     * <p>These attributes are wiped out when {@link #startMatching() new rule match is started}.</p>
+     */
+    @Nonnull
+    private final Map<Class<?>, Object> attrs;
 
     private int rev;
 
@@ -66,6 +77,7 @@ public class Knowns {
         this.mappings = emptyMap();
         this.resolutions = Stream.of(variables)
                 .collect(Collectors.toMap(UnaryOperator.identity(), v -> UNRESOLVED));
+        this.attrs = emptyMap();
     }
 
     private Knowns(
@@ -74,20 +86,31 @@ public class Knowns {
             @Nonnull Map<Variable, MappedTerm> mappings) {
         this.resolutions = resolutions;
         this.mappings = mappings;
+        this.attrs = proto.attrs;
+        this.rev = proto.rev;
+    }
+
+    private Knowns(
+            @Nonnull Knowns proto,
+            @Nonnull Map<Class<?>, Object> attrs) {
+        this.resolutions = proto.resolutions;
+        this.mappings = proto.mappings;
+        this.attrs = attrs;
         this.rev = proto.rev;
     }
 
     private Knowns(@Nonnull Knowns proto) {
         this.resolutions = proto.resolutions;
         this.mappings = proto.mappings;
+        this.attrs = emptyMap();
         this.rev = proto.rev + 1;
     }
 
     /**
      * Handles the given local variable mapping.
      *
-     * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
-     * The updated knowns are passed to {@code handler}.
+     * <p>If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+     * The updated knowns are passed to {@code handler}.</p>
      *
      * @param variable a variable, local to resolution rule.
      * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
@@ -109,8 +132,8 @@ public class Knowns {
     /**
      * Handles the given local variable mapping.
      *
-     * If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
-     * The updated knowns are passed to [handler].
+     * <p>If the given variable is not mapped yet, then declares a local variable and maps the given variable to it.
+     * The updated knowns are passed to {@code handler}.</p>
      *
      * @param variable a variable, local to resolution rule.
      * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
@@ -270,10 +293,15 @@ public class Knowns {
     /**
      * Creates knowns to update while matching the rules.
      *
-     * <p>Such knowns contain no mappings.</p>
+     * <p>This is called in the very beginning of {@link Rule#getCondition() rule condition}
+     * {@link Rule.Pattern#match(Predicate.Call, Knowns) match}.</p>
+     *
+     * <p>This wipes out {@link #attr(Class) resolution attributes}. Also, the
+     * {@link #declareLocal(Variable, BiFunction) locals declared} after this call are unique and does not correspond
+     * to the locals declared earlier.</p>
      */
     @Nonnull
-    public Knowns startMatching() {
+    public final Knowns startMatching() {
         return new Knowns(this);
     }
 
@@ -323,6 +351,49 @@ public class Knowns {
 
                             return Optional.of(new Knowns(this, resolutions, this.mappings));
                         }));
+    }
+
+    /**
+     * Returns resolution attribute with the given type.
+     *
+     * @param type a class of resolution attribute.
+     * @param <T> as type of resolution attribute.
+     *
+     * @return optional containing resolution attribute value, or empty optional if there is no such attribute exists.
+     */
+    @Nonnull
+    public final <T> Optional<T> attr(@Nonnull Class<? extends T> type) {
+
+        @SuppressWarnings("unchecked")
+        final T value = (T) this.attrs.get(type);
+
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * Assigns resolution attribute value.
+     *
+     * <p>Resolution attributes are identified by their types. At most one resolution attribute with the given type
+     * exists.</p>
+     *
+     * <p>Resolution attributes are typically assigned during rule pattern match and used by predicates. They are wiped
+     * out when {@link #startMatching() new rule match is started}.</p>
+     *
+     * @param type a class of resolution attribute.
+     * @param value new resolution attribute value.
+     * @param <T> a type of resolution attribute.
+     *
+     * @return a new knowns instance with the given attribute set to the specified value.
+     */
+    @Nonnull
+    public final <T> Knowns attr(@Nonnull Class<? extends T> type, @Nonnull T value) {
+
+        final HashMap<Class<?>, Object> attrs = new HashMap<>(this.attrs.size() + 1);
+
+        attrs.putAll(this.attrs);
+        attrs.put(type, value);
+
+        return new Knowns(this, attrs);
     }
 
     private static final Resolution UNRESOLVED = new Resolution() {

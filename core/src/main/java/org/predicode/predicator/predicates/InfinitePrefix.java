@@ -64,4 +64,10 @@ final class InfinitePrefix extends Predicate.Prefix {
                 });
     }
 
+    @Nonnull
+    @Override
+    InfinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
+        return new InfinitePrefix(getTerms(), getSuffix().updateQualifiers(qualifiers));
+    }
+
 }
