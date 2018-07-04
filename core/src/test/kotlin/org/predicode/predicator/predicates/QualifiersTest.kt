@@ -1,7 +1,7 @@
 package org.predicode.predicator.predicates
 
-import ch.tutteli.atrium.api.cc.en_UK.*
-import ch.tutteli.atrium.assertThat
+import ch.tutteli.atrium.api.cc.en_GB.*
+import ch.tutteli.atrium.verbs.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -34,10 +34,10 @@ class QualifiersTest {
 
     @Test
     fun `build singleton on empty input`() {
-        assertThat(Qualifiers.qualifiers()).isSame(Qualifiers.noQualifiers())
-        assertThat(Qualifiers.qualifiers(emptyList())).isSame(Qualifiers.noQualifiers())
+        assertThat(Qualifiers.qualifiers()).isSameAs(Qualifiers.noQualifiers())
+        assertThat(Qualifiers.qualifiers(emptyList())).isSameAs(Qualifiers.noQualifiers())
         assertThat(Qualifiers.qualifiers(emptyList<Qualifier>() as Iterable<Qualifier>))
-                .isSame(Qualifiers.noQualifiers())
+                .isSameAs(Qualifiers.noQualifiers())
     }
 
     @Nested
@@ -85,7 +85,7 @@ class QualifiersTest {
 
             val qualifiers = Qualifiers.qualifiers(testQualifier())
 
-            assertThat(qualifiers.set()).isSame(qualifiers)
+            assertThat(qualifiers.set()).isSameAs(qualifiers)
         }
 
         @Test
@@ -93,7 +93,7 @@ class QualifiersTest {
 
             val qualifiers = Qualifiers.qualifiers(testQualifier())
 
-            assertThat(qualifiers.set(testQualifier())).isSame(qualifiers)
+            assertThat(qualifiers.set(testQualifier())).isSameAs(qualifiers)
         }
 
     }
@@ -114,7 +114,7 @@ class QualifiersTest {
 
             val qualifiers = Qualifiers.qualifiers(testQualifier())
 
-            assertThat(qualifiers.fulfill(Qualifiers.noQualifiers())).isSame(qualifiers)
+            assertThat(qualifiers.fulfill(Qualifiers.noQualifiers())).isSameAs(qualifiers)
         }
 
         @Test
@@ -142,7 +142,7 @@ class QualifiersTest {
             val initial = Qualifiers.qualifiers(testQualifier())
             val updated = initial.fulfill(Qualifiers.qualifiers(testQualifier1()))
 
-            assertThat(updated).isSame(initial)
+            assertThat(updated).isSameAs(initial)
         }
 
     }
@@ -162,7 +162,7 @@ class QualifiersTest {
         @Test
         fun `excludes nothing from empty qualifiers`() {
             assertThat(Qualifiers.noQualifiers().exclude(Qualifiers.qualifiers(testQualifier1())))
-                    .isSame(Qualifiers.noQualifiers())
+                    .isSameAs(Qualifiers.noQualifiers())
         }
 
         @Test
@@ -171,7 +171,7 @@ class QualifiersTest {
             val qualifiers = Qualifiers.qualifiers(testQualifier(), testQualifier2())
 
             assertThat(qualifiers.exclude(Qualifiers.noQualifiers()))
-                    .isSame(qualifiers)
+                    .isSameAs(qualifiers)
         }
 
         @Test
@@ -180,7 +180,7 @@ class QualifiersTest {
             val qualifiers = Qualifiers.qualifiers(testQualifier())
 
             assertThat(qualifiers.exclude(Qualifiers.qualifiers(testQualifier2())))
-                    .isSame(qualifiers)
+                    .isSameAs(qualifiers)
         }
 
     }

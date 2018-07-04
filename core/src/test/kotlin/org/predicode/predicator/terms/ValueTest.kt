@@ -1,13 +1,15 @@
 package org.predicode.predicator.terms
 
-import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.assertThat
+import ch.tutteli.atrium.api.cc.en_GB.toBe
+import ch.tutteli.atrium.verbs.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.Knowns
 import org.predicode.predicator.predicates.Predicate
 import org.predicode.predicator.predicates.TestPredicateResolver
-import java.util.*
+import org.predicode.predicator.testutils.isEmpty
+import org.predicode.predicator.testutils.notToBeEmpty
+import org.predicode.predicator.testutils.toContain
 
 
 class ValueTest {
@@ -29,14 +31,12 @@ class ValueTest {
 
     @Test
     fun `matches the same value`() {
-        assertThat(rawValue("value1").match(rawValue("value1"), knowns).get())
-                .toBe(knowns)
+        assertThat(rawValue("value1").match(rawValue("value1"), knowns)).toContain(knowns)
     }
 
     @Test
     fun `does not match another value`() {
-        assertThat(rawValue("value1").match(rawValue(123), knowns))
-                .toBe(Optional.empty())
+        assertThat(rawValue("value1").match(rawValue(123), knowns)).isEmpty()
     }
 
     @Test
@@ -47,16 +47,15 @@ class ValueTest {
 
         knowns = Knowns(variable)
 
-        assertThat(value.match(variable, knowns).get()) {
-            assertThat(subject.resolution(variable).value().get())
-                    .toBe(value)
+        assertThat(value.match(variable, knowns)).notToBeEmpty {
+            assertThat(subject.resolution(variable).value()).toContain(value)
         }
     }
 
     @Test
     fun `matches placeholder`() {
         assertThat(rawValue("value").match(Placeholder.placeholder(), knowns))
-                .toBe(Optional.of(knowns))
+                .toContain(knowns)
     }
 
     @Test
@@ -64,10 +63,8 @@ class ValueTest {
 
         val value = rawValue("name")
 
-        assertThat(value.match(namedKeyword("name"), knowns))
-                .toBe(Optional.empty())
-        assertThat(value.match(namedAtom("name"), knowns))
-                .toBe(Optional.empty())
+        assertThat(value.match(namedKeyword("name"), knowns)).isEmpty()
+        assertThat(value.match(namedAtom("name"), knowns)).isEmpty()
     }
 
     @Test
@@ -75,8 +72,8 @@ class ValueTest {
 
         val value = rawValue("name")
 
-        assertThat(value.expand(resolver).get())
-                .toBe(Term.Expansion(value, knowns))
+        assertThat(value.expand(resolver))
+                .toContain(Term.Expansion(value, knowns))
     }
 
 }

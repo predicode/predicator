@@ -1,7 +1,7 @@
 package org.predicode.predicator.grammar
 
-import ch.tutteli.atrium.api.cc.en_UK.toBe
-import ch.tutteli.atrium.assertThat
+import ch.tutteli.atrium.api.cc.en_GB.toBe
+import ch.tutteli.atrium.verbs.assertThat
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.grammar.QuotedName.ATOM_NAME
 import org.predicode.predicator.grammar.QuotedName.KEYWORD_NAME
