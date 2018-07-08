@@ -2,7 +2,6 @@ package org.predicode.predicator.predicates;
 
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
-import org.predicode.predicator.annotations.SamWithReceiver;
 import org.predicode.predicator.terms.PlainTerm;
 import org.predicode.predicator.terms.Term;
 import reactor.core.publisher.Flux;
@@ -24,7 +23,6 @@ import static java.util.Collections.unmodifiableList;
  * are applied to matching rule's {@link Rule#getPredicate() predicate} in order to resolve it.</p>
  */
 @FunctionalInterface
-@SamWithReceiver
 @Immutable
 public interface Predicate {
 

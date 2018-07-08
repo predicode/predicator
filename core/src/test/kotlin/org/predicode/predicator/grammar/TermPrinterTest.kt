@@ -32,9 +32,10 @@ internal class TermPrinterTest {
     fun phrase() {
         assertThat(
                 printTerms(
-                        Phrase(
-                                Keyword.named("keyword"),
-                                Atom.named("atom"))))
+                        Phrase {
+                            k("keyword")
+                            a("atom")
+                        }))
                 .toBe("(keyword 'atom)")
     }
 
@@ -235,9 +236,10 @@ internal class TermPrinterTest {
     @Test
     fun `separates phrases from quoted terms`() {
 
-        val phrase = Phrase(
-                Keyword.named("keyword"),
-                Value.raw("value"))
+        val phrase = Phrase {
+            k("keyword")
+            raw("value")
+        }
 
         assertThat(printTerms(phrase, Atom.named("atom")))
                 .toBe("(keyword [value]) 'atom")
@@ -264,9 +266,10 @@ internal class TermPrinterTest {
     @Test
     fun `separates phrases from keywords`() {
 
-        val phrase = Phrase(
-                Keyword.named("keyword"),
-                Value.raw("value"))
+        val phrase = Phrase {
+            k("keyword")
+            raw("value")
+        }
 
         assertThat(printTerms(phrase, Keyword.named("keyword")))
                 .toBe("(keyword [value]) keyword")
@@ -286,8 +289,8 @@ internal class TermPrinterTest {
     fun `separates phrases`() {
         assertThat(
                 printTerms(
-                        Phrase(Keyword.named("phrase 1")),
-                        Phrase(Keyword.named("phrase 2"))))
+                        Phrase { k("phrase 1") },
+                        Phrase { k("phrase 2") }))
                 .toBe("(phrase 1) (phrase 2)")
     }
 

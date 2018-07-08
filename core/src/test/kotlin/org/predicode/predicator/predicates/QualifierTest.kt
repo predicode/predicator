@@ -13,34 +13,39 @@ class QualifierTest {
         val qualifier = testQualifier()
 
         assertThat(qualifier.signature).toBe(
-                Qualifier.signature(Keyword.named("qualifier1"),
-                        Placeholder.placeholder(),
-                        Keyword.named("keyword2"),
-                        Placeholder.placeholder(),
-                        Placeholder.placeholder(),
-                        Placeholder.placeholder()))
+                qualifierSignature {
+                    k("qualifier1")
+                    p
+                    k("keyword2")
+                    p
+                    p
+                    p
+                })
         assertThat(qualifier.signature).toBe(testQualifier1().signature)
     }
 
 }
 
-fun testQualifier(): Qualifier = Qualifier.of(
-        Keyword.named("qualifier1"),
-        Atom.named("atom"),
-        Keyword.named("keyword2"),
-        Variable.named("variable"),
-        Placeholder.placeholder(),
-        Value.raw(123))
+fun testQualifier(): Qualifier = Qualifier {
+    k("qualifier1")
+    a("atom")
+    k("keyword2")
+    v("variable")
+    p
+    raw(123)
+}
 
-fun testQualifier1(): Qualifier = Qualifier.of(
-        Keyword.named("qualifier1"),
-        Variable.named("variable"),
-        Keyword.named("keyword2"),
-        Atom.named("atom"),
-        Placeholder.placeholder(),
-        Value.raw("abc"))
+fun testQualifier1(): Qualifier = Qualifier {
+    k("qualifier1")
+    v("variable")
+    k("keyword2")
+    a("atom")
+    p
+    raw("abc")
+}
 
-fun testQualifier2(): Qualifier = Qualifier.of(
-        Atom.named("qualifier2"),
-        Keyword.named("keyword3"),
-        Value.raw(321))
+fun testQualifier2(): Qualifier = Qualifier {
+    a("qualifier2")
+    k("keyword3")
+    raw(321)
+}

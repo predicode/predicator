@@ -349,7 +349,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
             });
         }
 
-        qualifiers.add(new Qualifier(terms));
+        qualifiers.add(Qualifier.of(terms));
 
         return knowns;
     }

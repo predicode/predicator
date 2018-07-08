@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.predicode.predicator.annotations.SamWithReceiver;
 import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.predicates.Qualifier;
 import org.predicode.predicator.predicates.Qualifiers;
@@ -100,7 +99,6 @@ public final class Rule {
      * A selector of matching predicate resolution rules.
      */
     @FunctionalInterface
-    @SamWithReceiver
     public interface Selector {
 
         /**

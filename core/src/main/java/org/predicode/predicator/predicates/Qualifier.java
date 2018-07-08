@@ -78,7 +78,7 @@ public final class Qualifier {
     @Nonnull
     private final Signature signature;
 
-    Qualifier(@Nonnull List<? extends PlainTerm> terms) {
+    private Qualifier(@Nonnull List<? extends PlainTerm> terms) {
         this.terms = unmodifiableList(terms);
         this.signature = signature(
                 terms.stream()
