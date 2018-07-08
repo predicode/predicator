@@ -32,17 +32,16 @@ class VariableTest {
     @Test
     fun `does not match keyword`() {
         assertThat(
-                namedVariable("variable").match(
-                        namedKeyword(
-                                "keyword"), knowns))
+                Variable.named("variable").match(
+                        Keyword.named("keyword"), knowns))
                 .isEmpty()
     }
 
     @Test
     fun `maps to atom`() {
 
-        val variable = namedVariable("variable")
-        val atom = namedAtom("atom")
+        val variable = Variable.named("variable")
+        val atom = Atom.named("atom")
 
         assertThat(variable.match(atom, knowns)).notToBeEmpty {
             subject.mapping(variable) { mapping, _ ->
@@ -55,8 +54,8 @@ class VariableTest {
     @Test
     fun `maps to value`() {
 
-        val variable = namedVariable("variable")
-        val value = rawValue("value")
+        val variable = Variable.named("variable")
+        val value = Value.raw("value")
 
         assertThat(variable.match(value, knowns)).notToBeEmpty {
             subject.mapping(variable) { mapping, _ ->
@@ -68,15 +67,15 @@ class VariableTest {
 
     @Test
     fun `matches placeholder`() {
-        assertThat(namedVariable("variable").match(Placeholder.placeholder(), knowns))
+        assertThat(Variable.named("variable").match(Placeholder.placeholder(), knowns))
                 .toContain(knowns)
     }
 
     @Test
     fun `does not remap the same term`() {
 
-        val variable = namedVariable("variable")
-        val value = rawValue(12345)
+        val variable = Variable.named("variable")
+        val value = Value.raw(12345)
 
         knowns = knowns.map(variable, value).get()
 
@@ -91,18 +90,18 @@ class VariableTest {
     @Test
     fun `does not remap to another term`() {
 
-        val variable = namedVariable("variable")
+        val variable = Variable.named("variable")
 
-        knowns = knowns.map(variable, rawValue(12345)).get()
+        knowns = knowns.map(variable, Value.raw(12345)).get()
 
-        assertThat(variable.match(namedAtom("atom"), knowns)).isEmpty()
+        assertThat(variable.match(Atom.named("atom"), knowns)).isEmpty()
     }
 
     @Test
     fun `fails to map to unknown query variable`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar = namedVariable("queryVar")
+        val localVar = Variable.named("localVar")
+        val queryVar = Variable.named("queryVar")
 
         expect { localVar.match(queryVar, knowns) }
                 .toThrow<UnknownVariableException> {}
@@ -111,8 +110,8 @@ class VariableTest {
     @Test
     fun `maps to query variable`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar = namedVariable("queryVar")
+        val localVar = Variable.named("localVar")
+        val queryVar = Variable.named("queryVar")
 
         knowns = Knowns(queryVar)
 
@@ -127,14 +126,14 @@ class VariableTest {
     @Test
     fun `resolves already mapped query variable`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar = namedVariable("queryVar")
+        val localVar = Variable.named("localVar")
+        val queryVar = Variable.named("queryVar")
 
         knowns = Knowns(queryVar)
                 .map(localVar, queryVar)
                 .get()
 
-        val resolution = namedAtom("resolution")
+        val resolution = Atom.named("resolution")
 
         assertThat(localVar.match(resolution, knowns)).notToBeEmpty {
             assertThat(subject.resolution(queryVar).value())
@@ -149,9 +148,9 @@ class VariableTest {
     @Test
     fun `does not re-resolve mapped query variable to the same term`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar = namedVariable("queryVar")
-        val resolution = namedAtom("resolution")
+        val localVar = Variable.named("localVar")
+        val queryVar = Variable.named("queryVar")
+        val resolution = Atom.named("resolution")
 
         knowns = Knowns(queryVar)
                 .resolve(queryVar, resolution).get()
@@ -170,22 +169,22 @@ class VariableTest {
     @Test
     fun `does not resolve mapped query variable to another term`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar = namedVariable("queryVar")
+        val localVar = Variable.named("localVar")
+        val queryVar = Variable.named("queryVar")
 
         knowns = Knowns(queryVar)
-                .resolve(queryVar, namedAtom("resolution")).get()
+                .resolve(queryVar, Atom.named("resolution")).get()
                 .map(localVar, queryVar).get()
 
-        assertThat(localVar.match(namedAtom("other resolution"), knowns)).isEmpty()
+        assertThat(localVar.match(Atom.named("other resolution"), knowns)).isEmpty()
     }
 
     @Test
     fun `aliases already mapped query variable`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar1 = namedVariable("queryVar1")
-        val queryVar2 = namedVariable("queryVar2")
+        val localVar = Variable.named("localVar")
+        val queryVar1 = Variable.named("queryVar1")
+        val queryVar2 = Variable.named("queryVar2")
 
         knowns = Knowns(queryVar1, queryVar2)
                 .map(localVar, queryVar1).get()
@@ -203,10 +202,10 @@ class VariableTest {
     @Test
     fun `deep aliases already mapped query variable`() {
 
-        val localVar = namedVariable("localVar")
-        val queryVar1 = namedVariable("queryVar1")
-        val queryVar2 = namedVariable("queryVar2")
-        val queryVar3 = namedVariable("queryVar3")
+        val localVar = Variable.named("localVar")
+        val queryVar1 = Variable.named("queryVar1")
+        val queryVar2 = Variable.named("queryVar2")
+        val queryVar3 = Variable.named("queryVar3")
 
         knowns = Knowns(queryVar1, queryVar2, queryVar3)
                 .map(localVar, queryVar1).get()
@@ -227,8 +226,8 @@ class VariableTest {
     @Test
     fun `expands to mapping`() {
 
-        val variable = namedVariable("variable")
-        val value = rawValue(12345)
+        val variable = Variable.named("variable")
+        val value = Value.raw(12345)
 
         knowns = knowns.map(variable, value).get()
         resolver = resolver.withKnowns(knowns)
@@ -244,17 +243,17 @@ class VariableTest {
         @Test
         fun `compared by identity`() {
 
-            val variable = tempVariable("t")
+            val variable = Variable.temp("t")
 
             assertThat(variable).toBe(variable)
-            assertThat(variable).notToBe(tempVariable("t"))
+            assertThat(variable).notToBe(Variable.temp("t"))
         }
 
         @Test
         fun `has a name with the given prefix`() {
 
             val prefix = "temp variable prefix"
-            val variable = tempVariable(prefix)
+            val variable = Variable.temp(prefix)
 
             assertThat(variable.name)
                     .startsWith("$prefix ")

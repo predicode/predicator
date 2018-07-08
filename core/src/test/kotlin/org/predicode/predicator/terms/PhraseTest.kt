@@ -24,8 +24,8 @@ class PhraseTest {
     @Test
     fun `string representation`() {
         assertThat(Phrase(
-                namedKeyword("keyword"),
-                namedVariable("variable")).toString())
+                Keyword.named("keyword"),
+                Variable.named("variable")).toString())
                 .toBe("keyword _variable")
     }
 

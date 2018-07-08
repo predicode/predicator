@@ -19,7 +19,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Collections.*;
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
-import static org.predicode.predicator.terms.Variable.tempVariable;
+import static org.predicode.predicator.terms.Variable.temp;
 
 
 /**
@@ -471,7 +471,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         public Tuple2<PlainTerm, Knowns> visitPlain(
                 @Nonnull PlainTerm term,
                 @Nonnull Knowns knowns) {
-            return knowns.declareLocal(tempVariable("extra qualifier"), Tuples::of);
+            return knowns.declareLocal(temp("extra qualifier"), Tuples::of);
         }
 
     }

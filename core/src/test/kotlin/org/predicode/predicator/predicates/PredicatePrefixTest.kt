@@ -7,8 +7,8 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.predicode.predicator.terms.Keyword
 import org.predicode.predicator.terms.PlainTerm
-import org.predicode.predicator.terms.namedKeyword
 import org.predicode.predicator.testutils.isEmpty
 import java.util.*
 import java.util.function.IntFunction
@@ -22,9 +22,9 @@ class FinitePrefixTest {
 
     @BeforeEach
     fun create() {
-        suffixTerms = listOf(namedKeyword("suffix1"), namedKeyword("suffix2"))
+        suffixTerms = listOf(Keyword.named("suffix1"), Keyword.named("suffix2"))
         suffix = Predicate.call(suffixTerms)
-        prefixTerms = listOf(namedKeyword("prefix1"), namedKeyword("prefix2"))
+        prefixTerms = listOf(Keyword.named("prefix1"), Keyword.named("prefix2"))
         prefix = Predicate.prefix(prefixTerms, suffix)
     }
 
@@ -125,7 +125,7 @@ class InfinitePrefixTest {
     fun create() {
         suffixPrefix = mockk("suffixPrefix")
         suffix = Predicate.infiniteCall(suffixPrefix)
-        prefixTerms = listOf(namedKeyword("prefix1"), namedKeyword("prefix2"))
+        prefixTerms = listOf(Keyword.named("prefix1"), Keyword.named("prefix2"))
         prefix = Predicate.prefix(prefixTerms, suffix)
     }
 
@@ -160,7 +160,7 @@ class InfinitePrefixTest {
     @Test
     fun `builds longer prefix with infinite suffix`() {
 
-        val suffixTerms = listOf(namedKeyword("suffix1"))
+        val suffixTerms = listOf(Keyword.named("suffix1"))
         val suffixSuffix = Predicate.infiniteCall(mockk("suffixSuffix"))
 
         every { suffixPrefix.apply(1) }.returns(Optional.of(Predicate.prefix(suffixTerms, suffixSuffix)))
@@ -174,7 +174,7 @@ class InfinitePrefixTest {
     @Test
     fun `builds longer prefix with finite suffix`() {
 
-        val suffixTerms = listOf(namedKeyword("suffix1"), namedKeyword("suffix2"))
+        val suffixTerms = listOf(Keyword.named("suffix1"), Keyword.named("suffix2"))
 
         every { suffixPrefix.apply(1) }.returns(Optional.of(Predicate.prefix(
                 suffixTerms.slice(0..0),

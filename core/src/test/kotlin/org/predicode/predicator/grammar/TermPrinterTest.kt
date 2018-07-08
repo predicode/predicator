@@ -4,27 +4,27 @@ import ch.tutteli.atrium.api.cc.en_GB.toBe
 import ch.tutteli.atrium.verbs.assertThat
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.terms.*
-import org.predicode.predicator.terms.Keyword.infixOperator
-import org.predicode.predicator.terms.Keyword.prefixOperator
+import org.predicode.predicator.terms.Keyword.infix
+import org.predicode.predicator.terms.Keyword.prefix
 
 
 internal class TermPrinterTest {
 
     @Test
     fun keyword() {
-        assertThat(printTerms(namedKeyword("keyword name")))
+        assertThat(printTerms(Keyword.named("keyword name")))
                 .toBe("keyword name")
     }
 
     @Test
     fun atom() {
-        assertThat(printTerms(namedAtom("atom name")))
+        assertThat(printTerms(Atom.named("atom name")))
                 .toBe("'atom name")
     }
 
     @Test
     fun variable() {
-        assertThat(printTerms(namedVariable("variable name")))
+        assertThat(printTerms(Variable.named("variable name")))
                 .toBe("_variable name")
     }
 
@@ -33,58 +33,58 @@ internal class TermPrinterTest {
         assertThat(
                 printTerms(
                         Phrase(
-                                namedKeyword("keyword"),
-                                namedAtom("atom"))))
+                                Keyword.named("keyword"),
+                                Atom.named("atom"))))
                 .toBe("(keyword 'atom)")
     }
 
     @Test
     fun `closes quotes before keywords`() {
         assertThat(printTerms(
-                namedAtom("atom"),
-                namedKeyword("keyword")))
+                Atom.named("atom"),
+                Keyword.named("keyword")))
                 .toBe("'atom' keyword")
         assertThat(
                 printTerms(
-                        namedVariable("variable"),
-                        namedKeyword("keyword")))
+                        Variable.named("variable"),
+                        Keyword.named("keyword")))
                 .toBe("_variable_ keyword")
     }
 
     @Test
     fun `appends infix operators`() {
         assertThat(printTerms(
-                namedAtom("atom"),
-                infixOperator("op")))
+                Atom.named("atom"),
+                infix("op")))
                 .toBe("'atom'op")
         assertThat(
                 printTerms(
-                        namedVariable("variable"),
-                        infixOperator("op")))
+                        Variable.named("variable"),
+                        infix("op")))
                 .toBe("_variable_op")
     }
 
     @Test
     fun `separates keywords`() {
         assertThat(printTerms(
-                namedKeyword("first"),
-                namedKeyword("second")))
+                Keyword.named("first"),
+                Keyword.named("second")))
                 .toBe("first second")
     }
 
     @Test
     fun `separates keyword and operator`() {
         assertThat(printTerms(
-                namedKeyword("first"),
-                infixOperator("second")))
+                Keyword.named("first"),
+                infix("second")))
                 .toBe("first`second")
         assertThat(printTerms(
-                prefixOperator("first"),
-                namedKeyword("second")))
+                prefix("first"),
+                Keyword.named("second")))
                 .toBe("first`second")
         assertThat(printTerms(
-                prefixOperator("first"),
-                infixOperator("second")))
+                prefix("first"),
+                infix("second")))
                 .toBe("first`second")
     }
 
@@ -92,15 +92,15 @@ internal class TermPrinterTest {
     fun `after placeholder`() {
         assertThat(printTerms(
                 Placeholder.placeholder(),
-                namedAtom("second")))
+                Atom.named("second")))
                 .toBe("_ 'second")
         assertThat(printTerms(
                 Placeholder.placeholder(),
-                namedVariable("second")))
+                Variable.named("second")))
                 .toBe("_ _second")
         assertThat(printTerms(
                 Placeholder.placeholder(),
-                rawValue("second")))
+                Value.raw("second")))
                 .toBe("_ [second]")
         assertThat(printTerms(
                 Placeholder.placeholder(),
@@ -108,26 +108,26 @@ internal class TermPrinterTest {
                 .toBe("_ _")
         assertThat(printTerms(
                 Placeholder.placeholder(),
-                Phrase(namedKeyword("second"))))
+                Phrase(Keyword.named("second"))))
                 .toBe("_ (second)")
     }
 
     @Test
     fun `before placeholder`() {
         assertThat(printTerms(
-                namedAtom("first"),
+                Atom.named("first"),
                 Placeholder.placeholder()))
                 .toBe("'first _")
         assertThat(printTerms(
-                namedVariable("first"),
+                Variable.named("first"),
                 Placeholder.placeholder()))
                 .toBe("_first _")
         assertThat(printTerms(
-                rawValue("first"),
+                Value.raw("first"),
                 Placeholder.placeholder()))
                 .toBe("[first] _")
         assertThat(printTerms(
-                Phrase(namedKeyword("first")),
+                Phrase(Keyword.named("first")),
                 Placeholder.placeholder()))
                 .toBe("(first) _")
     }
@@ -135,100 +135,100 @@ internal class TermPrinterTest {
     @Test
     fun `prefix operator`() {
         assertThat(printTerms(
-                prefixOperator("first"),
-                namedAtom("second")))
+                prefix("first"),
+                Atom.named("second")))
                 .toBe("first'second")
         assertThat(printTerms(
-                prefixOperator("first"),
-                namedVariable("second")))
+                prefix("first"),
+                Variable.named("second")))
                 .toBe("first_second")
         assertThat(printTerms(
-                prefixOperator("first"),
-                rawValue("second")))
+                prefix("first"),
+                Value.raw("second")))
                 .toBe("first[second]")
         assertThat(printTerms(
-                prefixOperator("first"),
+                prefix("first"),
                 Placeholder.placeholder()))
                 .toBe("first`_")
         assertThat(printTerms(
-                prefixOperator("first"),
-                Phrase(namedKeyword("second"))))
+                prefix("first"),
+                Phrase(Keyword.named("second"))))
                 .toBe("first(second)")
     }
 
     @Test
     fun `infix operator`() {
         assertThat(printTerms(
-                namedAtom("first"),
-                infixOperator("second")))
+                Atom.named("first"),
+                infix("second")))
                 .toBe("'first'second")
         assertThat(printTerms(
-                namedVariable("first"),
-                infixOperator("second")))
+                Variable.named("first"),
+                infix("second")))
                 .toBe("_first_second")
         assertThat(printTerms(
-                rawValue("first"),
-                infixOperator("second")))
+                Value.raw("first"),
+                infix("second")))
                 .toBe("[first]second")
         assertThat(printTerms(
                 Placeholder.placeholder(),
-                infixOperator("second")))
+                infix("second")))
                 .toBe("_`second")
         assertThat(printTerms(
-                Phrase(namedKeyword("first")),
-                infixOperator("second")))
+                Phrase(Keyword.named("first")),
+                infix("second")))
                 .toBe("(first)second")
     }
 
     @Test
     fun `separates keywords from quoted terms`() {
         assertThat(printTerms(
-                namedKeyword("keyword"),
-                namedAtom("atom")))
+                Keyword.named("keyword"),
+                Atom.named("atom")))
                 .toBe("keyword 'atom")
         assertThat(printTerms(
-                namedAtom("atom"),
-                namedKeyword("keyword")))
+                Atom.named("atom"),
+                Keyword.named("keyword")))
                 .toBe("'atom' keyword")
         assertThat(printTerms(
-                namedKeyword("keyword"),
-                namedVariable("variable")))
+                Keyword.named("keyword"),
+                Variable.named("variable")))
                 .toBe("keyword _variable")
         assertThat(printTerms(
-                namedVariable("variable"),
-                namedKeyword("keyword")))
+                Variable.named("variable"),
+                Keyword.named("keyword")))
                 .toBe("_variable_ keyword")
     }
 
     @Test
     fun `does not double-quote terms`() {
         assertThat(printTerms(
-                namedAtom("atom+"),
-                namedKeyword("keyword")))
+                Atom.named("atom+"),
+                Keyword.named("keyword")))
                 .toBe("'atom+' keyword")
         assertThat(printTerms(
-                namedVariable("variable+"),
-                namedKeyword("keyword")))
+                Variable.named("variable+"),
+                Keyword.named("keyword")))
                 .toBe("_variable+_ keyword")
     }
 
     @Test
     fun `separates values from quoted terms`() {
         assertThat(printTerms(
-                rawValue("value"),
-                namedAtom("atom")))
+                Value.raw("value"),
+                Atom.named("atom")))
                 .toBe("[value] 'atom")
         assertThat(printTerms(
-                namedAtom("atom"),
-                rawValue("value")))
+                Atom.named("atom"),
+                Value.raw("value")))
                 .toBe("'atom [value]")
         assertThat(printTerms(
-                rawValue("value"),
-                namedVariable("variable")))
+                Value.raw("value"),
+                Variable.named("variable")))
                 .toBe("[value] _variable")
         assertThat(printTerms(
-                namedVariable("variable"),
-                rawValue("value")))
+                Variable.named("variable"),
+                Value.raw("value")))
                 .toBe("_variable [value]")
     }
 
@@ -236,28 +236,28 @@ internal class TermPrinterTest {
     fun `separates phrases from quoted terms`() {
 
         val phrase = Phrase(
-                namedKeyword("keyword"),
-                rawValue("value"))
+                Keyword.named("keyword"),
+                Value.raw("value"))
 
-        assertThat(printTerms(phrase, namedAtom("atom")))
+        assertThat(printTerms(phrase, Atom.named("atom")))
                 .toBe("(keyword [value]) 'atom")
-        assertThat(printTerms(namedAtom("atom"), phrase))
+        assertThat(printTerms(Atom.named("atom"), phrase))
                 .toBe("'atom (keyword [value])")
-        assertThat(printTerms(phrase, namedVariable("variable")))
+        assertThat(printTerms(phrase, Variable.named("variable")))
                 .toBe("(keyword [value]) _variable")
-        assertThat(printTerms(namedVariable("variable"), phrase))
+        assertThat(printTerms(Variable.named("variable"), phrase))
                 .toBe("_variable (keyword [value])")
     }
 
     @Test
     fun `separates values from keywords`() {
         assertThat(printTerms(
-                rawValue("value"),
-                namedKeyword("keyword")))
+                Value.raw("value"),
+                Keyword.named("keyword")))
                 .toBe("[value] keyword")
         assertThat(printTerms(
-                namedKeyword("keyword"),
-                rawValue("value")))
+                Keyword.named("keyword"),
+                Value.raw("value")))
                 .toBe("keyword [value]")
     }
 
@@ -265,20 +265,20 @@ internal class TermPrinterTest {
     fun `separates phrases from keywords`() {
 
         val phrase = Phrase(
-                namedKeyword("keyword"),
-                rawValue("value"))
+                Keyword.named("keyword"),
+                Value.raw("value"))
 
-        assertThat(printTerms(phrase, namedKeyword("keyword")))
+        assertThat(printTerms(phrase, Keyword.named("keyword")))
                 .toBe("(keyword [value]) keyword")
-        assertThat(printTerms(namedKeyword("keyword"), phrase))
+        assertThat(printTerms(Keyword.named("keyword"), phrase))
                 .toBe("keyword (keyword [value])")
     }
 
     @Test
     fun `separates values`() {
         assertThat(printTerms(
-                rawValue("first"),
-                rawValue("second")))
+                Value.raw("first"),
+                Value.raw("second")))
                 .toBe("[first] [second]")
     }
 
@@ -286,8 +286,8 @@ internal class TermPrinterTest {
     fun `separates phrases`() {
         assertThat(
                 printTerms(
-                        Phrase(namedKeyword("phrase 1")),
-                        Phrase(namedKeyword("phrase 2"))))
+                        Phrase(Keyword.named("phrase 1")),
+                        Phrase(Keyword.named("phrase 2"))))
                 .toBe("(phrase 1) (phrase 2)")
     }
 

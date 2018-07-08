@@ -7,8 +7,8 @@ import ch.tutteli.atrium.verbs.assertThat
 import ch.tutteli.atrium.verbs.expect
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.predicode.predicator.terms.namedAtom
-import org.predicode.predicator.terms.namedVariable
+import org.predicode.predicator.terms.Atom
+import org.predicode.predicator.terms.Variable
 import org.predicode.predicator.testutils.isEmpty
 import org.predicode.predicator.testutils.notToBeEmpty
 import org.predicode.predicator.testutils.toContain
@@ -25,17 +25,17 @@ class KnownsTest {
             val knowns = Knowns()
 
             expect { knowns.resolve(
-                    namedVariable("unknown"),
-                    namedAtom("resolution")) }
+                    Variable.named("unknown"),
+                    Atom.named("resolution")) }
                     .toThrow<UnknownVariableException> {}
         }
 
         @Test
         fun `resolves variable`() {
 
-            val variable = namedVariable("variable")
+            val variable = Variable.named("variable")
             val knowns = Knowns(variable)
-            val resolution = namedAtom("resolution")
+            val resolution = Atom.named("resolution")
 
             assertThat(knowns.resolve(variable, resolution)).notToBeEmpty {
                 assertThat(subject.resolution(variable).value())
@@ -46,8 +46,8 @@ class KnownsTest {
         @Test
         fun `does not re-resolve variable to the same resolution`() {
 
-            val variable = namedVariable("variable")
-            val resolution = namedAtom("resolution")
+            val variable = Variable.named("variable")
+            val resolution = Atom.named("resolution")
             val knowns = Knowns(variable).resolve(variable, resolution).get()
 
             assertThat(knowns.resolve(variable, resolution)).notToBeEmpty {
@@ -60,20 +60,20 @@ class KnownsTest {
         @Test
         fun `does not update existing resolution`() {
 
-            val variable = namedVariable("variable")
-            val resolution = namedAtom("resolution")
+            val variable = Variable.named("variable")
+            val resolution = Atom.named("resolution")
             val knowns = Knowns(variable).resolve(variable, resolution).get()
 
-            assertThat(knowns.resolve(variable, namedAtom("other"))).isEmpty()
+            assertThat(knowns.resolve(variable, Atom.named("other"))).isEmpty()
         }
 
         @Test
         fun `aliases already resolved variable`() {
 
-            val localVar = namedVariable("localVar")
-            val queryVar1 = namedVariable("queryVar1")
-            val queryVar2 = namedVariable("queryVar2")
-            val resolution = namedAtom("resolution")
+            val localVar = Variable.named("localVar")
+            val queryVar1 = Variable.named("queryVar1")
+            val queryVar2 = Variable.named("queryVar2")
+            val resolution = Atom.named("resolution")
 
             var knowns = Knowns(queryVar1, queryVar2)
                     .map(localVar, queryVar1).get()

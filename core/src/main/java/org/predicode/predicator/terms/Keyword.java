@@ -22,17 +22,6 @@ import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
 public abstract class Keyword extends SignatureTerm {
 
     /**
-     * A keyword designating definition of expression.
-     *
-     * <p>This is used to build phrase expansion rules. When expanding a phrase, it is replaced by (temporary) variable,
-     * while predicate constructed to find a definition rule.</p>
-     *
-     * <p>A definition rule pattern consists of a variable, followed by this keyword, followed by expression terms.</p>
-     */
-    @Nonnull
-    public static Keyword DEFINITION_KEYWORD = new Keyword(":=") {};
-
-    /**
      * Creates a keyword with the given name.
      *
      * <p>This keyword matches only keywords constructed with this function with the same {@code name}</p>.
@@ -42,7 +31,7 @@ public abstract class Keyword extends SignatureTerm {
      * @return new {@link Kind#KEYWORD ordinal} keyword.
      */
     @Nonnull
-    public static Keyword namedKeyword(@Nonnull String name) {
+    public static Keyword named(@Nonnull String name) {
         return new NamedKeyword(name, Kind.KEYWORD);
     }
 
@@ -56,7 +45,7 @@ public abstract class Keyword extends SignatureTerm {
      * @return new {@link Kind#PREFIX_OPERATOR prefix operator}.
      */
     @Nonnull
-    public static Keyword prefixOperator(@Nonnull String name) {
+    public static Keyword prefix(@Nonnull String name) {
         return new NamedKeyword(name, Kind.PREFIX_OPERATOR);
     }
 
@@ -70,8 +59,21 @@ public abstract class Keyword extends SignatureTerm {
      * @return new {@link Kind#INFIX_OPERATOR infix operator}.
      */
     @Nonnull
-    public static Keyword infixOperator(@Nonnull String name) {
+    public static Keyword infix(@Nonnull String name) {
         return new NamedKeyword(name, Kind.INFIX_OPERATOR);
+    }
+
+    /**
+     * A keyword designating definition of expression.
+     *
+     * <p>This is used to build phrase expansion rules. When expanding a phrase, it is replaced by (temporary) variable,
+     * while predicate constructed to find a definition rule.</p>
+     *
+     * <p>A definition rule pattern consists of a variable, followed by this keyword, followed by expression terms.</p>
+     */
+    @Nonnull
+    public static Keyword definition() {
+        return Definition.INSTANCE;
     }
 
     @Nonnull
@@ -192,40 +194,6 @@ public abstract class Keyword extends SignatureTerm {
         @Nonnull
         public final QuotedName getQuoted() {
             return this.quoted;
-        }
-
-    }
-
-    @Immutable
-    private static final class NamedKeyword extends Keyword {
-
-        NamedKeyword(@Nonnull String name, @Nonnull Kind kind) {
-            super(name, kind);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            final NamedKeyword operator = (NamedKeyword) o;
-
-            if (!getName().equals(operator.getName())) {
-                return false;
-            }
-
-            return getKind() == operator.getKind();
-        }
-
-        @Override
-        public int hashCode() {
-            int result = getName().hashCode();
-            result = 31 * result + getKind().hashCode();
-            return result;
         }
 
     }

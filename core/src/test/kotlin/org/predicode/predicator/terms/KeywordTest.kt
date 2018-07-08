@@ -24,40 +24,40 @@ class KeywordTest {
 
     @Test
     fun `string representation`() {
-        assertThat(namedKeyword("keyword").toString())
+        assertThat(Keyword.named("keyword").toString())
                 .toBe("`keyword`")
     }
 
     @Test
     fun `matches keyword with the same name`() {
-        assertThat(namedKeyword("name1").match(namedKeyword("name1"), knowns))
+        assertThat(Keyword.named("name1").match(Keyword.named("name1"), knowns))
                 .toContain(knowns)
     }
 
     @Test
     fun `does not match keyword with another name`() {
-        assertThat(namedKeyword("name1").match(namedKeyword("name2"), knowns)).isEmpty()
+        assertThat(Keyword.named("name1").match(Keyword.named("name2"), knowns)).isEmpty()
     }
 
     @Test
     fun `does not match placeholder`() {
-        assertThat(namedKeyword("name").match(Placeholder.placeholder(), knowns)).isEmpty()
+        assertThat(Keyword.named("name").match(Placeholder.placeholder(), knowns)).isEmpty()
     }
 
     @Test
     fun `does not match other terms`() {
 
-        val keyword = namedKeyword("name")
+        val keyword = Keyword.named("name")
 
-        assertThat(keyword.match(namedAtom("name"), knowns)).isEmpty()
-        assertThat(keyword.match(rawValue(123), knowns)).isEmpty()
-        assertThat(keyword.match(namedVariable("name"), knowns)).isEmpty()
+        assertThat(keyword.match(Atom.named("name"), knowns)).isEmpty()
+        assertThat(keyword.match(Value.raw(123), knowns)).isEmpty()
+        assertThat(keyword.match(Variable.named("name"), knowns)).isEmpty()
     }
 
     @Test
     fun `expands to itself`() {
 
-        val keyword = namedKeyword("name")
+        val keyword = Keyword.named("name")
 
         assertThat(keyword.expand(resolver))
                 .toContain(Term.Expansion(keyword, knowns))

@@ -25,32 +25,32 @@ class AtomTest {
 
     @Test
     fun `string representation`() {
-        assertThat(namedAtom("atom").toString())
+        assertThat(Atom.named("atom").toString())
                 .toBe("'atom'")
     }
 
     @Test
     fun `matches atom with the same name`() {
-        assertThat(namedAtom("name1").match(namedAtom("name1"), knowns))
+        assertThat(Atom.named("name1").match(Atom.named("name1"), knowns))
                 .toContain(knowns)
     }
 
     @Test
     fun `matches placeholder`() {
-        assertThat(namedAtom("name1").match(Placeholder.placeholder(), knowns))
+        assertThat(Atom.named("name1").match(Placeholder.placeholder(), knowns))
                 .toContain(knowns)
     }
 
     @Test
     fun `does not match atom with another name`() {
-        assertThat(namedAtom("name1").match(namedAtom("name2"), knowns)).isEmpty()
+        assertThat(Atom.named("name1").match(Atom.named("name2"), knowns)).isEmpty()
     }
 
     @Test
     fun `resolves variable`() {
 
-        val atom = namedAtom("name")
-        val variable = namedVariable("var")
+        val atom = Atom.named("name")
+        val variable = Variable.named("var")
 
         knowns = Knowns(variable)
 
@@ -63,17 +63,17 @@ class AtomTest {
     @Test
     fun `does not match other terms`() {
 
-        val atom = namedAtom("name")
+        val atom = Atom.named("name")
 
-        assertThat(atom.match(namedKeyword("name"), knowns)).isEmpty()
-        assertThat(atom.match(rawValue(123), knowns)).isEmpty()
+        assertThat(atom.match(Keyword.named("name"), knowns)).isEmpty()
+        assertThat(atom.match(Value.raw(123), knowns)).isEmpty()
 
     }
 
     @Test
     fun `expands to itself`() {
 
-        val atom = namedAtom("name")
+        val atom = Atom.named("name")
 
         assertThat(atom.expand(resolver))
                 .toContain(Term.Expansion(atom, knowns))
