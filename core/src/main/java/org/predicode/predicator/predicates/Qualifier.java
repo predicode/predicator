@@ -32,8 +32,8 @@ public final class Qualifier {
      * @return new qualifier instance.
      */
     @Nonnull
-    public static Qualifier qualifier(@Nonnull PlainTerm... terms) {
-        return qualifier(Arrays.asList(terms));
+    public static Qualifier of(@Nonnull PlainTerm... terms) {
+        return of(Arrays.asList(terms));
     }
 
     /**
@@ -44,7 +44,7 @@ public final class Qualifier {
      * @return new qualifier instance.
      */
     @Nonnull
-    public static Qualifier qualifier(@Nonnull List<? extends PlainTerm> terms) {
+    public static Qualifier of(@Nonnull List<? extends PlainTerm> terms) {
         return new Qualifier(terms);
     }
 

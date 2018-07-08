@@ -13,8 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
-
 
 /**
  * Predicate resolution rule.
@@ -183,7 +181,7 @@ public final class Rule {
 
         Pattern(@Nonnull List<? extends PlainTerm> terms) {
             this.terms = terms;
-            this.qualifiers = noQualifiers();
+            this.qualifiers = Qualifiers.none();
         }
 
         /**

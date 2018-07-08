@@ -10,14 +10,14 @@ class QualifiersTest {
 
     @Test
     fun `construction does not depend on qualifiers order`() {
-        assertThat(Qualifiers.qualifiers(testQualifier(), testQualifier2()))
-                .toBe(Qualifiers.qualifiers(testQualifier2(), testQualifier()))
+        assertThat(Qualifiers.of(testQualifier(), testQualifier2()))
+                .toBe(Qualifiers.of(testQualifier2(), testQualifier()))
     }
 
     @Test
     fun `contains qualifiers`() {
 
-        val qualifiers = Qualifiers.qualifiers(testQualifier(), testQualifier2())
+        val qualifiers = Qualifiers.of(testQualifier(), testQualifier2())
 
         assertThat(qualifiers)
                 .contains(testQualifier(), testQualifier2())
@@ -27,17 +27,17 @@ class QualifiersTest {
     @Test
     fun `does not duplicate qualifiers`() {
 
-        val qualifiers = Qualifiers.qualifiers(testQualifier(), testQualifier())
+        val qualifiers = Qualifiers.of(testQualifier(), testQualifier())
 
         assertThat(qualifiers).containsStrictly(testQualifier())
     }
 
     @Test
     fun `build singleton on empty input`() {
-        assertThat(Qualifiers.qualifiers()).isSameAs(Qualifiers.noQualifiers())
-        assertThat(Qualifiers.qualifiers(emptyList())).isSameAs(Qualifiers.noQualifiers())
-        assertThat(Qualifiers.qualifiers(emptyList<Qualifier>() as Iterable<Qualifier>))
-                .isSameAs(Qualifiers.noQualifiers())
+        assertThat(Qualifiers.of()).isSameAs(Qualifiers.none())
+        assertThat(Qualifiers.of(emptyList())).isSameAs(Qualifiers.none())
+        assertThat(Qualifiers.of(emptyList<Qualifier>() as Iterable<Qualifier>))
+                .isSameAs(Qualifiers.none())
     }
 
     @Nested
@@ -47,7 +47,7 @@ class QualifiersTest {
         @Test
         fun `sets qualifiers`() {
 
-            val qualifiers = Qualifiers.noQualifiers().set(testQualifier())
+            val qualifiers = Qualifiers.none().set(testQualifier())
 
             assertThat(qualifiers).containsStrictly(testQualifier())
             assertThat(qualifiers.set(testQualifier2()))
@@ -57,21 +57,21 @@ class QualifiersTest {
 
         @Test
         fun `sets all qualifiers`() {
-            assertThat(Qualifiers.noQualifiers().set(testQualifier(), testQualifier2()))
+            assertThat(Qualifiers.none().set(testQualifier(), testQualifier2()))
                     .contains(testQualifier(), testQualifier2())
                     .hasSize(2)
         }
 
         @Test
         fun `does not duplicate qualifiers`() {
-            assertThat(Qualifiers.noQualifiers().set(testQualifier(), testQualifier1()))
+            assertThat(Qualifiers.none().set(testQualifier(), testQualifier1()))
                     .containsStrictly(testQualifier1())
         }
 
         @Test
         fun `updates qualifiers with the same signature`() {
 
-            val initial = Qualifiers.qualifiers(testQualifier())
+            val initial = Qualifiers.of(testQualifier())
             val updated = initial.set(testQualifier1())
 
             assertThat(updated)
@@ -83,7 +83,7 @@ class QualifiersTest {
         @Test
         fun `returns the same instance when nothing added`() {
 
-            val qualifiers = Qualifiers.qualifiers(testQualifier())
+            val qualifiers = Qualifiers.of(testQualifier())
 
             assertThat(qualifiers.set()).isSameAs(qualifiers)
         }
@@ -91,7 +91,7 @@ class QualifiersTest {
         @Test
         fun `returns the same instance when similar qualifier re-added`() {
 
-            val qualifiers = Qualifiers.qualifiers(testQualifier())
+            val qualifiers = Qualifiers.of(testQualifier())
 
             assertThat(qualifiers.set(testQualifier())).isSameAs(qualifiers)
         }
@@ -104,7 +104,7 @@ class QualifiersTest {
 
         @Test
         fun `sets all qualifiers`() {
-            assertThat(Qualifiers.noQualifiers().setAll(Qualifiers.qualifiers(testQualifier(), testQualifier2())))
+            assertThat(Qualifiers.none().setAll(Qualifiers.of(testQualifier(), testQualifier2())))
                     .contains(testQualifier(), testQualifier2())
                     .hasSize(2)
         }
@@ -112,14 +112,14 @@ class QualifiersTest {
         @Test
         fun `returns the same instance when nothing added`() {
 
-            val qualifiers = Qualifiers.qualifiers(testQualifier())
+            val qualifiers = Qualifiers.of(testQualifier())
 
-            assertThat(qualifiers.fulfill(Qualifiers.noQualifiers())).isSameAs(qualifiers)
+            assertThat(qualifiers.fulfill(Qualifiers.none())).isSameAs(qualifiers)
         }
 
         @Test
         fun `does not duplicate qualifiers`() {
-            assertThat(Qualifiers.noQualifiers().setAll(Qualifiers.qualifiers(testQualifier(), testQualifier1()))).
+            assertThat(Qualifiers.none().setAll(Qualifiers.of(testQualifier(), testQualifier1()))).
                     containsStrictly(testQualifier1())
         }
 
@@ -131,7 +131,7 @@ class QualifiersTest {
 
         @Test
         fun `sets all qualifiers`() {
-            assertThat(Qualifiers.noQualifiers().fulfill(Qualifiers.qualifiers(testQualifier(), testQualifier2())))
+            assertThat(Qualifiers.none().fulfill(Qualifiers.of(testQualifier(), testQualifier2())))
                     .contains(testQualifier(), testQualifier2())
                     .hasSize(2)
         }
@@ -139,8 +139,8 @@ class QualifiersTest {
         @Test
         fun `does not update qualifiers with the same signature`() {
 
-            val initial = Qualifiers.qualifiers(testQualifier())
-            val updated = initial.fulfill(Qualifiers.qualifiers(testQualifier1()))
+            val initial = Qualifiers.of(testQualifier())
+            val updated = initial.fulfill(Qualifiers.of(testQualifier1()))
 
             assertThat(updated).isSameAs(initial)
         }
@@ -154,32 +154,32 @@ class QualifiersTest {
         @Test
         fun `excludes qualifiers with the same signature only`() {
             assertThat(
-                    Qualifiers.qualifiers(testQualifier(), testQualifier2())
-                            .exclude(Qualifiers.qualifiers(testQualifier1())))
+                    Qualifiers.of(testQualifier(), testQualifier2())
+                            .exclude(Qualifiers.of(testQualifier1())))
                             .containsStrictly(testQualifier2())
         }
 
         @Test
         fun `excludes nothing from empty qualifiers`() {
-            assertThat(Qualifiers.noQualifiers().exclude(Qualifiers.qualifiers(testQualifier1())))
-                    .isSameAs(Qualifiers.noQualifiers())
+            assertThat(Qualifiers.none().exclude(Qualifiers.of(testQualifier1())))
+                    .isSameAs(Qualifiers.none())
         }
 
         @Test
         fun `returns the same instance after removing empty qualifiers`() {
 
-            val qualifiers = Qualifiers.qualifiers(testQualifier(), testQualifier2())
+            val qualifiers = Qualifiers.of(testQualifier(), testQualifier2())
 
-            assertThat(qualifiers.exclude(Qualifiers.noQualifiers()))
+            assertThat(qualifiers.exclude(Qualifiers.none()))
                     .isSameAs(qualifiers)
         }
 
         @Test
         fun `returns the same instance after removing nothing`() {
 
-            val qualifiers = Qualifiers.qualifiers(testQualifier())
+            val qualifiers = Qualifiers.of(testQualifier())
 
-            assertThat(qualifiers.exclude(Qualifiers.qualifiers(testQualifier2())))
+            assertThat(qualifiers.exclude(Qualifiers.of(testQualifier2())))
                     .isSameAs(qualifiers)
         }
 

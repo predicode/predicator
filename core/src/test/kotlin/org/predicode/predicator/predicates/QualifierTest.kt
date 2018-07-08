@@ -24,7 +24,7 @@ class QualifierTest {
 
 }
 
-fun testQualifier(): Qualifier = Qualifier.qualifier(
+fun testQualifier(): Qualifier = Qualifier.of(
         Keyword.named("qualifier1"),
         Atom.named("atom"),
         Keyword.named("keyword2"),
@@ -32,7 +32,7 @@ fun testQualifier(): Qualifier = Qualifier.qualifier(
         Placeholder.placeholder(),
         Value.raw(123))
 
-fun testQualifier1(): Qualifier = Qualifier.qualifier(
+fun testQualifier1(): Qualifier = Qualifier.of(
         Keyword.named("qualifier1"),
         Variable.named("variable"),
         Keyword.named("keyword2"),
@@ -40,7 +40,7 @@ fun testQualifier1(): Qualifier = Qualifier.qualifier(
         Placeholder.placeholder(),
         Value.raw("abc"))
 
-fun testQualifier2(): Qualifier = Qualifier.qualifier(
+fun testQualifier2(): Qualifier = Qualifier.of(
         Atom.named("qualifier2"),
         Keyword.named("keyword3"),
         Value.raw(321))
