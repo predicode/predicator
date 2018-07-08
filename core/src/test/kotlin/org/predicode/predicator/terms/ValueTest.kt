@@ -25,25 +25,25 @@ class ValueTest {
 
     @Test
     fun `string representation`() {
-        assertThat(namedVariable("variable").toString())
+        assertThat(Variable.named("variable").toString())
                 .toBe("_variable_")
     }
 
     @Test
     fun `matches the same value`() {
-        assertThat(rawValue("value1").match(rawValue("value1"), knowns)).toContain(knowns)
+        assertThat(Value.raw("value1").match(Value.raw("value1"), knowns)).toContain(knowns)
     }
 
     @Test
     fun `does not match another value`() {
-        assertThat(rawValue("value1").match(rawValue(123), knowns)).isEmpty()
+        assertThat(Value.raw("value1").match(Value.raw(123), knowns)).isEmpty()
     }
 
     @Test
     fun `resolves variable`() {
 
-        val value = rawValue("value")
-        val variable = namedVariable("var")
+        val value = Value.raw("value")
+        val variable = Variable.named("var")
 
         knowns = Knowns(variable)
 
@@ -54,23 +54,23 @@ class ValueTest {
 
     @Test
     fun `matches placeholder`() {
-        assertThat(rawValue("value").match(Placeholder.placeholder(), knowns))
+        assertThat(Value.raw("value").match(Placeholder.placeholder(), knowns))
                 .toContain(knowns)
     }
 
     @Test
     fun `does not match other terms`() {
 
-        val value = rawValue("name")
+        val value = Value.raw("name")
 
-        assertThat(value.match(namedKeyword("name"), knowns)).isEmpty()
-        assertThat(value.match(namedAtom("name"), knowns)).isEmpty()
+        assertThat(value.match(Keyword.named("name"), knowns)).isEmpty()
+        assertThat(value.match(Atom.named("name"), knowns)).isEmpty()
     }
 
     @Test
     fun `expands to itself`() {
 
-        val value = rawValue("name")
+        val value = Value.raw("name")
 
         assertThat(value.expand(resolver))
                 .toContain(Term.Expansion(value, knowns))

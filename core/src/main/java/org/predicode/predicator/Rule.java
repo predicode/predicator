@@ -1,6 +1,5 @@
 package org.predicode.predicator;
 
-import org.predicode.predicator.annotations.SamWithReceiver;
 import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.predicates.Qualifier;
 import org.predicode.predicator.predicates.Qualifiers;
@@ -12,8 +11,6 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
 
 
 /**
@@ -102,7 +99,6 @@ public final class Rule {
      * A selector of matching predicate resolution rules.
      */
     @FunctionalInterface
-    @SamWithReceiver
     public interface Selector {
 
         /**
@@ -183,7 +179,7 @@ public final class Rule {
 
         Pattern(@Nonnull List<? extends PlainTerm> terms) {
             this.terms = terms;
-            this.qualifiers = noQualifiers();
+            this.qualifiers = Qualifiers.none();
         }
 
         /**

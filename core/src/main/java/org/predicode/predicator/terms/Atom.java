@@ -28,7 +28,7 @@ public abstract class Atom extends ResolvedTerm {
      * @param name atom name.
      */
     @Nonnull
-    public static Atom namedAtom(@Nonnull String name) {
+    public static Atom named(@Nonnull String name) {
         return new NamedAtom(name);
     }
 
@@ -107,34 +107,6 @@ public abstract class Atom extends ResolvedTerm {
     @Override
     public String toString() {
         return ALWAYS_QUOTE.printName(getName(), ATOM_NAME);
-    }
-
-    @Immutable
-    private static final class NamedAtom extends Atom {
-
-        NamedAtom(@Nonnull String name) {
-            super(name);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            final Atom.NamedAtom that = (Atom.NamedAtom) o;
-
-            return getName().equals(that.getName());
-        }
-
-        @Override
-        public int hashCode() {
-            return getName().hashCode();
-        }
-
     }
 
 

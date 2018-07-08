@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
+import static org.predicode.predicator.predicates.Qualifiers.none;
 
 
 final class InfiniteCall extends Predicate.Call {
@@ -17,7 +17,7 @@ final class InfiniteCall extends Predicate.Call {
     private final Qualifiers qualifiers;
 
     InfiniteCall(@Nonnull IntFunction<Optional<Predicate.Prefix>> buildPrefix) {
-        this(buildPrefix, noQualifiers());
+        this(buildPrefix, none());
     }
 
     InfiniteCall(

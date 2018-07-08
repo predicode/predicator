@@ -5,14 +5,11 @@ import reactor.core.publisher.Mono
 import reactor.core.publisher.toFlux
 import java.util.*
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun Rule.Selector.invoke(call: Predicate.Call, knowns: Knowns) = matchingRules(call, knowns)
+operator fun Rule.Selector.invoke(call: Predicate.Call, knowns: Knowns) = matchingRules(call, knowns)
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun Rule.Match.component1(): Rule = rule
+operator fun Rule.Match.component1(): Rule = rule
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun Rule.Match.component2(): Knowns = knowns
+operator fun Rule.Match.component2(): Knowns = knowns
 
 /**
  * Creates a selector among the given predicate resolution rules.

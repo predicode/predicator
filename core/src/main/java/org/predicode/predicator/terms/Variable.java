@@ -13,7 +13,6 @@ import java.util.Random;
 
 import static org.predicode.predicator.grammar.QuotedName.VARIABLE_NAME;
 import static org.predicode.predicator.grammar.QuotingStyle.ALWAYS_QUOTE;
-import static org.predicode.predicator.terms.Keyword.DEFINITION_KEYWORD;
 
 
 /**
@@ -37,20 +36,20 @@ public abstract class Variable extends MappedTerm {
      * @param name variable name.
      */
     @Nonnull
-    public static Variable namedVariable(@Nonnull String name) {
+    public static Variable named(@Nonnull String name) {
         return new NamedVariable(name);
     }
 
     /**
      * Create temporary {@link Variable variable}.
      *
-     * <p>Temporary variables are compared by their identity. In contrast to {@link #namedVariable(String)
+     * <p>Temporary variables are compared by their identity. In contrast to {@link #named(String)
      * named variables} the name of temporary one is used only for its representation.</p>
      *
      * @param prefix temporary variable name prefix.
      */
     @Nonnull
-    public static Variable tempVariable(@Nonnull String prefix) {
+    public static Variable temp(@Nonnull String prefix) {
         return new TempVariable(prefix + " " + tempNameRandom.nextInt());
     }
 
@@ -151,7 +150,7 @@ public abstract class Variable extends MappedTerm {
         final ArrayList<PlainTerm> termList = new ArrayList<>(2 + terms.length);
 
         termList.add(this);
-        termList.add(DEFINITION_KEYWORD);
+        termList.add(Keyword.definition());
         termList.addAll(Arrays.asList(terms));
 
         return termList;
@@ -165,41 +164,6 @@ public abstract class Variable extends MappedTerm {
     @Override
     public String toString() {
         return ALWAYS_QUOTE.printName(getName(), VARIABLE_NAME);
-    }
-
-    private static final class NamedVariable extends Variable {
-
-        NamedVariable(@Nonnull String name) {
-            super(name);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            final NamedVariable that = (NamedVariable) o;
-
-            return getName().equals(that.getName());
-        }
-
-        @Override
-        public int hashCode() {
-            return getName().hashCode();
-        }
-
-    }
-
-    private static final class TempVariable extends Variable {
-
-        TempVariable(@Nonnull String name) {
-            super(name);
-        }
-
     }
 
 }

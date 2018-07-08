@@ -19,7 +19,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Collections.*;
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
-import static org.predicode.predicator.terms.Variable.tempVariable;
+import static org.predicode.predicator.terms.Variable.temp;
 
 
 /**
@@ -32,12 +32,12 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
 
     private static final Qualifiers NO_QUALIFIERS = new Qualifiers(emptyMap());
     private static final Collector<Qualifier, ?, Qualifiers>
-            TO_QUALIFIERS = Collectors.collectingAndThen(
+            COLLECTOR = Collectors.collectingAndThen(
                     Collectors.toMap(
                             Qualifier::getSignature,
                             UnaryOperator.identity(),
                             (q1, q2) -> q2),
-                    map -> map.isEmpty() ? noQualifiers() : new Qualifiers(unmodifiableMap(map)));
+                    map -> map.isEmpty() ? none() : new Qualifiers(unmodifiableMap(map)));
     private static final ExtraQualifierBuilder EXTRA_QUALIFIER_TERM_REPLACER =
             new ExtraQualifierBuilder();
 
@@ -47,7 +47,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
      * @return a collection not containing any qualifiers.
      */
     @Nonnull
-    public static Qualifiers noQualifiers() {
+    public static Qualifiers none() {
         return NO_QUALIFIERS;
     }
 
@@ -59,7 +59,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
      * @return new qualifiers collection.
      */
     @Nonnull
-    public static Qualifiers oneQualifier(@Nonnull Qualifier qualifier) {
+    public static Qualifiers just(@Nonnull Qualifier qualifier) {
         return new Qualifiers(singletonMap(qualifier.getSignature(), qualifier));
     }
 
@@ -71,11 +71,11 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
      * @return new qualifiers collection.
      */
     @Nonnull
-    public static Qualifiers qualifiers(@Nonnull Qualifier... qualifiers) {
+    public static Qualifiers of(@Nonnull Qualifier... qualifiers) {
         if (qualifiers.length == 1) {
-            return oneQualifier(qualifiers[0]);
+            return just(qualifiers[0]);
         }
-        return Stream.of(qualifiers).collect(toQualifiers());
+        return Stream.of(qualifiers).collect(collector());
     }
 
     /**
@@ -86,8 +86,8 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
      * @return new qualifiers collection.
      */
     @Nonnull
-    public static Qualifiers qualifiers(@Nonnull Collection<? extends Qualifier> qualifiers) {
-        return qualifiers.stream().collect(toQualifiers());
+    public static Qualifiers of(@Nonnull Collection<? extends Qualifier> qualifiers) {
+        return qualifiers.stream().collect(collector());
     }
 
     /**
@@ -98,13 +98,18 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
      * @return new qualifiers collection.
      */
     @Nonnull
-    public static Qualifiers qualifiers(@Nonnull Iterable<? extends Qualifier> qualifiers) {
-        return StreamSupport.stream(qualifiers.spliterator(), false).collect(toQualifiers());
+    public static Qualifiers of(@Nonnull Iterable<? extends Qualifier> qualifiers) {
+        return StreamSupport.stream(qualifiers.spliterator(), false).collect(collector());
     }
 
+    /**
+     * A stream collector collecting incoming qualifiers into qualifiers collection.
+     *
+     * @return qualifiers stream collector.
+     */
     @Nonnull
-    public static Collector<Qualifier, ?, Qualifiers> toQualifiers() {
-        return TO_QUALIFIERS;
+    public static Collector<Qualifier, ?, Qualifiers> collector() {
+        return COLLECTOR;
     }
 
     @Nonnull
@@ -264,7 +269,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         final Qualifiers result = qualifiers.update(
                 stream().filter(qualifier -> !qualifiers.map().containsKey(qualifier.getSignature())),
                 () -> new HashMap<>(size() - qualifiers.size()),
-                noQualifiers());
+                none());
 
         return result.size() == size() ? this : result;
     }
@@ -321,7 +326,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
             knowns = addExtraQualifierTo(qualifier, knowns, qualifiers);
         }
 
-        return knowns.attr(Qualifiers.class, qualifiers(qualifiers));
+        return knowns.attr(Qualifiers.class, of(qualifiers));
     }
 
     @Nonnull
@@ -344,7 +349,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
             });
         }
 
-        qualifiers.add(new Qualifier(terms));
+        qualifiers.add(Qualifier.of(terms));
 
         return knowns;
     }
@@ -471,7 +476,7 @@ public final class Qualifiers extends AbstractCollection<Qualifier> {
         public Tuple2<PlainTerm, Knowns> visitPlain(
                 @Nonnull PlainTerm term,
                 @Nonnull Knowns knowns) {
-            return knowns.declareLocal(tempVariable("extra qualifier"), Tuples::of);
+            return knowns.declareLocal(temp("extra qualifier"), Tuples::of);
         }
 
     }

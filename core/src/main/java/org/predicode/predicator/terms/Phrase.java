@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.predicode.predicator.terms.Variable.tempVariable;
+import static org.predicode.predicator.terms.Variable.temp;
 import static org.predicode.predicator.grammar.TermPrinter.printTerms;
 
 
@@ -59,7 +59,7 @@ public class Phrase extends CompoundTerm implements Predicate {
         return expansion(resolver)
                 .map(expansion -> {
 
-                    final Variable tempVar = tempVariable("phrase expansion");
+                    final Variable tempVar = temp("phrase expansion");
 
                     return new Expansion(
                             tempVar,

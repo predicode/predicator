@@ -9,10 +9,8 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.predicode.predicator.predicates.Predicate.emptyCall
-import org.predicode.predicator.terms.PlainTerm
-import org.predicode.predicator.terms.namedAtom
-import org.predicode.predicator.terms.namedKeyword
-import org.predicode.predicator.terms.rawValue
+import org.predicode.predicator.terms.*
+import org.predicode.predicator.terms.Value
 import org.predicode.predicator.testutils.isEmpty
 import java.util.*
 import java.util.function.IntFunction
@@ -69,7 +67,7 @@ class FiniteCallTest {
 
     @BeforeEach
     fun create() {
-        terms = listOf(namedKeyword("keyword"), namedAtom("atom"), rawValue(System.currentTimeMillis()))
+        terms = listOf(Keyword.named("keyword"), Atom.named("atom"), Value.raw(System.currentTimeMillis()))
         call = Predicate.call(terms)
     }
 
@@ -114,9 +112,9 @@ class InfiniteCallTest {
 
         val prefix = Predicate.prefix(
                 listOf(
-                        namedKeyword("keyword"),
-                        namedAtom("atom"),
-                        rawValue(System.currentTimeMillis())))
+                        Keyword.named("keyword"),
+                        Atom.named("atom"),
+                        Value.raw(System.currentTimeMillis())))
 
         every { buildPrefix.apply(any()) }.returns(Optional.of(prefix))
 

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static org.predicode.predicator.predicates.Qualifiers.noQualifiers;
+import static org.predicode.predicator.predicates.Qualifiers.none;
 
 
 final class EmptyCall extends Predicate.Call implements FiniteCall {
@@ -20,7 +20,7 @@ final class EmptyCall extends Predicate.Call implements FiniteCall {
     @Nonnull
     @Override
     public Qualifiers getQualifiers() {
-        return noQualifiers();
+        return none();
     }
 
     @Override
