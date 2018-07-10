@@ -12,6 +12,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
+import java.util.function.UnaryOperator;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -167,86 +168,28 @@ public interface Predicate {
      * to request a {@link #prefix(int) prefix}. The latter contains the terms.</p>
      */
     @Immutable
-    abstract class Call implements Predicate {
+    abstract class Call implements Predicate, Qualified<Call> {
 
         Call() {
         }
 
         /**
-         * Predicate qualifiers.
+         * Predicate call qualifiers.
          *
          * @return collection of qualifiers.
          */
+        @Override
         @Nonnull
         public abstract Qualifiers getQualifiers();
 
-        /**
-         * Qualifies this predicate call.
-         *
-         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
-         *
-         * @param qualifiers qualifiers to apply to this predicate call.
-         *
-         * @return new predicate call with the given qualifiers applied on top of this call's ones,
-         * or this instance if qualifiers didn't change.
-         *
-         * @see Qualifiers#set(Qualifier...)
-         */
         @Nonnull
-        public Call qualify(@Nonnull Qualifier... qualifiers) {
+        @Override
+        public Call qualify(@Nonnull UnaryOperator<Qualifiers> updateQualifiers) {
 
-            final Qualifiers updated = getQualifiers().set(qualifiers);
+            final Qualifiers old = getQualifiers();
+            final Qualifiers updated = updateQualifiers.apply(old);
 
-            if (updated == getQualifiers()) {
-                return this;
-            }
-
-            return updateQualifiers(updated);
-        }
-
-        /**
-         * Qualifies this predicate call.
-         *
-         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
-         *
-         * @param qualifiers qualifiers to apply to this predicate call.
-         *
-         * @return new predicate call with the given qualifiers applied on top of this call's ones,
-         * or this instance if qualifiers didn't change.
-         *
-         * @see Qualifiers#setAll(Qualifiers)
-         */
-        @Nonnull
-        public Call qualify(@Nonnull Qualifiers qualifiers) {
-
-            final Qualifiers updated = getQualifiers().setAll(qualifiers);
-
-            if (updated == getQualifiers()) {
-                return this;
-            }
-
-            return updateQualifiers(updated);
-        }
-
-        /**
-         * Fulfill qualifiers of this predicate call.
-         *
-         * <p>Sets each of the given qualifiers, unless the qualifier with the same signature already present in this
-         * collection.</p>
-         *
-         * @param qualifiers qualifiers to set.
-         *
-         * @return new qualifiers collection with the given qualifiers set on top of this ones,
-         * or this instance if qualifiers didn't change.
-         *
-         * @see Qualifiers#fulfill(Qualifiers)
-         */
-        @Nonnull
-        public final Call fulfillQualifiers(@Nonnull Qualifiers qualifiers) {
-
-            final Qualifiers updated = getQualifiers().fulfill(qualifiers);
-
-            if (updated == getQualifiers()) {
+            if (old == updated) {
                 return this;
             }
 
@@ -305,7 +248,7 @@ public interface Predicate {
                                     match.getKnowns(),
                                     (call, knowns) -> resolver.matchingRules(
                                             knowns.attr(Qualifiers.class)
-                                                    .map(call::fulfillQualifiers)
+                                                    .map(qualifiers -> call.qualify(old -> old.fulfill(qualifiers)))
                                                     .orElse(call)))));
         }
 
