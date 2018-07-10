@@ -42,7 +42,7 @@ class EmptyCallTest {
     fun `has empty prefix`() {
         assertThat(call.prefix(0).get()) {
             assertThat(subject.terms).isEmpty()
-            assertThat(subject.suffix.isEmpty).toBe(true)
+            assertThat(subject.rest.isEmpty).toBe(true)
             assertThat(subject.isEmpty).toBe(true)
         }
     }

@@ -5,8 +5,7 @@ import org.predicode.predicator.predicates.QualifiersDsl
 
 interface PhraseDsl : TermsDsl, QualifiersDsl
 
-@Suppress("FunctionName")
-fun Phrase(define: PhraseDsl.() -> Unit) = object : PhraseDsl {
+fun newPhrase(define: PhraseDsl.() -> Unit) = object : PhraseDsl {
 
     val terms = mutableListOf<Term>()
     val qualifiers = mutableListOf<Qualifier>()
@@ -21,4 +20,4 @@ fun Phrase(define: PhraseDsl.() -> Unit) = object : PhraseDsl {
 
 }.apply(define).let { Phrase(it.terms) }
 
-fun TermsDsl.phrase(terms: PhraseDsl.() -> Unit) = Phrase(terms)
+fun TermsDsl.phrase(terms: PhraseDsl.() -> Unit) = newPhrase(terms)

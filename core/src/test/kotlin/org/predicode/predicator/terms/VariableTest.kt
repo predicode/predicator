@@ -25,7 +25,7 @@ class VariableTest {
 
     @BeforeEach
     fun `create knowns`() {
-        knowns = Knowns()
+        knowns = Knowns.none()
         resolver = TestPredicateResolver(knowns)
     }
 
@@ -113,7 +113,7 @@ class VariableTest {
         val localVar = Variable.named("localVar")
         val queryVar = Variable.named("queryVar")
 
-        knowns = Knowns(queryVar)
+        knowns = Knowns.forVariables(queryVar)
 
         assertThat(localVar.match(queryVar, knowns)).notToBeEmpty {
             subject.mapping(localVar) { mapping, _ ->
@@ -129,7 +129,7 @@ class VariableTest {
         val localVar = Variable.named("localVar")
         val queryVar = Variable.named("queryVar")
 
-        knowns = Knowns(queryVar)
+        knowns = Knowns.forVariables(queryVar)
                 .map(localVar, queryVar)
                 .get()
 
@@ -152,7 +152,7 @@ class VariableTest {
         val queryVar = Variable.named("queryVar")
         val resolution = Atom.named("resolution")
 
-        knowns = Knowns(queryVar)
+        knowns = Knowns.forVariables(queryVar)
                 .resolve(queryVar, resolution).get()
                 .map(localVar, queryVar).get()
 
@@ -172,7 +172,7 @@ class VariableTest {
         val localVar = Variable.named("localVar")
         val queryVar = Variable.named("queryVar")
 
-        knowns = Knowns(queryVar)
+        knowns = Knowns.forVariables(queryVar)
                 .resolve(queryVar, Atom.named("resolution")).get()
                 .map(localVar, queryVar).get()
 
@@ -186,7 +186,7 @@ class VariableTest {
         val queryVar1 = Variable.named("queryVar1")
         val queryVar2 = Variable.named("queryVar2")
 
-        knowns = Knowns(queryVar1, queryVar2)
+        knowns = Knowns.forVariables(queryVar1, queryVar2)
                 .map(localVar, queryVar1).get()
 
         assertThat(localVar.match(queryVar2, knowns)).notToBeEmpty {
@@ -207,7 +207,7 @@ class VariableTest {
         val queryVar2 = Variable.named("queryVar2")
         val queryVar3 = Variable.named("queryVar3")
 
-        knowns = Knowns(queryVar1, queryVar2, queryVar3)
+        knowns = Knowns.forVariables(queryVar1, queryVar2, queryVar3)
                 .map(localVar, queryVar1).get()
         knowns = localVar.match(queryVar2, knowns).get()
 

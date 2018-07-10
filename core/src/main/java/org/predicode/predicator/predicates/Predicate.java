@@ -12,6 +12,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
+import java.util.function.UnaryOperator;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -162,88 +163,33 @@ public interface Predicate {
      *
      * <p>The call is a sequence of {@link PlainTerm plain terms}. Possibly infinite. In the latter case it matches
      * prefix rules only.</p>
+     *
+     * <p>The call consists of plain terms. However, they are not immediately available. To request the terms one has
+     * to request a {@link #prefix(int) prefix}. The latter contains the terms.</p>
      */
     @Immutable
-    abstract class Call implements Predicate {
+    abstract class Call implements Predicate, Qualified<Call> {
 
         Call() {
         }
 
         /**
-         * Predicate qualifiers.
+         * Predicate call qualifiers.
          *
          * @return collection of qualifiers.
          */
+        @Override
         @Nonnull
         public abstract Qualifiers getQualifiers();
 
-        /**
-         * Qualifies this predicate call.
-         *
-         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
-         *
-         * @param qualifiers qualifiers to apply to this predicate call.
-         *
-         * @return new predicate call with the given qualifiers applied on top of this call's ones,
-         * or this instance if qualifiers didn't change.
-         *
-         * @see Qualifiers#set(Qualifier...)
-         */
         @Nonnull
-        public Call qualify(@Nonnull Qualifier... qualifiers) {
+        @Override
+        public Call qualify(@Nonnull UnaryOperator<Qualifiers> updateQualifiers) {
 
-            final Qualifiers updated = getQualifiers().set(qualifiers);
+            final Qualifiers old = getQualifiers();
+            final Qualifiers updated = updateQualifiers.apply(old);
 
-            if (updated == getQualifiers()) {
-                return this;
-            }
-
-            return updateQualifiers(updated);
-        }
-
-        /**
-         * Qualifies this predicate call.
-         *
-         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
-         *
-         * @param qualifiers qualifiers to apply to this predicate call.
-         *
-         * @return new predicate call with the given qualifiers applied on top of this call's ones,
-         * or this instance if qualifiers didn't change.
-         *
-         * @see Qualifiers#setAll(Qualifiers)
-         */
-        @Nonnull
-        public Call qualify(@Nonnull Qualifiers qualifiers) {
-
-            final Qualifiers updated = getQualifiers().setAll(qualifiers);
-
-            if (updated == getQualifiers()) {
-                return this;
-            }
-
-            return updateQualifiers(updated);
-        }
-
-        /**
-         * Fulfill qualifiers of this predicate call.
-         *
-         * <p>Sets each of the given qualifiers, unless the qualifier with the same signature already present in this
-         * collection.</p>
-         *
-         * @param qualifiers qualifiers to set.
-         *
-         * @return new qualifiers collection with the given qualifiers set on top of this ones,
-         * or this instance if qualifiers didn't change.
-         *
-         * @see Qualifiers#fulfill(Qualifiers)
-         */
-        @Nonnull
-        public final Call fulfillQualifiers(@Nonnull Qualifiers qualifiers) {
-
-            final Qualifiers updated = getQualifiers().fulfill(qualifiers);
-
-            if (updated == getQualifiers()) {
+            if (old == updated) {
                 return this;
             }
 
@@ -302,7 +248,7 @@ public interface Predicate {
                                     match.getKnowns(),
                                     (call, knowns) -> resolver.matchingRules(
                                             knowns.attr(Qualifiers.class)
-                                                    .map(call::fulfillQualifiers)
+                                                    .map(qualifiers -> call.qualify(old -> old.fulfill(qualifiers)))
                                                     .orElse(call)))));
         }
 
@@ -325,10 +271,9 @@ public interface Predicate {
     }
 
     /**
-     * Predicate prefix.
+     * Predicate call prefix.
      *
-     * <p>It consists of (unmodifiable) list of terms in this prefix, and an optional suffix containing all other terms.
-     * </p>
+     * <p>It contains a list of terms in this prefix, and the rest of terms in the predicate call after the prefix.</p>
      */
     @Immutable
     abstract class Prefix extends Call {
@@ -337,29 +282,39 @@ public interface Predicate {
         private final List<? extends PlainTerm> terms;
 
         @Nonnull
-        private final Call suffix;
+        private final Call rest;
 
         Prefix(
                 @Nonnull List<? extends PlainTerm> terms,
-                @Nonnull Call suffix) {
+                @Nonnull Call rest) {
             this.terms = unmodifiableList(terms);
-            this.suffix = suffix;
+            this.rest = rest;
         }
 
+        /**
+         * Predicate prefix terms.
+         *
+         * @return readonly list of terms.
+         */
         @Nonnull
         public final List<? extends PlainTerm> getTerms() {
             return this.terms;
         }
 
+        /**
+         * The rest of the predicate call terms after the {@link #getTerms() prefix ones}.
+         *
+         * @return the rest of the terms represented by predicate call.
+         */
         @Nonnull
-        public final Call getSuffix() {
-            return this.suffix;
+        public final Call getRest() {
+            return this.rest;
         }
 
         @Override
         @Nonnull
         public final Qualifiers getQualifiers() {
-            return getSuffix().getQualifiers();
+            return getRest().getQualifiers();
         }
 
         @Nonnull
@@ -389,7 +344,7 @@ public interface Predicate {
                 return false;
             }
 
-            return this.suffix.equals(prefix.suffix);
+            return this.rest.equals(prefix.rest);
         }
 
         @Override
@@ -398,7 +353,7 @@ public interface Predicate {
             int result = super.hashCode();
 
             result = 31 * result + this.terms.hashCode();
-            result = 31 * result + this.suffix.hashCode();
+            result = 31 * result + this.rest.hashCode();
 
             return result;
         }

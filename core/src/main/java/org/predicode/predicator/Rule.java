@@ -1,7 +1,7 @@
 package org.predicode.predicator;
 
 import org.predicode.predicator.predicates.Predicate;
-import org.predicode.predicator.predicates.Qualifier;
+import org.predicode.predicator.predicates.Qualified;
 import org.predicode.predicator.predicates.Qualifiers;
 import org.predicode.predicator.terms.PlainTerm;
 import reactor.core.publisher.Flux;
@@ -11,6 +11,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 
 /**
@@ -169,7 +170,7 @@ public final class Rule {
      * of terms in the pattern.</p>
      */
     @Immutable
-    public static abstract class Pattern {
+    public static abstract class Pattern implements Qualified<Pattern> {
 
         @Nonnull
         private final List<? extends PlainTerm> terms;
@@ -206,65 +207,36 @@ public final class Rule {
         }
 
         /**
-         * Pattern qualifiers.
-         *
-         * @return collection of qualifiers.
-         */
-        @Nonnull
-        public final Qualifiers getQualifiers() {
-            return this.qualifiers;
-        }
-
-        /**
-         * Qualifies this pattern.
-         *
-         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
-         *
-         * @param qualifiers qualifiers to apply to this pattern.
-         *
-         * @return new pattern with the given qualifiers applied on top of this pattern's ones,
-         * or this instance if qualifiers didn't change.
-         */
-        @Nonnull
-        public Pattern qualify(@Nonnull Qualifier... qualifiers) {
-
-            final Qualifiers updated = getQualifiers().set(qualifiers);
-
-            if (updated == getQualifiers()) {
-                return this;
-            }
-
-            return updateQualifiers(updated);
-        }
-
-        /**
-         * Qualifies this pattern.
-         *
-         * <p>Either appends the given qualifiers, or updates the ones with the same signature.</p>
-         *
-         * @param qualifiers qualifiers to apply to this pattern.
-         *
-         * @return new pattern with the given qualifiers applied on top of this pattern's ones,
-         * or this instance if qualifiers didn't change.
-         */
-        @Nonnull
-        public Pattern qualify(@Nonnull Qualifiers qualifiers) {
-
-            final Qualifiers updated = getQualifiers().setAll(qualifiers);
-
-            if (updated == getQualifiers()) {
-                return this;
-            }
-
-            return updateQualifiers(updated);
-        }
-
-        /**
          * Whether this is a prefix pattern.
          *
          * @return {@code true} if this is a prefix pattern, or {@code false} if this is an exact one.
          */
         public abstract boolean isPrefix();
+
+        /**
+         * Pattern qualifiers.
+         *
+         * @return collection of qualifiers.
+         */
+        @Override
+        @Nonnull
+        public final Qualifiers getQualifiers() {
+            return this.qualifiers;
+        }
+
+        @Nonnull
+        @Override
+        public final Pattern qualify(@Nonnull UnaryOperator<Qualifiers> updateQualifiers) {
+
+            final Qualifiers old = getQualifiers();
+            final Qualifiers updated = updateQualifiers.apply(old);
+
+            if (old == updated) {
+                return this;
+            }
+
+            return updateQualifiers(updated);
+        }
 
         /**
          * Attempts to match the given predicate call against this pattern.

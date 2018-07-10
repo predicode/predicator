@@ -19,7 +19,7 @@ class AtomTest {
 
     @BeforeEach
     fun `create knowns`() {
-        knowns = Knowns()
+        knowns = Knowns.none()
         resolver = TestPredicateResolver(knowns)
     }
 
@@ -52,7 +52,7 @@ class AtomTest {
         val atom = Atom.named("name")
         val variable = Variable.named("var")
 
-        knowns = Knowns(variable)
+        knowns = Knowns.forVariables(variable)
 
         assertThat(atom.match(variable, knowns)).notToBeEmpty {
             assertThat(subject.resolution(variable).value())
