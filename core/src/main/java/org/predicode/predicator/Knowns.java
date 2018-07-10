@@ -37,6 +37,33 @@ public class Knowns {
 
     };
 
+    private static final Knowns NONE = new Knowns();
+
+    /**
+     * Constructs knowns without any mappings or query variables.
+     *
+     * @return empty knowns instance.
+     */
+    @Nonnull
+    public static Knowns none() {
+        return NONE;
+    }
+
+    /**
+     * Constructs knowns without any mappings and with the given query variables unresolved.
+     *
+     * @param variables query variables.
+     *
+     * @return knowns instance
+     */
+    @Nonnull
+    public static Knowns forVariables(@Nonnull Variable ...variables) {
+        if (variables.length == 0) {
+            return none();
+        }
+        return new Knowns(variables);
+    }
+
     /**
      * Original query variable resolutions.
      *
@@ -68,12 +95,13 @@ public class Knowns {
 
     private int rev;
 
-    /**
-     * Constructs knowns without any mappings and with the given query variables unresolved.
-     *
-     * @param variables query variables.
-     */
-    public Knowns(@Nonnull Variable ...variables) {
+    private Knowns() {
+        this.mappings = emptyMap();
+        this.resolutions = emptyMap();
+        this.attrs = emptyMap();
+    }
+
+    private Knowns(@Nonnull Variable ...variables) {
         this.mappings = emptyMap();
         this.resolutions = Stream.of(variables)
                 .collect(Collectors.toMap(UnaryOperator.identity(), v -> UNRESOLVED));
@@ -314,11 +342,14 @@ public class Knowns {
      */
     @Nonnull
     public Resolution resolution(@Nonnull Variable variable) {
-        return this.resolutions.computeIfAbsent(
-                variable,
-                v -> {
-                    throw new UnknownVariableException(v);
-                });
+
+        final Resolution resolution = this.resolutions.get(variable);
+
+        if (resolution != null) {
+            return resolution;
+        }
+
+        throw new UnknownVariableException(variable);
     }
 
     /**

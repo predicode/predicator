@@ -16,13 +16,18 @@ import org.predicode.predicator.testutils.toContain
 
 class KnownsTest {
 
+    @Test
+    fun `constructed for empty variables is none`() {
+        assertThat(Knowns.forVariables()).isSameAs(Knowns.none())
+    }
+
     @Nested
     inner class Resolution {
 
         @Test
         fun `fails to resolve unknown variable`() {
 
-            val knowns = Knowns()
+            val knowns = Knowns.none()
 
             expect { knowns.resolve(
                     Variable.named("unknown"),
@@ -34,7 +39,7 @@ class KnownsTest {
         fun `resolves variable`() {
 
             val variable = Variable.named("variable")
-            val knowns = Knowns(variable)
+            val knowns = Knowns.forVariables(variable)
             val resolution = Atom.named("resolution")
 
             assertThat(knowns.resolve(variable, resolution)).notToBeEmpty {
@@ -48,7 +53,7 @@ class KnownsTest {
 
             val variable = Variable.named("variable")
             val resolution = Atom.named("resolution")
-            val knowns = Knowns(variable).resolve(variable, resolution).get()
+            val knowns = Knowns.forVariables(variable).resolve(variable, resolution).get()
 
             assertThat(knowns.resolve(variable, resolution)).notToBeEmpty {
                 assertThat(subject.resolution(variable).value())
@@ -62,7 +67,7 @@ class KnownsTest {
 
             val variable = Variable.named("variable")
             val resolution = Atom.named("resolution")
-            val knowns = Knowns(variable).resolve(variable, resolution).get()
+            val knowns = Knowns.forVariables(variable).resolve(variable, resolution).get()
 
             assertThat(knowns.resolve(variable, Atom.named("other"))).isEmpty()
         }
@@ -75,7 +80,7 @@ class KnownsTest {
             val queryVar2 = Variable.named("queryVar2")
             val resolution = Atom.named("resolution")
 
-            var knowns = Knowns(queryVar1, queryVar2)
+            var knowns = Knowns.forVariables(queryVar1, queryVar2)
                     .map(localVar, queryVar1).get()
 
             knowns = localVar.match(queryVar2, knowns).get() // Alias queryVar1 -> queryVar2

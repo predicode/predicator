@@ -19,7 +19,7 @@ class ValueTest {
 
     @BeforeEach
     fun `create knowns`() {
-        knowns = Knowns()
+        knowns = Knowns.none()
         resolver = TestPredicateResolver(knowns)
     }
 
@@ -45,7 +45,7 @@ class ValueTest {
         val value = Value.raw("value")
         val variable = Variable.named("var")
 
-        knowns = Knowns(variable)
+        knowns = Knowns.forVariables(variable)
 
         assertThat(value.match(variable, knowns)).notToBeEmpty {
             assertThat(subject.resolution(variable).value()).toContain(value)

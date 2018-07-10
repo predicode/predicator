@@ -37,7 +37,7 @@ class PhraseTest {
         @Test
         fun `expands terms`() {
 
-            val knowns = Knowns()
+            val knowns = Knowns.none()
             val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
                 override fun matchingRules(call: Predicate.Call): Flux<Rule.Match> =
@@ -56,7 +56,7 @@ class PhraseTest {
         @Test
         fun `updates predicate`() {
 
-            val knowns = Knowns()
+            val knowns = Knowns.none()
             val resolver = object : Predicate.Resolver {
                 override fun getKnowns() = knowns
                 override fun matchingRules(call: Predicate.Call): Flux<Rule.Match> =

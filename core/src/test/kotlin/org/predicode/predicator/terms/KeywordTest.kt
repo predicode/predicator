@@ -18,7 +18,7 @@ class KeywordTest {
 
     @BeforeEach
     fun `create knowns`() {
-        knowns = Knowns()
+        knowns = Knowns.none()
         resolver = TestPredicateResolver(knowns)
     }
 
