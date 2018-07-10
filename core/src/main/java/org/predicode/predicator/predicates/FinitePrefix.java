@@ -36,7 +36,7 @@ final class FinitePrefix extends Predicate.Prefix implements FiniteCall {
     @Nonnull
     @Override
     public List<? extends PlainTerm> allTerms() {
-        if (getSuffix().isEmpty()) {
+        if (getRest().isEmpty()) {
             return getTerms();
         }
         if (getTerms().isEmpty()) {
@@ -53,7 +53,7 @@ final class FinitePrefix extends Predicate.Prefix implements FiniteCall {
 
     @Override
     public String toString() {
-        if (getSuffix().isEmpty()) {
+        if (getRest().isEmpty()) {
             return printTerms(getTerms());
         }
 

@@ -35,7 +35,7 @@ final class ExactPattern extends Rule.Pattern {
     @Nonnull
     public Optional<Knowns> match(@Nonnull Predicate.Call call, @Nonnull Knowns knowns) {
         return call.prefix(getTerms().size())
-                .filter(prefix -> prefix.getSuffix().isEmpty()) // Ensure the call length equals to pattern one
+                .filter(prefix -> prefix.getRest().isEmpty()) // Ensure the call length equals to pattern one
                 .flatMap(prefix -> matchPrefix(prefix, this, knowns));
     }
 

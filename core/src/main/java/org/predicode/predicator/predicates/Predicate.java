@@ -162,6 +162,9 @@ public interface Predicate {
      *
      * <p>The call is a sequence of {@link PlainTerm plain terms}. Possibly infinite. In the latter case it matches
      * prefix rules only.</p>
+     *
+     * <p>The call consists of plain terms. However, they are not immediately available. To request the terms one has
+     * to request a {@link #prefix(int) prefix}. The latter contains the terms.</p>
      */
     @Immutable
     abstract class Call implements Predicate {
@@ -325,10 +328,9 @@ public interface Predicate {
     }
 
     /**
-     * Predicate prefix.
+     * Predicate call prefix.
      *
-     * <p>It consists of (unmodifiable) list of terms in this prefix, and an optional suffix containing all other terms.
-     * </p>
+     * <p>It contains a list of terms in this prefix, and the rest of terms in the predicate call after the prefix.</p>
      */
     @Immutable
     abstract class Prefix extends Call {
@@ -337,29 +339,39 @@ public interface Predicate {
         private final List<? extends PlainTerm> terms;
 
         @Nonnull
-        private final Call suffix;
+        private final Call rest;
 
         Prefix(
                 @Nonnull List<? extends PlainTerm> terms,
-                @Nonnull Call suffix) {
+                @Nonnull Call rest) {
             this.terms = unmodifiableList(terms);
-            this.suffix = suffix;
+            this.rest = rest;
         }
 
+        /**
+         * Predicate prefix terms.
+         *
+         * @return readonly list of terms.
+         */
         @Nonnull
         public final List<? extends PlainTerm> getTerms() {
             return this.terms;
         }
 
+        /**
+         * The rest of the predicate call terms after the {@link #getTerms() prefix ones}.
+         *
+         * @return the rest of the terms represented by predicate call.
+         */
         @Nonnull
-        public final Call getSuffix() {
-            return this.suffix;
+        public final Call getRest() {
+            return this.rest;
         }
 
         @Override
         @Nonnull
         public final Qualifiers getQualifiers() {
-            return getSuffix().getQualifiers();
+            return getRest().getQualifiers();
         }
 
         @Nonnull
@@ -389,7 +401,7 @@ public interface Predicate {
                 return false;
             }
 
-            return this.suffix.equals(prefix.suffix);
+            return this.rest.equals(prefix.rest);
         }
 
         @Override
@@ -398,7 +410,7 @@ public interface Predicate {
             int result = super.hashCode();
 
             result = 31 * result + this.terms.hashCode();
-            result = 31 * result + this.suffix.hashCode();
+            result = 31 * result + this.rest.hashCode();
 
             return result;
         }

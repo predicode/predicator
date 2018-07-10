@@ -26,7 +26,7 @@ final class InfinitePrefix extends Predicate.Prefix {
 
     @Override
     public String toString() {
-        return printTerms(getTerms()) + " ... " + getSuffix();
+        return printTerms(getTerms()) + " ... " + getRest();
     }
 
     @Nullable
@@ -48,10 +48,10 @@ final class InfinitePrefix extends Predicate.Prefix {
         if (length < oldPrefixLen) {
             return Optional.of(new InfinitePrefix(
                     oldPrefix.subList(0, length),
-                    new InfinitePrefix(oldPrefix.subList(length, oldPrefixLen), getSuffix())));
+                    new InfinitePrefix(oldPrefix.subList(length, oldPrefixLen), getRest())));
         }
 
-        return getSuffix()
+        return getRest()
                 .prefix(length - oldPrefixLen)
                 .map(suffixPrefix -> {
 
@@ -60,14 +60,14 @@ final class InfinitePrefix extends Predicate.Prefix {
                     newTerms.addAll(oldPrefix);
                     newTerms.addAll(suffixPrefix.getTerms());
 
-                    return Predicate.prefix(newTerms, suffixPrefix.getSuffix());
+                    return Predicate.prefix(newTerms, suffixPrefix.getRest());
                 });
     }
 
     @Nonnull
     @Override
     InfinitePrefix updateQualifiers(@Nonnull Qualifiers qualifiers) {
-        return new InfinitePrefix(getTerms(), getSuffix().updateQualifiers(qualifiers));
+        return new InfinitePrefix(getTerms(), getRest().updateQualifiers(qualifiers));
     }
 
 }
