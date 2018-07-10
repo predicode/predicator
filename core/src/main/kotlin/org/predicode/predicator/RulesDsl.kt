@@ -58,7 +58,6 @@ fun RulesDsl.Definition.call(define: PredicateDsl.Call.() -> Unit) =
 fun RulesDsl.Definition.phrase(define: PhraseDsl.() -> Unit) =
         predicate(newPhrase(define))
 
-@Suppress("ObjectLiteralToLambda")
 fun RulesDsl.Definition.resolveBy(resolve: (Predicate.Resolver) -> Flux<Knowns>) =
         predicate(Predicate { resolver -> resolve(resolver) })
 
