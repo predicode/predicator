@@ -32,7 +32,7 @@ internal class TermPrinterTest {
     fun phrase() {
         assertThat(
                 printTerms(
-                        Phrase {
+                        newPhrase {
                             k("keyword")
                             a("atom")
                         }))
@@ -236,7 +236,7 @@ internal class TermPrinterTest {
     @Test
     fun `separates phrases from quoted terms`() {
 
-        val phrase = Phrase {
+        val phrase = newPhrase {
             k("keyword")
             raw("value")
         }
@@ -266,7 +266,7 @@ internal class TermPrinterTest {
     @Test
     fun `separates phrases from keywords`() {
 
-        val phrase = Phrase {
+        val phrase = newPhrase {
             k("keyword")
             raw("value")
         }
@@ -289,8 +289,8 @@ internal class TermPrinterTest {
     fun `separates phrases`() {
         assertThat(
                 printTerms(
-                        Phrase { k("phrase 1") },
-                        Phrase { k("phrase 2") }))
+                        newPhrase { k("phrase 1") },
+                        newPhrase { k("phrase 2") }))
                 .toBe("(phrase 1) (phrase 2)")
     }
 

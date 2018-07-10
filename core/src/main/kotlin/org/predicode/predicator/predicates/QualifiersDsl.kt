@@ -3,13 +3,12 @@ package org.predicode.predicator.predicates
 import org.predicode.predicator.annotations.PredicatorDslMarker
 import org.predicode.predicator.terms.PlainTermsDsl
 import org.predicode.predicator.terms.SignatureTermsDsl
-import org.predicode.predicator.terms.plainTerms
-import org.predicode.predicator.terms.signatureTerms
+import org.predicode.predicator.terms.newPlainTerms
+import org.predicode.predicator.terms.newSignatureTerms
 
-@Suppress("FunctionName")
-fun Qualifier(define: PlainTermsDsl.() -> Unit) = Qualifier.of(plainTerms(define))
+fun newQualifier(define: PlainTermsDsl.() -> Unit) = Qualifier.of(newPlainTerms(define))
 
-fun qualifierSignature(define: SignatureTermsDsl.() -> Unit) = Qualifier.signature(signatureTerms(define))
+fun newQualifierSignature(define: SignatureTermsDsl.() -> Unit) = Qualifier.signature(newSignatureTerms(define))
 
 @PredicatorDslMarker
 interface QualifiersDsl {
@@ -20,10 +19,9 @@ interface QualifiersDsl {
 
 fun QualifiersDsl.q(define: PlainTermsDsl.() -> Unit) = qualifier(define)
 
-fun QualifiersDsl.qualifier(define: PlainTermsDsl.() -> Unit) = Qualifier(define).also { qualifier(it) }
+fun QualifiersDsl.qualifier(define: PlainTermsDsl.() -> Unit) = newQualifier(define).also { qualifier(it) }
 
-@Suppress("FunctionName")
-fun Qualifiers(define: QualifiersDsl.() -> Unit) = object : QualifiersDsl {
+fun newQualifiers(define: QualifiersDsl.() -> Unit) = object : QualifiersDsl {
 
     val qualifiers = mutableListOf<Qualifier>()
 

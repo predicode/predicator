@@ -8,11 +8,11 @@ import org.predicode.predicator.terms.PlainTermsDsl
 interface PredicateDsl {
 
     @PredicatorDslMarker
-    interface CallDsl : PlainTermsDsl, QualifiersDsl
+    interface Call : PlainTermsDsl, QualifiersDsl
 
 }
 
-internal class PredicateCallBuilder : PredicateDsl.CallDsl {
+internal class PredicateCallBuilder : PredicateDsl.Call {
 
     val terms = mutableListOf<PlainTerm>()
     val qualifiers = mutableListOf<Qualifier>()
@@ -27,7 +27,7 @@ internal class PredicateCallBuilder : PredicateDsl.CallDsl {
 
 }
 
-fun predicateCall(define: PredicateDsl.CallDsl.() -> Unit) =
+fun newPredicateCall(define: PredicateDsl.Call.() -> Unit) =
         PredicateCallBuilder()
                 .apply(define)
                 .let { Predicate.call(it.terms).qualify(Qualifiers.of(it.qualifiers)) }

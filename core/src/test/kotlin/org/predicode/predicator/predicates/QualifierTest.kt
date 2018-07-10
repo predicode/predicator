@@ -13,7 +13,7 @@ class QualifierTest {
         val qualifier = testQualifier()
 
         assertThat(qualifier.signature).toBe(
-                qualifierSignature {
+                newQualifierSignature {
                     k("qualifier1")
                     p
                     k("keyword2")
@@ -26,7 +26,7 @@ class QualifierTest {
 
 }
 
-fun testQualifier(): Qualifier = Qualifier {
+fun testQualifier(): Qualifier = newQualifier {
     k("qualifier1")
     a("atom")
     k("keyword2")
@@ -35,7 +35,7 @@ fun testQualifier(): Qualifier = Qualifier {
     raw(123)
 }
 
-fun testQualifier1(): Qualifier = Qualifier {
+fun testQualifier1(): Qualifier = newQualifier {
     k("qualifier1")
     v("variable")
     k("keyword2")
@@ -44,7 +44,7 @@ fun testQualifier1(): Qualifier = Qualifier {
     raw("abc")
 }
 
-fun testQualifier2(): Qualifier = Qualifier {
+fun testQualifier2(): Qualifier = newQualifier {
     a("qualifier2")
     k("keyword3")
     raw(321)

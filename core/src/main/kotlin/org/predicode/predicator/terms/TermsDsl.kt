@@ -14,7 +14,7 @@ interface ResolvedTermsDsl {
 
 }
 
-fun resolvedTerms(define: ResolvedTermsDsl.() -> Unit): List<ResolvedTerm> =
+fun newResolvedTerms(define: ResolvedTermsDsl.() -> Unit): List<ResolvedTerm> =
         object : ResolvedTermsDsl {
 
             val terms = mutableListOf<ResolvedTerm>()
@@ -42,7 +42,7 @@ interface MappedTermsDsl : ResolvedTermsDsl {
 
 }
 
-fun mappedTerms(define: MappedTermsDsl.() -> Unit): List<MappedTerm> =
+fun newMappedTerms(define: MappedTermsDsl.() -> Unit): List<MappedTerm> =
         object : MappedTermsDsl {
 
             val terms = mutableListOf<MappedTerm>()
@@ -66,7 +66,7 @@ interface SignatureTermsDsl {
 
 }
 
-fun signatureTerms(define: SignatureTermsDsl.() -> Unit): List<SignatureTerm> =
+fun newSignatureTerms(define: SignatureTermsDsl.() -> Unit): List<SignatureTerm> =
         object : SignatureTermsDsl {
 
             val terms = mutableListOf<SignatureTerm>()
@@ -96,7 +96,7 @@ interface PlainTermsDsl : MappedTermsDsl, SignatureTermsDsl {
 
 }
 
-fun plainTerms(define: PlainTermsDsl.() -> Unit): List<PlainTerm> =
+fun newPlainTerms(define: PlainTermsDsl.() -> Unit): List<PlainTerm> =
         object : PlainTermsDsl {
 
             val terms = mutableListOf<PlainTerm>()
@@ -125,7 +125,7 @@ interface TermsDsl : PlainTermsDsl {
 
 }
 
-fun terms(define: TermsDsl.() -> Unit): List<Term> =
+fun newTerms(define: TermsDsl.() -> Unit): List<Term> =
         object : TermsDsl {
 
             val terms = mutableListOf<Term>()
