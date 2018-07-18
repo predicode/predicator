@@ -4,9 +4,9 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
@@ -37,10 +37,10 @@ public abstract class Term {
      *
      * @param resolver predicate resolver instance to resolve/expand against.
      *
-     * @return this term expansion, or empty optional if this term can not be expanded.
+     * @return this term expansion(s), or empty flux if this term can not be expanded.
      */
     @Nonnull
-    public abstract Optional<Expansion> expand(@Nonnull Predicate.Resolver resolver);
+    public abstract Flux<Expansion> expand(@Nonnull Predicate.Resolver resolver);
 
     /**
      * Prints this term representation with the given term printer.

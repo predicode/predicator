@@ -9,6 +9,7 @@ import org.predicode.predicator.predicates.Predicate
 import org.predicode.predicator.predicates.TestPredicateResolver
 import org.predicode.predicator.testutils.isEmpty
 import org.predicode.predicator.testutils.toContain
+import reactor.test.StepVerifier
 
 
 class KeywordTest {
@@ -59,8 +60,9 @@ class KeywordTest {
 
         val keyword = Keyword.named("name")
 
-        assertThat(keyword.expand(resolver))
-                .toContain(Term.Expansion(keyword, knowns))
+        StepVerifier.create(keyword.expand(resolver))
+                .expectNext(Term.Expansion(keyword, knowns))
+                .verifyComplete()
     }
 
 }

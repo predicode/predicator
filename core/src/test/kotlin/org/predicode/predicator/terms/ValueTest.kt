@@ -10,6 +10,7 @@ import org.predicode.predicator.predicates.TestPredicateResolver
 import org.predicode.predicator.testutils.isEmpty
 import org.predicode.predicator.testutils.notToBeEmpty
 import org.predicode.predicator.testutils.toContain
+import reactor.test.StepVerifier
 
 
 class ValueTest {
@@ -72,8 +73,9 @@ class ValueTest {
 
         val value = Value.raw("name")
 
-        assertThat(value.expand(resolver))
-                .toContain(Term.Expansion(value, knowns))
+        StepVerifier.create(value.expand(resolver))
+                .expectNext(Term.Expansion(value, knowns))
+                .verifyComplete()
     }
 
 }
