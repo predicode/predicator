@@ -5,7 +5,6 @@ import org.predicode.predicator.Rule;
 import org.predicode.predicator.grammar.TermPrinter;
 import org.predicode.predicator.predicates.Predicate;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -56,7 +55,7 @@ public class Phrase extends CompoundTerm implements Predicate {
 
     @Nonnull
     @Override
-    public Mono<Expansion> expand(@Nonnull Resolver resolver) {
+    public Flux<Expansion> expand(@Nonnull Resolver resolver) {
         return expansion(resolver)
                 .map(phraseExpansion -> {
 
@@ -68,8 +67,7 @@ public class Phrase extends CompoundTerm implements Predicate {
                                     tempVar,
                                     knowns,
                                     predicate -> phraseExpansion.definition(local).and(predicate)));
-                })
-                .next();
+                });
     }
 
     /**
@@ -154,7 +152,7 @@ public class Phrase extends CompoundTerm implements Predicate {
         private PhraseExpansion(@Nonnull PhraseExpansion prev, @Nonnull Term.Expansion termExpansion) {
             this.resolver = prev.resolver.withKnowns(termExpansion.getKnowns());
             this.predicate = termExpansion.getUpdatePredicate().apply(prev.predicate);
-            this.terms = prev.terms;
+            this.terms = prev.terms.clone();
             this.index = prev.index + 1;
             this.terms[prev.index] = termExpansion.getExpanded();
 
@@ -164,7 +162,6 @@ public class Phrase extends CompoundTerm implements Predicate {
         Flux<PhraseExpansion> expandTerm(@Nonnull Term term) {
             return term
                     .expand(this.resolver)
-                    .flux()
                     .map(termExpansion -> new PhraseExpansion(this, termExpansion));
         }
 

@@ -4,7 +4,7 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.Knowns;
 import org.predicode.predicator.predicates.Predicate;
 import org.predicode.predicator.grammar.TermPrinter;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import java.util.function.BiFunction;
@@ -40,7 +40,7 @@ public abstract class Term {
      * @return this term expansion(s), or empty flux if this term can not be expanded.
      */
     @Nonnull
-    public abstract Mono<Expansion> expand(@Nonnull Predicate.Resolver resolver);
+    public abstract Flux<Expansion> expand(@Nonnull Predicate.Resolver resolver);
 
     /**
      * Prints this term representation with the given term printer.

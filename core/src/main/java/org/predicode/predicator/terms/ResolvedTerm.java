@@ -2,7 +2,7 @@ package org.predicode.predicator.terms;
 
 import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.predicode.predicator.predicates.Predicate;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 
@@ -27,8 +27,8 @@ public abstract class ResolvedTerm extends MappedTerm {
 
     @Nonnull
     @Override
-    public final Mono<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
-        return Mono.just(new Expansion(this, resolver.getKnowns()));
+    public final Flux<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
+        return Flux.just(new Expansion(this, resolver.getKnowns()));
     }
 
     public interface Visitor<P, R> {

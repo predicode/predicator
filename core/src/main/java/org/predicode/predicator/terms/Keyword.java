@@ -5,7 +5,7 @@ import org.predicode.predicator.Knowns;
 import org.predicode.predicator.grammar.QuotedName;
 import org.predicode.predicator.grammar.TermPrinter;
 import org.predicode.predicator.predicates.Predicate;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -133,8 +133,8 @@ public abstract class Keyword extends SignatureTerm {
 
     @Nonnull
     @Override
-    public final Mono<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
-        return Mono.just(new Expansion(this, resolver.getKnowns()));
+    public final Flux<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
+        return Flux.just(new Expansion(this, resolver.getKnowns()));
     }
 
     @Nonnull
