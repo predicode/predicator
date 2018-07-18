@@ -10,6 +10,7 @@ import org.predicode.predicator.predicates.TestPredicateResolver
 import org.predicode.predicator.testutils.isEmpty
 import org.predicode.predicator.testutils.notToBeEmpty
 import org.predicode.predicator.testutils.toContain
+import reactor.test.StepVerifier
 
 
 class AtomTest {
@@ -75,8 +76,9 @@ class AtomTest {
 
         val atom = Atom.named("name")
 
-        assertThat(atom.expand(resolver))
-                .toContain(Term.Expansion(atom, knowns))
+        StepVerifier.create(atom.expand(resolver))
+                .expectNext(Term.Expansion(atom, knowns))
+                .verifyComplete()
     }
 
 }

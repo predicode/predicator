@@ -17,6 +17,7 @@ import org.predicode.predicator.predicates.TestPredicateResolver
 import org.predicode.predicator.testutils.isEmpty
 import org.predicode.predicator.testutils.notToBeEmpty
 import org.predicode.predicator.testutils.toContain
+import reactor.test.StepVerifier
 
 class VariableTest {
 
@@ -232,8 +233,9 @@ class VariableTest {
         knowns = knowns.map(variable, value).get()
         resolver = resolver.withKnowns(knowns)
 
-        assertThat(variable.expand(resolver))
-                .toContain(Term.Expansion(value, knowns))
+        StepVerifier.create(variable.expand(resolver))
+                .expectNext(Term.Expansion(value, knowns))
+                .verifyComplete()
     }
 
     @Nested

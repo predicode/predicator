@@ -13,10 +13,10 @@ import org.predicode.predicator.invoke
 import org.predicode.predicator.predicates.Predicate
 import org.predicode.predicator.selectOneOf
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import reactor.core.publisher.toFlux
 import reactor.core.publisher.toMono
 import reactor.test.StepVerifier
-import java.util.*
 import java.util.function.UnaryOperator
 
 class PhraseTest {
@@ -45,7 +45,7 @@ class PhraseTest {
             }
             val term = mockk<PlainTerm>()
 
-            every { term.expand(refEq(resolver)) }.returns(Optional.of(Term.Expansion(term, knowns)))
+            every { term.expand(refEq(resolver)) }.returns(Mono.just(Term.Expansion(term, knowns)))
 
             StepVerifier.create(Phrase(term).resolve(resolver))
                     .verifyComplete()
@@ -67,7 +67,7 @@ class PhraseTest {
             val and = mockk<Predicate>("AND")
             val updatePredicate = mockk<UnaryOperator<Predicate>>()
 
-            every { term.expand(any()) }.returns(Optional.of(Term.Expansion(term, knowns, updatePredicate)))
+            every { term.expand(any()) }.returns(Mono.just(Term.Expansion(term, knowns, updatePredicate)))
             every { updatePredicate.apply(any()) }.returns(predicate)
             every { predicate.and(any()) }.returns(and)
             every { and.resolve(any()) }.returns(knowns.toMono().toFlux())

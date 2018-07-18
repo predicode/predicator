@@ -4,6 +4,7 @@ import org.predicode.predicator.Knowns;
 import org.predicode.predicator.Rule;
 import org.predicode.predicator.grammar.TermPrinter;
 import org.predicode.predicator.predicates.Predicate;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -110,8 +111,8 @@ public abstract class Variable extends MappedTerm {
 
     @Nonnull
     @Override
-    public Optional<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
-        return resolver.getKnowns().mapping(this, Expansion::new);
+    public Mono<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
+        return Mono.justOrEmpty(resolver.getKnowns().mapping(this, Expansion::new));
     }
 
     @Nonnull
