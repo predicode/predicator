@@ -112,7 +112,7 @@ public abstract class Variable extends MappedTerm {
     @Nonnull
     @Override
     public Mono<Expansion> expand(@Nonnull Predicate.Resolver resolver) {
-        return Mono.justOrEmpty(resolver.getKnowns().mapping(this, Expansion::new));
+        return Mono.just(resolver.getKnowns().mapping(this, Expansion::new));
     }
 
     @Nonnull

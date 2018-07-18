@@ -142,19 +142,23 @@ public class Knowns {
      *
      * @param variable a variable, local to resolution rule.
      * @param handler a handler function accepting mapping and updated knowns as argument and returning arbitrary value.
+     *
+     * @param <R> result type.
+     *
+     * @return the result of {@code handler} capll.
      */
     @Nonnull
-    public <R> Optional<R> mapping(
+    public <R> R mapping(
             @Nonnull Variable variable,
             @Nonnull BiFunction<? super PlainTerm, ? super Knowns, ? extends R> handler) {
 
         final PlainTerm mapping = this.mappings.get(variable);
 
         if (mapping != null) {
-            return Optional.of(handler.apply(mapping, this));
+            return handler.apply(mapping, this);
         }
 
-        return Optional.of(declareLocal(variable, handler));
+        return declareLocal(variable, handler);
     }
 
     /**
