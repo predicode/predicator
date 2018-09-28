@@ -54,7 +54,7 @@
 
     <jsr305.version>3.0.2</jsr305.version>
     <reactor-bom.version>Californium-RELEASE</reactor-bom.version>
-    <junit-jupiter.version>5.2.0</junit-jupiter.version>
+    <junit-jupiter.version>5.3.1</junit-jupiter.version>
     <atrium.version>0.7.0</atrium.version>
     <mockk.version>1.8.5</mockk.version>
   </properties>
@@ -239,14 +239,7 @@
         <!-- Test execution -->
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.21.0</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.junit.platform</groupId>
-              <artifactId>junit-platform-surefire-provider</artifactId>
-              <version>1.2.0</version>
-            </dependency>
-          </dependencies>
+          <version>2.22.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
