@@ -56,7 +56,7 @@
     <reactor-bom.version>Californium-RELEASE</reactor-bom.version>
     <junit-jupiter.version>5.3.1</junit-jupiter.version>
     <atrium.version>0.7.0</atrium.version>
-    <mockk.version>1.8.5</mockk.version>
+    <mockk.version>1.8.8</mockk.version>
   </properties>
 
   <repositories>
