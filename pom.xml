@@ -53,7 +53,7 @@
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
 
     <jsr305.version>3.0.2</jsr305.version>
-    <reactor-bom.version>Bismuth-SR10</reactor-bom.version>
+    <reactor-bom.version>Californium-RELEASE</reactor-bom.version>
     <junit-jupiter.version>5.2.0</junit-jupiter.version>
     <atrium.version>0.7.0</atrium.version>
     <mockk.version>1.8.5</mockk.version>
